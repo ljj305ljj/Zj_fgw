@@ -1,0 +1,58 @@
+﻿<div id="opinionList" class="details-opinion-list scroll-content">
+    <!-- 查看意见-->
+    <div class="details-opinion-item" v-show="opinionList.length>0" v-for="(item, i) in opinionList">
+        <div class="opinion-org">{{item.opinionCodeName}}</div>
+        <div class="opinion-details"  v-html='unescape(item.opinionContent)'></div>
+        <div class="opinion-opt-person">{{unescape(item.opinionUser)}} {{unescape(item.createTime)}}</div>
+    </div>
+    <img v-show="opinionList.length == 0" width="100%" src="../../img/empty_prompt.png"></img>
+</div>
+<style>
+    /* 查看意见 */
+    .details-opinion-item{
+        padding: .6rem;
+        border-bottom: 1px solid #ededed;
+        font-size: .8rem;
+    }
+    .opinion-org{
+        margin-bottom: .6rem;
+        font-weight: bold;
+    }
+    .opinion-details {
+        margin-bottom: .4rem;
+    }
+    .opinion-opt-person {
+        text-align: right;
+        color: #999;
+    }
+</style>
+<script>
+   window.opinionPage= new Vue({
+        el: '#opinionList',
+        data() {
+            return {
+                opinionList: []
+            };
+        },
+        created:function(){
+            this.getOpinions();
+         },
+        methods: {
+            getOpinions(){
+                let _self = this;
+                _self.opinionList={};
+                let docInfor = toArr(App.LS.get("docInfor"));
+                let _url= ZjgyHost + ZjgyUrl["get-opinlist"];
+                let data = {
+                    "docId":docInfor.id
+                }
+                if(_url){
+                    ajaxRequst(_url,'GET','application/json;charset=UTF-8','json',data).then(function(json){
+                        _self.opinionList = json;
+                        console.dir(_self.opinionList);
+                    });
+                }
+            }
+        }
+    });
+</script>

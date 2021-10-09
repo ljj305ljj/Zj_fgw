@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+    <meta content="email=no" name="format-detection" />
+    <title>填报</title>		
+   
+    <script type="text/javascript" src="../../js/loadVersion.js" ></script>	
+    <script>
+        var loadList=[				
+            {name:"iconfontcss",type:"css",url:"../../css/iconfont.css"},
+            {name:"commoncss",type:"css",url:"../../css/common.css"},	
+            {name:"flowPagecss",type:"css",url:"../../css/flowPage.css"},
+            {name:"indexcss",type:"css",url:"../../css/index.css"},				
+            {name:"vuejs",type:"js",url:"../../js/vue.min.js"},
+            {name:"jqueryjs",type:"js",url:"../../js/jquery-1.9.1.min.js"},
+            {name:"indexjs",type:"js",url:"../../js/index1.9.12.js"},
+            {name:"vantjs",type:"js",url:"../../js/vant.min.js"},
+            {name:"ipConfigjs",type:"js",url:"../../js/ipConfig.js"},
+            {name:"commonjs",type:"js",url:"../../js/common.js"},
+            {name:"flowpagejs",type:"js",url:"js/FeedbackFormPage.js"}
+        ];
+        loadVersion.iniVersion(loadList);
+    </script>
+   
+     <style>
+        .title {
+            font-size: 1rem;
+            text-align: center;
+            color: #606061;
+            padding: .8rem 0 .5rem 0;
+            background: #fff;
+        }
+
+        .date {
+            font-size: .8rem;
+            text-align: right;
+            padding-right: .5rem;
+            padding-bottom: .8rem;
+            background: #fff;
+        }
+
+        dl:first-child {
+            padding-top: .6rem;
+        }
+
+        dl {
+            padding: .3rem 0;
+            font-size: .9rem;
+        }
+
+        dt {
+            border-bottom: #f1f0f0 solid 1px;
+            /* background: #fff; */
+        }
+
+        dd {
+            /*padding: .3rem 0;  border-bottom: #f1f0f0  solid 1px;*/
+            /* background: #fff; */
+            height: auto;
+            position: relative;
+            color: #313131;
+            white-space: normal !important;
+            line-height: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        dd.chekBox,
+        #basicInfor dd.checked {
+            text-align: left;
+            padding-left: 0.1rem;
+            width: 96%;
+            height: auto;
+        }
+
+        dd>span,
+        dt {
+            color: #6C6B6B;
+            display: block;
+            text-align: left;
+        }
+
+        dd.add {
+            padding: 1rem;
+            font-size: 0.8rem;
+        }
+
+        dd.add>span {
+            color: rgb(28, 149, 255);
+        }
+
+        dd>.textcontent {
+            width: 55%;
+            text-align: right;
+        }
+
+        dd>textarea.editable {
+            color: #C4CBD3
+        }
+
+        dd>.dlspan span {
+            border-bottom: solid 1px #828080;
+            width: 1rem;
+            display: inline-block;
+            line-height: .24rem;
+        }
+        .van-cell{
+            background-color: transparent !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="feedBackPages" class="flex">
+        <template>
+        <div style="height:100%; overflow-y: auto; overflow-x: hidden;padding-bottom:3rem;">
+            <!-- <div class="title">{{formData.subject}}</div> -->
+                <!-- <div  class="date">报销时间: {{formData.draftDate}}</div> -->
+                <van-form validate-first @failed="onFailed" @submit="onSubmit"> 
+                    <dl>
+                        <dd>
+                            <van-field v-model="nodeTime" input-align="right" label="反馈期限" rows="1"
+                                autosize size="large" type="textarea" name="nodeTime" disabled >
+                            </van-field>
+                        </dd>
+                        <dd>
+                            <van-field v-model="form.feedbackTime" input-align="right" label="反馈时间" rows="1"
+                                autosize size="large" type="textarea" >
+                            </van-field>
+                        </dd>
+                        <dd>
+                            <van-field v-model="form.subject" input-align="right" label="事项标题" rows="1" autosize
+                                size="large" type="textarea">
+                            </van-field>
+                        </dd>
+                        <dd>
+                            <van-field v-model="form.feedbackUserName" input-align="right" label="反馈人" rows="1" autosize
+                                size="large" type="textarea">
+                            </van-field>
+                        </dd>
+                        <dd>
+                            <van-field v-model="form.contactNum" input-align="right" label="联系电话" rows="1"
+                                autosize size="large" type="textarea" 
+                                required
+                                :rules="rules.contactNum" 
+                                error-message-align="right"  ref="contactNum">
+                            </van-field>
+                        </dd>
+                        <dd>
+                            <van-field v-model="form.completeSituation" input-align="right" label="进展情况" rows="2"
+                                autosize size="large" type="textarea"
+                                 required 
+                                 :rules="rules.completeSituation" 
+                                 error-message-align="right" ref="completeSituation">
+                            </van-field>
+                        </dd>
+                        <dd>
+                            <van-field v-model="form.problem" input-align="right" label="存在问题" rows="2"
+                                autosize size="large" type="textarea" 
+                                required
+                                :rules="rules.problem" 
+                                error-message-align="right"  ref="problem"> 
+                            </van-field>
+                        </dd>
+                        <dd>
+                            <van-field v-model="form.nextPlan" input-align="right" label="下一步工作计划" rows="2"
+                                autosize size="large" type="textarea"
+                                 required
+                                 :rules="rules.nextPlan" 
+                                error-message-align="right"  ref="nextPlan">
+                            </van-field>
+                        </dd>
+                        <dd>
+                            <van-field v-model="form.feedbackSituation" input-align="right" label="反馈情况" rows="1"
+                                autosize size="large" type="textarea">
+                            </van-field>
+                        </dd>
+                        <dd>
+                            <van-field v-model="form.completeNum" input-align="right" label="完成值" placeholder="请输入完成值" rows="1"
+                                autosize size="large" type="number">
+                            </van-field>
+                        </dd>
+                        <dd>
+                            <van-field v-model="form.liangHuaJinDu " input-align="right" label="量化" rows="1"
+                                autosize size="large" type="number">
+                            </van-field>
+                        </dd>
+                        <dd>
+                            <van-popup v-model="dingXingZhiBiao.showDingXingZhiBiao" position="bottom"  style="overflow-y: scroll;">
+                                <van-radio-group v-model="dingXingZhiBiao.selected" :id="dingXingZhiBiao.selected.value+'radio'">
+                                    <van-cell-group>
+                                        <van-cell v-show="dingXingZhiBiao.options.length>0" v-for="(itemOption,i) in dingXingZhiBiao.options" :title="itemOption.label" clickable @click="setDingXingValue(itemOption)">
+                                            <template #right-icon>      
+                                                <van-radio :name="itemOption" />
+                                            </template>
+                                        </van-cell>
+                                    </van-cell-group>
+                                </van-radio-group>
+                            </van-popup>  
+                            <van-field v-model="form.dingXingZhiBiao" input-align="right" label="定性" placeholder="请选择"
+                                autosize size="large" @click="showDingXingPopup()" is-link readonly >
+                            </van-field>
+                        </dd>
+                    </dl>
+                    <div class="send-Btns"><span id="opinBack" @click="onSubmit('0')" >保存</span><span class="send-cancel" onclick="closePage();">关 闭</span></div>
+                    <!-- <div class="send-Btns"><span id="opinBack" @click="onSubmit()" >确定</span><span class="send-cancel" onclick="closePage();">取 消</span></div> -->
+                </van-form>
+           
+        </div>
+        </template>
+    </div>
+   
+   
+</body>
+
+</html>

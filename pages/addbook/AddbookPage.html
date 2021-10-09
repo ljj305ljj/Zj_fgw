@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<meta name="wpk-bid" content="dta_1_840942484"> <script>    !(function(c,i,e,b){var h=i.createElement("script");var f=i.getElementsByTagName("script")[0];h.type="text/javascript";h.crossorigin=true;h.onload=function(){c[b]||(c[b]=new c.wpkReporter({bid:"dta_1_840942484"}));c[b].installAll()};f.parentNode.insertBefore(h,f);h.src=e})(window,document,"https://g.alicdn.com/woodpeckerx/jssdk??wpkReporter.js","__wpk");</script>
+		<title>通讯录</title>		
+		<script type="text/javascript" src="../../js/loadVersion.js" ></script>	
+		<script>
+			var loadList=[				
+				{name:"iconfontcss",type:"css",url:"../../css/iconfont.css"},
+				{name:"commoncss",type:"css",url:"../../css/common.css"},	
+				{name:"indexcss",type:"css",url:"../../css/index.css"},	
+				{name:"addbookcss",type:"css",url:"css/addbook.css"},					
+				{name:"vuejs",type:"js",url:"../../js/vue.min.js"},
+				{name:"jqueryjs",type:"js",url:"../../js/jquery-1.9.1.min.js"},
+				{name:"indexjs",type:"js",url:"../../js/index1.9.12.js"},
+				{name:"vantjs",type:"js",url:"../../js/vant.min.js"},
+				{name:"ipConfigjs",type:"js",url:"../../js/ipConfig.js"},
+				{name:"commonjs",type:"js",url:"../../js/common.js"},
+				{name:"listPagejs",type:"js",url:"js/listPage.js"}
+			];
+			loadVersion.iniVersion(loadList);
+		</script>
+	</head>
+	<body>
+		<div id="ListData" class="page-view" style="background: #f7f8fa;">
+			<van-tabs v-model="tabActive" color="#5078FE" 
+            title-active-color="#5078FE" line-width="30%" line-height="2px" @change="getListData();">
+			<template v-for="(item,x) in tabData.view">
+				<van-tab :title="item.name">
+					<van-tree-select v-if="item.type == 'inner'" style="padding-top: .2rem;" :height="scrollHeight" :items="addbookObj" :main-active-index.sync="active">
+						<template #content>
+							<template v-for="(aobj,a) in addbookObj">
+								<template v-if="active === a" >
+									<van-swipe-cell v-for="(child,c) in aobj.childrens">
+										<van-cell-group class="addbook-list">
+											<div class="flex-list">
+												<span>{{child.realName}}</span>
+												<div class="mobile">{{child.mobile}}</div>
+												<div class="email">{{child.email}}</div>
+											</div>
+										</van-cell-group>
+										<template #right>
+											<label><van-button style="height: 100%;" square type="info" text="" icon="phone-o" @click="call(child)" /></label><!--<label><van-button style="height: 100%;" square type="primary" text="短信" /></label>-->
+										</template>
+									</van-swipe-cell>
+								</template>
+							</template>
+						</template>
+					</van-tree-select>
+
+					<van-index-bar v-else >
+						<template v-for="(aobj,a) in outerAddbookObj">
+							<van-index-anchor :index="aobj.id"><div v-show="aobj.childrens.length > 0">{{aobj.id}}</div></van-index-anchor>
+							<van-swipe-cell v-for="(oItem,o) in aobj.childrens">
+								<van-cell-group class="addbook-list" >
+									<div class="flex-list">
+										<span>{{oItem.realName}}</span>
+										<div class="mobile">{{oItem.mobile}}</div>
+										<div class="email">{{oItem.email}}</div>
+									</div>
+								</van-cell-group>
+								<template #right>
+									<label><van-button style="height: 100%;" square type="info" text="" icon="phone-o" @click="call(aobj)" /></label><!--<label><van-button style="height: 100%;" square type="primary" text="短信" /></label>-->
+								</template>
+							</van-swipe-cell>
+						</template>
+					</van-index-bar>
+				</van-tab>
+			</template>
+        </van-tabs>
+		</div>
+	</body>
+</html>

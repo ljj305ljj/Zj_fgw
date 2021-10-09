@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<!-- <meta name="wpk-bid" content="dta_1_840942484"> 
+		<script> !(function(c,i,e,b){var h=i.createElement("script");var f=i.getElementsByTagName("script")[0];h.type="text/javascript";h.crossorigin=true;h.onload=function(){c[b]||(c[b]=new c.wpkReporter({bid:"dta_1_840942484"}));c[b].installAll()};f.parentNode.insertBefore(h,f);h.src=e})(window,document,"https://g.alicdn.com/woodpeckerx/jssdk??wpkReporter.js","__wpk");</script> -->
+		<title></title>			
+		<script type="text/javascript" src="../../js/loadVersion.js" ></script>	
+		<script>
+			var loadList=[											
+				{name:"vuejs",type:"js",url:"../../js/vue.min.js"},
+				{name:"iconfontcss",type:"css",url:"../../css/iconfont.css"},
+				{name:"commoncss",type:"css",url:"../../css/common.css"},	
+				{name:"flowPagecss",type:"css",url:"../../css/flowPage.css"},					
+				{name:"swipercss",type:"css",url:"../../css/swiper.min.css"},	
+				{name:"jqueryjs",type:"js",url:"../../js/jquery-1.9.1.min.js"},
+				{name:"indexjs",type:"js",url:"../../js/index1.9.12.js"},
+				{name:"ipConfigjs",type:"js",url:"../../js/ipConfig.js"},
+				{name:"commonjs",type:"js",url:"../../js/common.js"},
+				{name:"flowpagejs",type:"js",url:"js/SendPage.js"}
+			];
+			loadVersion.iniVersion(loadList);
+		</script>
+	</head>
+	<body >
+	<div id="SendPages" >	
+			<div  class="sendDiv" >
+				<div class="send-body" >
+					 <ul class="leftDiv-ul">
+						<li class="leftDiv-li">
+							<a class="send-tit" id="valDept">
+								<span class="">用户选择</span>
+							</a>
+							<ul id="box-deptList" class="box-dept">
+							<template   v-show="!$.isEmptyObject(userTrees)">
+								<li class="lab-sel" v-for="(itemUer,m) in userTrees" >
+								<label  :class="{'sel-act': Object.keys(userTrees)[0]==m}" @click="deptEvent($event)"><span :class="Object.keys(userTrees)[0]==m?'rjicon icon-subup span-chack':'rjicon icon-addup span-chack'"></span>{{m}}</label>
+								<div class="dept-p">	
+									<div  v-for="(user,j) in itemUer" :class="($.inArray(user,selUsers)>-1)?'pp-act':''"  :data-uid="user.treeId" class="pp-sel" :data-num="j" @click="userEvent($event,user)">{{user.treeName}}</div>
+								</div>
+								</li>
+							</template>								
+							</ul>
+						</li>
+					</ul>
+					<ul class="leftDiv-ul">
+						<li class="leftDiv-li">
+							<div class="sel-people-div">
+								<div id="send-tip-num" class="sel-people-tip">已选人员</div>
+								<div class="bak-Sel" id="resultUser">								
+								<template  v-show="selUsers.length>0" v-for="(peoples,j) in selUsers">
+									<label :uid="peoples.uid" :data-rnum="j" :data-back="peoples.treeId+':'+peoples.treePid+':'+peoples.treeName" :data-uid="peoples.userNo" @click="selUserEvent($event,peoples)">{{peoples.treeName}}<span class="rjicon icon-cuowu"></span></label>	
+								</template>						
+								</div>
+							</div>
+						</li>
+					</ul> 
+					<!-- <ul class="leftDiv-ul">
+						<li class="leftDiv-li">
+							<a id="valMsm"  class="msmtype rjicon icon-chekbox icon-selected"  @click="smsEvent($event)"> 短信提醒</a>
+						</li>
+					</ul> -->
+				</div>
+				<div class="send-Btns"><span id="flowSend" :style="{background: selUsers.length==0?'#c8c8c8':'#0086cf'}"   @click="selUsers.length==0?'':submitSend()">确定发送</span><span class="send-cancel" onclick="closePage();">取 消</span></div>
+			</div>
+			
+
+	</div>
+	</body>
+</html>

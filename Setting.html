@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+    <meta content="email=no" name="format-detection"/>
+    <!-- <meta name="wpk-bid" content="dta_1_840942484">
+    <script> !(function(c,i,e,b){var h=i.createElement("script");var f=i.getElementsByTagName("script")[0];h.type="text/javascript";h.crossorigin=true;h.onload=function(){c[b]||(c[b]=new c.wpkReporter({bid:"dta_1_840942484"}));c[b].installAll()};f.parentNode.insertBefore(h,f);h.src=e})(window,document,"https://g.alicdn.com/woodpeckerx/jssdk??wpkReporter.js","__wpk");</script> -->
+    <title></title>
+    <script type="text/javascript" src="./js/loadVersion.js"></script>
+    <script>
+        var loadList = [
+            {name: "iconfontcss", type: "css", url: "css/iconfont.css"},
+            {name: "commoncss", type: "css", url: "css/common.css"},
+            {name: "indexcss", type: "css", url: "css/index.css"},
+            {name: "settingcss", type: "css", url: "css/setting.css"},
+            {name: "vuejs", type: "js", url: "js/vue.min.js"},
+            {name: "jqueryjs", type: "js", url: "js/jquery-1.9.1.min.js"},
+            {name: "indexjs", type: "js", url: "js/index1.9.12.js" },
+            {name: "vantjs", type: "js", url: "js/vant2.12.min.js"},
+            {name: "ipConfigjs", type: "js", url: "js/ipConfig.js"},
+            //{name: "commonjs", type: "js", url: "js/vconsole.min.js"},
+            {name: "commonjs", type: "js", url: "js/common.js"},
+            {name: "setting", type: "js", url: "js/setting.js"}
+        ];
+        loadVersion.iniVersion(loadList);
+    </script>
+</head>
+<body>
+
+<div id="setting">
+    <template>
+    <div>
+        <header>首页显示功能
+            <span>(最多可选{{itemNum}}项任务)</span>
+        </header>
+        <div class="setting-All">
+            <div class="setting-All_item" v-for="(item,i) in settingData" :key="item.id">
+                <div class="setting-All_item--icon" :style="{background:i>iconBackgrounds.length-1?iconBackgrounds[i-iconBackgrounds.length]:iconBackgrounds[i]}">
+                    <i :class="['rjicon', `rjicon-${item.icon}`]"></i>
+                </div>
+                <div class="setting-All_item--word">{{item.title}}</div>
+                <van-switch v-model="item.isCheck" size="24px"  inactive-color="#dcdee0" :value="item.isCheck" @input="switchChange(i,type=0,$event)"/>
+            </div>
+        </div>
+    </div>
+    <div>
+        <header>首页显示列表
+            <span>(最多可选{{listNum}}项任务)</span>
+        </header>
+            <div class="setting-List">
+              <div class="setting-List_item" v-for="(item,i) in settingList" :key="item.id">
+                 <span class="setting-All_item--word">{{item.name}}</span>
+                 <van-switch v-model="item.isCheck" size="24px"  inactive-color="#dcdee0" :value="item.isCheck" @input="switchChange(i,type=1,$event)"/>
+              </div>
+            </div>
+    </div>
+    <div>
+        <header>字体大小 </header>
+        <div class="setting-wordSize">
+            <div class="fsli-txt"><span v-for="(txt,i) in txtSize" :style="{fontSize: txt.val + 'px'}" @click="changeMySize(txt.val,i)">{{txt.name}}</span></div>
+            <div class="diy-ul">
+                <van-slider  v-model="value" :step="getStep" active-color="#c3c3c3" inactive-color="#c3c3c3" bar-height="1px" @change="changeMySize2"/>
+
+            </div>
+        </div>
+    </template>
+    </div>
+</div>
+
+</body>
+</html>

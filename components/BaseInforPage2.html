@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+	<meta content="email=no" name="format-detection" />
+	<title>办理单</title>
+</head>
+
+<body>
+	<div id="BLD2" class="bldview">
+		<div id="text4" class="bldpage" :style="'height:'+getDetailHeight()">
+			<div class="bld-note" v-show="noteDate.length>0">
+				<div class="bld-note-title" @click="showNote=!showNote" :class="showNote?'':'noshow'"><span
+						class="rjicon icon-feedback"></span></div>
+				<ul v-show="showNote" class="bld-note-div">
+					<template>
+						<li class="bld-note-li" v-for="(obj,i) in noteDate">
+							<div>{{obj.sendUserName}}</div>
+							<div>{{obj.sendTime}}</div>
+							<div>{{obj.content}}</div>
+						</li>
+					</template>
+				</ul>
+			</div>
+			<div id="tempDiv2" style="display: none;"></div>
+			<div id="Bldbox2"></div>
+		</div>
+		<!--<div id="FileBtn" v-if="btnArrs.length>0" class="foot-btn" :style="moreBtn?'height:auto':''">
+			<div class="bottom-nav-box" v-for="item in btnArrs" @click="toEvents(item.toEvent,$event)"><span
+					class="rjicon" :class="item.iconCss"></span><span v-cloak>{{item.btnName}}</span></div>
+		</div>-->
+	</div>
+	<script>
+		var docInfor2 = toArr(App.LS.get("docInfor2"));
+		console.log(333);
+		let stateBusiness = toArr(App.LS.get("stateBusiness"));
+		var vFBD2 = new Vue({
+			el: '#BLD2',
+			data() {
+				return {
+					btnArrs: [],
+					moreBtn: false,
+					showNote: false,
+					noteDate: [],
+					//docInfor2: toArr(App.LS.get("docInfor22"))
+				}
+			},
+			mounted: function () {
+				//wispApp.UI.showProgressDialog("正在加载办理单...");
+				console.log("阅办单2")
+				//App.LS.remove("flowOpinion");
+				this.getOpinionList();
+				//this.fullOpinions(JSON.parse(App.LS.get("oplists")));
+				try {
+					//this.initBtnData();
+				} catch (e) {
+					//alert(e)
+				}
+				//this.getNoteList();
+			},
+			methods: {
+				getDetailHeight: function () {
+					return ($("body").height() - 44 - 54 + "px");
+				},
+				toEvents: function (name, thisObj) {
+					console.log(name);
+					//closePage();
+					if (name == "jsEnd" || name == "jsOver" || name == "jsFreeReturn" || name == "jsCancle" || name == "startProcess" || name == "saveForm") {
+						eval("(" + name + "())");
+					} else {
+						App.LS.set("flowType", name);
+						OpenWebView("/FlowBoxPage.html");
+					}
+				},
+				getFlowOpinion: function () {
+					baseCommon.getFlowOpinion();
+				},
+				getNoteList: function () {
+					baseCommon.getNoteList(this.noteDate);
+				},
+				getHandleId: function () {
+					var _self = this;
+					//wispApp.UI.showProgressDialog("正在载入办理单...");
+					try {
+						var listInfo = toArr(App.LS.get('listInfo'));
+						var userinfo = toArr(App.LS.get('User'));
+						if (listInfo.AtRead == "1") {
+							var _url = ZjgyHost + ZjgyUrl["isReadOpinion"];
+							var obj = { docCate: docInfor2.form.docCate, userNo: userinfo.userNo };
+							ajaxRequst(_url, "get", 'application/json', "json", obj).then((json) => {
+								var canopinion = [];
+								$.each(json, function (i, list) {
+									$.each(list.opinionNo, function (j, opin) {
+										canopinion.push("已阅意见|" + opin);
+									});
+								});
+								App.LS.set("isReadOpin", JSON.stringify(canopinion));
+								if (App.LS.get("module2") == "dispatch") {
+									_self.initbasePage(JSON.parse(docInfor2.dealFormId).options[0].id);
+								} else if (App.LS.get("module2") == "receival") {
+									_self.getToHandleId();//收文调用这个方法
+								} else {
+
+								}
+							});
+						} else {
+							//console.log(JSON.parse(docInfor2.dealFormId).options[0].id);
+							if (App.LS.get("module2") == "dispatch") {
+								_self.initbasePage(JSON.parse(docInfor2.dealFormId).options[0].id);
+							} else {
+								_self.getToHandleId();//收文调用这个方法
+							}
+							App.LS.remove("isReadOpin");
+						}
+					} catch (e) {
+						_self.getToHandleId();
+						App.LS.remove("isReadOpin");
+					}
+				},
+				//收文调用这个方法
+				getToHandleId: function () {
+					var _self = this;
+					var thismodule2 = App.LS.get("module2");
+					var _url = "";
+					switch (thismodule2) {
+						case "receival":
+							_url = ZjgyHost + ZjgyUrl[thismodule2 + "-bld"] + "?docCateNo=" + docInfor2.docCate + "&handleOrView=1&systemNo=" + docInfor2.systemNo;
+							break;
+						case "dispatch":
+							_url = "notGetId";
+							break;
+						case "meeting":
+							_url = ZjgyHost + ZjgyUrl[thismodule2 + "-bld"] + "?moduleId=" + thismodule2.toUpperCase() + "&type=SPECIAL";
+							break;
+						case "travel_approval":
+						case "overtime":
+						case "leave":
+						case "special_work":
+							_url = ZjgyHost + ZjgyUrl[thismodule2 + "-bld"] + "?moduleId=" + thismodule2.toUpperCase() + "&type=DEALFORM&systemNo=" + docInfor2.systemNo;
+							break;
+						case "car_apply":
+							_url = "oaNotId"
+							break;
+						case "meeting_book":
+							_url = ZjgyHost + ZjgyUrl[thismodule2 + "-bld"] + "?moduleId=" + thismodule2.toUpperCase() + "&type=BOOK";
+							break;
+						case "info":
+							_url = ZjgyHost + ZjgyUrl[thismodule2 + "-bld"] + "?moduleId=INFOREPORT&status=正常&type=DEALFORM";
+							break;
+						default:
+
+							break;
+					}
+					if (_url == "notGetId") {
+						_self.initbasePage(JSON.parse(docInfor2.dealFormId).options[0].id);
+					} else if (_url == "oaNotId") {
+						var infos = docWordInfo[thismodule2];//{vname: "姓名", vid: "draftUserName", vtype: "t-span", vcol: ""}
+						var tableVal = [];
+						var diySet = { id: "Bldbox", title: "办理单未定义标题" };
+						$.each(infos, function (keys, item) {
+							if (keys == "标题") {
+								diySet.title = "item";
+							} else {
+								tableVal.push({ vname: keys, vid: item, vtype: "t-span", vcol: "" });
+							}
+						});
+						creatHandleTable(tableVal, "", diySet);
+						_self.getOpinionId();
+						wispApp.UI.dismissProgressDialog();
+					} else if (_url != "") {
+						ajaxRequst(_url, "get", 'application/json', "json").then((json) => {
+							if (json[0].id) {
+								//console.log(json[0].id);
+								_self.initbasePage(json[0].id);
+							} else {
+								wispApp.UI.dismissProgressDialog();
+								wispApp.UI.showToast("办理单获取失败，请稍后重试。");
+							}
+						});
+					}
+
+				},
+				initbasePage: function (handleid) {
+					var _self = this;
+					var handleType = "";
+					var _url = ZjgyHost + ZjgyUrl["downloadBLD"];
+					var obj = { id: handleid, isDownload: false }
+					ajaxRequst(_url, "get", 'application/json', "text", obj).then((json) => {
+						$("#Bldbox2,#tempDiv2,#tempDiv").empty()
+						initHandlePage("Bldbox2", "tempDiv2", json, handleType);
+						try {
+							var top = $(".canGoto").eq(0).offset().top;
+							top = top > 30 ? top : 30
+							App.LS.remove("goToScroll")
+							App.LS.set("goToScroll", top);
+						} catch (e) {
+							App.LS.set("goToScroll", 30);
+						}
+					});
+				
+					_self.getOpinionId();
+					wispApp.UI.dismissProgressDialog();
+				},
+				getOpinionId: function () {
+					var _self = this;
+					var thismodule2 = App.LS.get("module2");
+					if (thismodule2 == "leave" || thismodule2 == "overtime" || thismodule2 == "travel_approval") {
+						var _url = ZjgyHost + ZjgyUrl[thismodule2 + "-bld"] + "?moduleId=" + thismodule2.toUpperCase() + "&type=DEALFORM&systemNo=" + docInfor2.systemNo + "&name=opinion";
+						ajaxRequst(_url, "get", 'application/json', "json").then((json) => {
+							if (json[0].id) {
+								console.log(json[0].id);
+								_self.initOpinionPage(json[0].id);
+							} else {
+								wispApp.UI.dismissProgressDialog();
+								wispApp.UI.showToast("办理单获取失败，请稍后重试。");
+							}
+						});
+					}
+				},
+				initOpinionPage: function (handleid) {
+					var handleType = "";
+					var _url = ZjgyHost + ZjgyUrl["downloadBLD"];
+					var obj = { id: handleid, isDownload: false }
+					ajaxRequst(_url, "get", 'application/json', "text", obj).then((json) => {
+						//if (thismodule2 == "leave" || thismodule2 == "overtime" || thismodule2 == "travel_approval") {
+							$("#OPBldbox,#OPtempDiv").empty()
+							initHandlePage("OPBldbox", "OPtempDiv", json, handleType);
+						//}
+					});
+					wispApp.UI.dismissProgressDialog();
+				},
+				getOpinionList: function () {
+					var _self = this;
+					var getopinurl = ZjgyHost + ZjgyUrl["get-opinlist"] + "?docId=" + docInfor2.id;
+					//var getopinobj = JSON.stringify({docId:docInfor2.form.id});
+					ajaxRequst(getopinurl, "get", 'application/json', "json").then((opinionData) => {
+						console.log("opinionData2:"+opinionData);
+						var OpnDatas = Object.assign([], opinionData);
+						if(docInfor.relDocMark){
+							OpnDatas = OpnDatas.concat(detailPage.relopinionSyncListReceival);
+						}else if(docInfor.relReceivalMark){
+							OpnDatas = OpnDatas.concat(detailPage.relopinionSyncListDipatch);
+						}
+						
+						App.LS.set("oplist2", JSON.stringify(opinionData));
+						_self.fullOpinions(OpnDatas);
+					});
+				},
+				fullOpinions: function (opinionData) {
+					var _self = this;
+					let opinionsByType = [];
+					if(detailPage.proPermission && detailPage.proPermission.stateBusiness != undefined && detailPage.proPermission.stateBusiness.businessOpinion){
+						var userinfo = toArr(App.LS.get('userInfo'));
+						let businessOpinion = detailPage.proPermission.stateBusiness.businessOpinion;/* 环节可操作意见 */
+						
+						let unique = function(arrobj){//去重
+							let obj = {};
+							let arr = arrobj.reduce((cur,next) => {
+								obj[next.opinionNo] ? "" : obj[next.opinionNo] = true && cur.push(next);
+								return cur;
+							},[]) //设置cur默认类型为数组，并且初始值为空的数组
+							console.log(arr);
+							return arr;
+						}
+						$.each(opinionData, function(z,opinionObj) {
+							opinionsByType.push({"opinionNo":opinionObj.opinionCode,"opinionName":opinionObj.opinionCodeName});
+						})
+						$.each(businessOpinion,function(b,opinionObj){
+							opinionsByType.push({"opinionNo":opinionObj.opinionNo,"opinionName":opinionObj.opinionName});
+						})
+						opinionsByType = unique(opinionsByType);//去重
+						$.each(opinionsByType,function(t,opinion){//按意见类型分类显示
+							opinion.value = [];
+							$.each(opinionData, function(z,opinionObj) {
+								if(opinionObj.opinionCode == opinion.opinionNo){
+									opinion.value.push(opinionObj);
+								}
+							})
+						})
+						//当前文件的意见填写权限控制
+						$.each(businessOpinion,function(b,opinion){
+							//if(opinionsByType.length != 0){
+								$.each(opinionsByType, function(z,opinionObj) {
+									//console.dir(opinionObj.opinionCode)
+									if (opinionObj.opinionNo == opinion.opinionNo) {
+										//待办文件才可以填写意见
+										if(detailPage.proPermission.flowStatus == "running"){opinionObj.isEdit = true;}else{ opinionObj.isEdit = false; }
+										$.each(opinionObj.value,function(o,opinval){
+											if(detailPage.proPermission.flowStatus == "running" && opinval.opinionUserNo == userinfo.username ){
+												opinval.IsEdit = true;//是否可修改
+											}else{
+												opinval.IsEdit = false;
+											}
+											//opinion.value.push(opinionObj);
+										})
+									}
+								});
+							
+						})
+					}else{
+						$.each(opinionData, function(z,opinionObj) {
+							opinionsByType.push({"opinionNo":opinionObj.opinionCode,"opinionName":opinionObj.opinionCodeName});
+						})
+						$.each(opinionsByType,function(t,opinion){//按意见类型分类显示
+							opinion.value = [];
+							$.each(opinionData, function(z,opinionObj) {
+								if(opinionObj.opinionCode == opinion.opinionNo){
+									opinion.value.push(opinionObj);
+								}
+							})
+						})
+					}
+					Opinions2 = opinionsByType;
+					_self.getHandleId();
+				}
+			}
+		});
+
+	</script>
+	<style>
+		/*查看办理单*/
+		[v-cloak] {display: none;}
+		.bldview{height: 100%;width: 100%;padding-bottom: 3rem;}
+		.bldpage{height: 100%;width: 100%;overflow-y: auto;}
+		/* .foot-btn{height: 3rem;position: fixed;bottom: 0;left: 0;width: 100%;border-top: 1px solid #ccc;background: #fff; color: #A1A1A3;}
+		.bottom-nav-box{height: 3rem;display: inline-block;width: 33.33%;text-align: center;line-height: 3rem;}
+		.bottom-nav-box>span.rjicon{font-size: 1.2rem;position: relative;display: block;line-height: 1.5rem;padding-top: .2rem;}
+		.bottom-nav-box>span:nth-child(2){position: relative;top: -1rem;line-height: 1.2rem;height: 1rem;font-size: .8rem;} */
+		.bldbox{position: relative;top:0;left: 0;}
+		.bld-note{position: absolute;top:30px;right: 0;z-index: 2;max-width: 40%;text-align: right;font-size: 1rem;max-width: 100%;}
+		.bld-note-title{position: absolute;top:0;left: -3rem;background: var(--wisp-color);color: #fff;padding: 0 1rem;border-top-left-radius: 30px;border-bottom-left-radius: 30px;line-height: 30px;text-align: center;float: right;}
+		.bld-note-div{box-shadow: 0px 2px 5px rgba(0,0,0,.1);width: 15rem;font-size: .8rem;background: rgba(249,249,249,.9);text-align: left;border-top: 1px solid var(--wisp-color);}
+		.bld-note-li{padding: 10px 6px 10px 10px;}
+		.bld-note-li:nth-of-type(even){background: rgba(222, 222, 222, 0.5);}
+		.noshow{opacity: .5;}
+		.van-overlay{ top: -3rem;}
+		.van-popup--center {
+			/* top: 0; */
+			-webkit-transform: translate3d(0,0,0);
+			transform: translate3d(0,0,0); 
+		}
+		.van-cell{
+			font-size: .8rem;
+			color:#A1A1A3;
+			text-align: center;
+		}
+	</style>
+</body>
+
+</html>

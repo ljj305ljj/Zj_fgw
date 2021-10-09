@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<meta name="wpk-bid" content="dta_1_840942484"> <script>    !(function(c,i,e,b){var h=i.createElement("script");var f=i.getElementsByTagName("script")[0];h.type="text/javascript";h.crossorigin=true;h.onload=function(){c[b]||(c[b]=new c.wpkReporter({bid:"dta_1_840942484"}));c[b].installAll()};f.parentNode.insertBefore(h,f);h.src=e})(window,document,"https://g.alicdn.com/woodpeckerx/jssdk??wpkReporter.js","__wpk");</script>
+		<title>列表</title>		
+		<script type="text/javascript" src="../../js/loadVersion.js" ></script>	
+		<script>
+			var loadList=[				
+				{name:"iconfontcss",type:"css",url:"../../css/iconfont.css"},
+				{name:"commoncss",type:"css",url:"../../css/common.css"},	
+				{name:"indexcss",type:"css",url:"../../css/index.css"},					
+				{name:"vuejs",type:"js",url:"../../js/vue.min.js"},
+				{name:"jqueryjs",type:"js",url:"../../js/jquery-1.9.1.min.js"},
+				{name:"indexjs",type:"js",url:"../../js/index1.9.12.js"},
+				{name:"vantjs",type:"js",url:"../../js/vant.min.js"},
+				{name:"ipConfigjs",type:"js",url:"../../js/ipConfig.js"},
+				{name:"commonjs",type:"js",url:"../../js/common.js"},
+				{name:"listPagejs",type:"js",url:"js/listPage.js"}
+			];
+			loadVersion.iniVersion(loadList);
+		</script>
+	</head>
+	<body>
+		<div id="ListData" class="page-view">
+			<van-tabs v-model="tabActive" swipeable color="#5078FE" animated
+            title-active-color="#5078FE" line-width="30%" line-height="2px" sticky :ellipsis="false">
+			<template v-for="(item,x) in tabData.view">
+				<van-tab :title="item.name">
+					<!-- 列表 -->
+					<van-pull-refresh v-model="item.refreshing" @refresh="onRefresh">
+						<van-list v-model="item.loading" :finished="item.finished" finished-text="没有更多了" @load="onLoad"  :id="item.id">
+							<ul >
+								<template v-if="item.data.list && item.data.list.length>0 ">
+									<template v-for="(obj,y) in item.data.list"> 	
+										<li class="tabBody-li indexli" :class="item.preIcon?'rjicon '+item.preIcon:''"  @click="openDoc(obj)">
+											<div class="word-title" :class="item.titleIcon?getTitleIcon(obj.createTime,obj.deadlineTime)+' rjicon '+item.titleIcon:''" >{{obj[item.subjectId]==null?'无标题':obj[item.subjectId]}}</div>
+											 <div class="word-bottom">									
+												<p v-for="(fieldItem,z) in item.field" v-show="obj[fieldItem.id]">
+													<template v-if="fieldItem.count">
+														{{fieldItem.showName?fieldItem.name+' : ':""}}{{obj[fieldItem.id].substring(0,fieldItem.count)}}
+													</template>
+													<template v-else>
+														{{fieldItem.showName?fieldItem.name+' : ':""}}{{obj[fieldItem.id]}}
+													</template>
+												</p>
+											</div>
+											
+										</li>
+									</template >
+								</template>
+								<template v-else><li><img class="emptyimg" src="../../img/empty_prompt.png" /></li></template>
+						   </ul>
+						</van-list>
+					</van-pull-refresh>
+				</van-tab>
+			</template>
+        </van-tabs>
+		</div>
+	</body>
+</html>

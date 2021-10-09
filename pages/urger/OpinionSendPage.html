@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<!-- <meta name="wpk-bid" content="dta_1_840942484"> 
+		<script> !(function(c,i,e,b){var h=i.createElement("script");var f=i.getElementsByTagName("script")[0];h.type="text/javascript";h.crossorigin=true;h.onload=function(){c[b]||(c[b]=new c.wpkReporter({bid:"dta_1_840942484"}));c[b].installAll()};f.parentNode.insertBefore(h,f);h.src=e})(window,document,"https://g.alicdn.com/woodpeckerx/jssdk??wpkReporter.js","__wpk");</script> -->
+		<title></title>			
+		<script type="text/javascript" src="../../js/loadVersion.js" ></script>	
+		<script>
+			var loadList=[											
+				{name:"vuejs",type:"js",url:"../../js/vue.min.js"},
+				{name:"iconfontcss",type:"css",url:"../../css/iconfont.css"},
+				{name:"commoncss",type:"css",url:"../../css/common.css"},	
+				{name:"flowPagecss",type:"css",url:"../../css/flowPage.css"},					
+				{name:"swipercss",type:"css",url:"../../css/swiper.min.css"},	
+				{name:"jqueryjs",type:"js",url:"../../js/jquery-1.9.1.min.js"},
+				{name:"indexjs",type:"js",url:"../../js/index1.9.12.js"},
+				{name:"ipConfigjs",type:"js",url:"../../js/ipConfig.js"},
+				{name:"commonjs",type:"js",url:"../../js/common.js"},
+				{name:"flowpagejs",type:"js",url:"js/OpinionSendPage.js"}
+			];
+			loadVersion.iniVersion(loadList);
+		</script>
+	</head>
+	<body >
+	<div id="readSendPages" >	
+		<template>
+			<div id="jsReadSend" class="sendDiv">
+				<!--<header class="flow-header">
+					<div onclick="$('#writeOpin').hide();" class="send-cancel rjicon icon-huitui" style=" float: left; padding-left: 0.1rem;"></div>
+					<div id="flowTitle-opin">意见填写</div>
+				</header>-->
+				<div class="opin-body">
+					<div id="writInput" class="opin-div"><div class="opin-top-btn"><label>意见内容：</label><label style="float: right;"><span class="clera-textarea" @click="claerOpinion()" >清空</span></label></div><textarea v-model="opinionContent" id="valOpinion" class="opintext-area" placeholder="请输入内容" >{{opinionContent}}</textarea></div>
+					
+				</div>
+				<div class="send-Btns"><span id="opinBack" @click="onSubmit()" >确定</span><span class="send-cancel" onclick="closePage();">取 消</span></div>
+			</div>
+		</template>
+	</div>
+	</body>
+</html>

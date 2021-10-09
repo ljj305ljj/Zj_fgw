@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+	<meta content="email=no" name="format-detection" />
+	<!-- <meta name="wpk-bid" content="dta_1_840942484"> <script>    !(function(c,i,e,b){var h=i.createElement("script");var f=i.getElementsByTagName("script")[0];h.type="text/javascript";h.crossorigin=true;h.onload=function(){c[b]||(c[b]=new c.wpkReporter({bid:"dta_1_840942484"}));c[b].installAll()};f.parentNode.insertBefore(h,f);h.src=e})(window,document,"https://g.alicdn.com/woodpeckerx/jssdk??wpkReporter.js","__wpk");</script> -->
+	<title>首页</title>
+	<script type="text/javascript" src="./js/loadVersion.js"></script>
+	<script>
+		var loadList = [
+			{ name: "iconfontcss", type: "css", url: "css/iconfont.css" },
+			//{ name: "iconfontcss", type: "css", url: "css/iconfontNew.css" },
+			{ name: "commoncss", type: "css", url: "css/common.css" },
+			{ name: "indexcss", type: "css", url: "css/index.css" },
+			{ name: "vuejs", type: "js", url: "js/vue.min.js" },
+			{ name: "jqueryjs", type: "js", url: "js/jquery-1.9.1.min.js" },
+			{name: "indexjs", type: "js", url: "js/index1.9.12.js" },
+			{ name: "vantjs", type: "js", url: "js/vant2.12.min.js" },
+			//{ name: "echarts", type: "js", url: "js/echarts.min.js" },
+			{ name: "ipConfigjs", type: "js", url: "js/ipConfig.js" },
+			//{ name: "commonjs", type: "js", url: "js/vconsole.min.js" },
+			{ name: "commonjs", type: "js", url: "js/common.js" },
+			{ name: "indexPhonejs", type: "js", url: "js/more.js" }
+		];
+		loadVersion.iniVersion(loadList, true);
+	</script>
+</head>
+
+<body>
+	<div id="More" class="page-view">
+		<template v-for="(indexItem,i) in indexTabData">
+			<div class="tab-handle-title">{{indexItem.name}}</div>
+			<van-grid :border="false">
+				<template v-for="(item,j) in indexItem.modal">
+					<div class="tab-handle-item" :class="showModalId==item.id?'tab-handle-active':''"
+						@click="goList(item,i,j)">
+						<div class="item-icon" :class="(item.url=='' && !item.childre)?'disabled':''"
+							:style="{background:j>iconBackgrounds.length-1?iconBackgrounds[j-iconBackgrounds.length]:iconBackgrounds[j]}">
+							<van-icon class-prefix="rjicon" :name="item.icon" :info="(item.num!=0)?item.num:''" />
+						</div>
+						<p>{{item.title}}</p>
+					</div>
+					<template v-if="j!=0  && j%4==3 || (j==indexItem.modal.length-1 && j%4<3)">
+						<div v-if="modalNum.id==(i+'-'+parseInt(j/4))" class="tab-more">
+							<div v-for="(view,k) in modalNum.datas" class="tab-handle-more" @click="goList(view)">
+								<div class="item-icon" :class="view.url==''?'disabled':''"
+									:style="{background:k>iconBackgrounds.length-1?iconBackgrounds[k-iconBackgrounds.length]:iconBackgrounds[k]}">
+									<van-icon class-prefix="rjicon" :name="view.icon"
+										:info="(view.num!=0)?view.num:''" />
+								</div>
+								<p>{{view.title}}</p>
+							</div>
+						</div>
+					</template>
+				</template>
+			</van-grid>
+		</template>
+		<!-- <vindexbtns :Datas="bottomBtnActive"></vindexbtns> -->
+	</div>
+</body>
+
+</html>

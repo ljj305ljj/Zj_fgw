@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <title>详情</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/pdfh5.css" />
+    <link href="ico/wisp_320.png" type="image/x-icon" rel="shortcut icon" />
+    <script src="https://mobile.cncico.com:9443/open/js/jem.js" type="text/javascript" charset="utf-8"></script>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+        #demo {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="text-wrapper">
+            <div class="text part1">
+                <div>
+                    <span class="letter">
+                        <div class="character">L</div> <span></span>
+                    </span>
+                    <span class="letter">
+                        <div class="character">o</div> <span></span>
+                    </span>
+                    <span class="letter">
+                        <div class="character">a</div> <span></span>
+                    </span>
+                    <span class="letter">
+                        <div class="character">d</div> <span></span>
+                    </span>
+                    <span class="letter">
+                        <div class="character">i</div> <span></span>
+                    </span>
+                    <span class="letter">
+                        <div class="character">n</div> <span></span>
+                    </span>
+                    <span class="letter">
+                        <div class="character">g</div> <span></span>
+                    </span>
+                </div>
+            </div>
+            <div class="how-to"><span>正在加载中，请您耐心等待...</span></div>
+        </div>
+
+    </div>
+    <div id="demo"></div>
+    <script src="js/pdf.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/pdf.worker.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/jquery-1.11.3.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/pdfh5.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">	
+    em.ready(function(){
+    // 执行接口调用
+    em.changeOrientation({
+    orientation:2, // 0,竖屏(默认)，1，横屏，2，跟随屏幕转动
+    success: function (res) {
+    }
+    });
+    });
+    // var detectOrient = function() {
+    //     var width = document.documentElement.clientWidth,
+    //             height = document.documentElement.clientHeight,
+    //             wrapper = document.getElementById("demo"),
+    //             style = "";
+    //     if(width >= height) { // 竖屏
+    //         style += "width:100%"; 
+    //         style += "height:100%;";
+    //         style += "-webkit-transform: rotate(0); transform: rotate(0);";
+    //         style += "-webkit-transform-origin: 0 0;";
+    //         style += "transform-origin: 0 0;";
+    //     } else { // 横屏
+    //         style += "width:" + height + "px;";// 注意旋转后的宽高切换
+    //         style += "height:" + width + "px;";
+    //         style += "-webkit-transform: rotate(90deg); transform: rotate(90deg);";
+    //         // 注意旋转中点的处理
+    //         style += "-webkit-transform-origin: " + width / 2 + "px " + width / 2 + "px;";
+    //         style += "transform-origin: " + width / 2 + "px " + width / 2 + "px;";
+    //     }
+    //     wrapper.style.cssText = style;
+    // }
+    // window.onresize = detectOrient;
+    // detectOrient();
+    //   window.screen.unlockOrientation();
+    var timestamp = new Date().getTime();
+    //获取url带的参数地址
+    function GetQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = location.search.substr(1).match(reg);
+        if (r != null) return decodeURIComponent(r[2]);
+        return "";
+    }
+    //alert(GetQueryString("fileTitle"))
+    openPdf("demo",GetQueryString("fileUrl"),{
+        waterMark: "省发改委  " + GetQueryString("userName") + " " + GetQueryString("phone"),
+        renderType:"canvas",
+        lazy:true
+    });	
+/*
+       $("#app").remove()
+            $("#demo").show()
+            //当前默认优先获取浏览器地址栏？file=后面的地址，如果地址栏没有，再拿配置项的pdfurl或者data来渲染pdf
+            //优先顺序：  ？file= > pdfurl > data
+            var pdfh5 = new Pdfh5('#demo', {
+                pdfurl: "./pdf/20191223145110898810.pdf",
+                // pdfurl: "testPDF/1.pdf",
+                 renderType:"canvas",
+                lazy: true
+            });
+*/
+	
+   </script>
+</body>
+
+</html>

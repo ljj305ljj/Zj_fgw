@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<title>基本信息</title>
+	</head>
+	<body>
+		<div id="jbxx" class="bldview">			
+            <div :style="'height:'+getDetailHeight()" style="overflow-y: auto; overflow-x: hidden;padding-bottom:3rem; background: #F1F1F3;">                
+                <template >   
+                    <div  class="title">工会活动预算信息</div>         
+                    <!-- <div  class="date">报销时间: {{formData.draftDate}}</div> -->
+                    <van-form validate-first >	
+                        <dl > 
+                        <!-- <dt><van-field label="处室名称" value="" disabled size="large" /></dt> -->
+                        <dd><van-field
+                            v-model="formData.docSequence"					
+                            input-align="right"
+                            label="业务编号"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.draftUserName"					
+                            input-align="right"
+                            label="经办人"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.draftDate"					
+                            input-align="right"
+                            label="登记时间"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.activityName"					
+                            input-align="right"
+                            label="活动名称"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.activityPlace"					
+                            input-align="right"
+                            label="地点场所"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.activityStartDate"					
+                            input-align="right"
+                            label="开始时间"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.activityEndDate"					
+                            input-align="right"
+                            label="结束时间"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <van-field label="关联文件" value="" disabled size="large" />
+                                <van-button :disabled="detailPage.proPermission.flowStatus=='running' ? false : true" slot="button" size="small" color="#5462E7" @click="OpenWebView('relative.html');">关联文件</van-button>
+                            </dt>  
+                            <template  v-for="(reldoc, reldocIndex) in relDocList">    
+                            <dd><van-field
+                                v-model="reldoc.subject"					
+                                input-align="right"
+                                label="标题"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                            </template>
+                        </dl>
+                        <template v-if="activityTotalNumJson" >
+                        <dl v-for="(item,index) in activityTotalNumJson.itemList">
+                        <dd><van-field
+                            v-model="item.itemName"					
+                            input-align="right"
+                            label="预算详情"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd v-if="item.isBold!=null && item.isBold"><van-field
+                            v-model="item.reportTotalNumber"					
+                            input-align="right"
+                            label="编报数"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd v-else><van-field
+                            v-model="item.reportNumber"					
+                            input-align="right"
+                            label="编报数"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd v-if="item.isBold!=null && item.isBold"><van-field
+                            v-model="item.approvedTotalNumber"					
+                            input-align="right"
+                            label="核定数"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd v-else><van-field
+                            v-model="item.approvedNumber"					
+                            input-align="right"
+                            label="核定数"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd v-if="item.isBold!=null && item.isBold"><van-field
+                            v-model="item.remarkTotal"					
+                            input-align="right"
+                            label="备注"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd v-else><van-field
+                            v-model="item.remark"					
+                            input-align="right"
+                            label="备注"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        </dl>  
+                        </template>
+                        <template v-if="activityDaysJson">
+                        <dl v-for="(item,index) in activityDaysJson.itemList">
+                            <dd><van-field
+                                v-model="item.itemName"					
+                                input-align="right"
+                                label="预算详情"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                            <dd v-if="item.isBold!=null && item.isBold"><van-field
+                                v-model="item.reportTotalNumber"					
+                                input-align="right"
+                                label="编报数"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                            <dd v-else><van-field
+                                v-model="item.reportNumber"					
+                                input-align="right"
+                                label="编报数"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                            <dd v-if="item.isBold!=null && item.isBold"><van-field
+                                v-model="item.approvedTotalNumber"					
+                                input-align="right"
+                                label="核定数"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                            <dd v-else><van-field
+                                v-model="item.approvedNumber"					
+                                input-align="right"
+                                label="核定数"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                            <dd v-if="item.isBold!=null && item.isBold"><van-field
+                                v-model="item.remarkTotal"					
+                                input-align="right"
+                                label="备注"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                            <dd v-else><van-field
+                                v-model="item.remark"					
+                                input-align="right"
+                                label="备注"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                        </dl>  
+                        </template>
+                        <template v-if="activityCostsJson">
+                            <dl v-for="(item,index) in activityCostsJson.itemList">
+                                <dd><van-field
+                                    v-model="item.itemName"					
+                                    input-align="right"
+                                    label="预算详情"
+                                    rows="1"
+                                    autosize
+                                    size="large"
+                                    type="textarea"
+                                    readonly
+                                    >
+                                </van-field></dd>
+                                <dd v-if="item.isBold!=null && item.isBold"><van-field
+                                    v-model="item.reportTotalNumber"					
+                                    input-align="right"
+                                    label="编报数"
+                                    rows="1"
+                                    autosize
+                                    size="large"
+                                    type="textarea"
+                                    readonly
+                                    >
+                                </van-field></dd>
+                                <dd v-else><van-field
+                                    v-model="item.reportNumber"					
+                                    input-align="right"
+                                    label="编报数"
+                                    rows="1"
+                                    autosize
+                                    size="large"
+                                    type="textarea"
+                                    readonly
+                                    >
+                                </van-field></dd>
+                                <dd v-if="item.isBold!=null && item.isBold"><van-field
+                                    v-model="item.approvedTotalNumber"					
+                                    input-align="right"
+                                    label="核定数"
+                                    rows="1"
+                                    autosize
+                                    size="large"
+                                    type="textarea"
+                                    readonly
+                                    >
+                                </van-field></dd>
+                                <dd v-else><van-field
+                                    v-model="item.approvedNumber"					
+                                    input-align="right"
+                                    label="核定数"
+                                    rows="1"
+                                    autosize
+                                    size="large"
+                                    type="textarea"
+                                    readonly
+                                    >
+                                </van-field></dd>
+                                <dd v-if="item.isBold!=null && item.isBold"><van-field
+                                    v-model="item.remarkTotal"					
+                                    input-align="right"
+                                    label="备注"
+                                    rows="1"
+                                    autosize
+                                    size="large"
+                                    type="textarea"
+                                    readonly
+                                    >
+                                </van-field></dd>
+                                <dd v-else><van-field
+                                    v-model="item.remark"					
+                                    input-align="right"
+                                    label="备注"
+                                    rows="1"
+                                    autosize
+                                    size="large"
+                                    type="textarea"
+                                    readonly
+                                    >
+                                </van-field></dd>
+                            </dl>  
+                        </template> 
+                    </van-form>	 
+                 </template>  
+               
+            </div>				
+		</div>
+		<script>
+			var docInfor = toArr(App.LS.get("docInfor"));
+			let stateBusiness = toArr(App.LS.get("stateBusiness"));
+           console.log("基本信息");
+			var jbxx=new Vue({
+			            el: '#jbxx',
+			            data(){
+			                return{
+			                    formData:docInfor,
+                                relDocList:toArr(docInfor.relDocList),
+                                activityTotalNumJson:toArr(docInfor.activityTotalNumJson),//参加人数
+                                activityDaysJson:toArr(docInfor.activityDaysJson),//活动天数
+                                activityCostsJson:toArr(docInfor.activityCostsJson),//费用合计
+                                purchaseNoticeInfo:toArr(docInfor.purchaseNoticeInfo),
+                                businessNo: toArr(App.LS.get("listInfo")).businessNo,
+			                }
+			            },
+			            mounted:function(){
+			                
+						   
+			            },
+			            methods:{
+                            getDetailHeight:function(){
+                            	return ($("body").height()-44-54 + "px");
+                            },
+                            },
+                            })
+			
+		</script>
+		<style>
+             .title{
+              font-size: 1rem;
+              text-align: center;
+              color: #606061;
+              padding: .8rem 0 .5rem 0;
+              background: #fff;
+            }
+            /* .date{
+                font-size: .8rem;
+                text-align: right;
+                padding-right: .5rem;
+                padding-bottom: .8rem;
+                background: #fff;
+            } */
+            dl:first-child {padding-top: .6rem;}
+            dl{padding: .3rem 0;font-size: .9rem;}
+            dt{border-bottom: #f1f0f0  solid 1px;background: #fff;}
+            dd{/*padding: .3rem 0;  border-bottom: #f1f0f0  solid 1px;*/background: #fff;height: auto;  position: relative;color: #313131;white-space: normal !important;line-height: 1rem;    display: flex;    justify-content: space-between;}
+            dd.chekBox,#basicInfor dd.checked{text-align: left;    padding-left: 0.1rem;    width: 96%;    height: auto;}
+            dd>span,dt{color: #6C6B6B; display: block;    text-align: left;}
+            dd.add{padding: 1rem;   font-size: 0.8rem;}
+            dd.add>span{ color: rgb(28, 149, 255); }
+            dd>.textcontent { width: 55%;text-align: right;}
+            dd>textarea.editable{color:#C4CBD3}
+            dd>.dlspan span { border-bottom: solid 1px #828080;  width: 1rem;  display: inline-block;    line-height: .24rem;}
+		</style>
+	</body>
+</html>

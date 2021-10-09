@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html style="background: #f1f1f3;">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<title>票据上传</title>
+		<script type="text/javascript" src="../../js/loadVersion.js" ></script>	
+		<script>
+			var loadList=[				
+				{name:"iconfontcss",type:"css",url:"../../css/iconfont.css"},
+				{name:"commoncss",type:"css",url:"../../css/common.css"},
+				{name:"treeListcss",type:"css",url:"./css/treeList.css"},	
+				{name:"indexcss",type:"css",url:"../../css/index.css"},	
+				{name:"handleFilecss",type:"css",url:"../../css/handleFile.css"},				
+				{name:"vuejs",type:"js",url:"../../js/vue.min.js"},
+				{name:"jqueryjs",type:"js",url:"../../js/jquery-1.9.1.min.js"},
+				{name:"indexjs",type:"js",url:"../../js/index1.9.12.js"},	
+				{name:"vantjs",type:"js",url:"../../js/vant.min.js"},
+				{name:"imageConversionjs",type:"js",url:"./js/imageConversion.js"},
+				// {name:"commonjs",type:"js",url:"../../js/vconsole.min.js"},
+				{name:"ipConfigjs",type:"js",url:"../../js/ipConfig.js"},
+				{name:"formComponentjs",type:"js",url:"./js/FormComponent.js"},
+				{name:"commonjs",type:"js",url:"../../js/common.js"},
+				{name:"billUploadjs",type:"js",url:"./js/billUploadPage.js"},
+			];
+			loadVersion.iniVersion(loadList);
+		</script>
+	</head>
+	<body >
+		<div id="billPage" class="flex">
+			<van-tabs @change=""  v-model="tabActive"  color="#5078FE" 
+            title-active-color="#5078FE"  line-width="20%" line-height="2px" :lazy-render="true" swipeable sticky>
+				<template v-for="(item,x) in tabData">
+					<van-tab :title="item.name"  :name="x"  >
+						<div class="flex" :id="item.pageId">
+							<div class="upload-action">
+								<span style="width: 60%;">
+									<van-uploader  :before-read="asyncBeforeRead" :after-read="uploadFiles" :disabled="!isEdit">本地或拍照上传</van-uploader><!--multiple-->
+								</span>
+								<!-- <span style="width: 30%;" @click="takePhoto">拍照上传</span> -->
+								<span style="width: 40%;text-align: right;" class="rjicon iconfangda"  @click="openBillView"></span>
+								<p style="font-size: .7rem;color: #b5b7b9;width:100%;">批量上传建议不超过10张票据</p>
+							</div>
+							<dl>
+								<van-field					
+								input-align="right"
+								label="票据信息"
+								rows="1"
+								autosize
+								size="large"
+								type="textarea" 
+								readonly
+								>
+								<template #input>
+									<span v-if="isEdit" class="rjicon iconzengjia" style="color:#5078fe; padding: 0 .8rem;"  @click="addExpenseDetail(item.pageId)"></span>
+									<span v-if="isEdit" class="rjicon  rjicon-del" style="color:#e80808"  @click="deleteExpenseDetail(item.pageId)"></span>
+								</template>
+								</van-field>
+							</dl>
+							<dl v-if="item.pageId == 'invoiceList' && expenseContentJson && expenseContentJson.invoiceList"> 
+								<van-checkbox-group v-model="checkBoxs[item.pageId].checkedIndexs">
+									<template v-for="(invoice,index) in expenseContentJson.invoiceList">
+										<dt>
+											<van-field					
+											input-align="right"
+											:label="'票据'+(index+1)"
+											rows="1"
+											autosize
+											size="large"
+											type="textarea" 
+											readonly
+											>
+											<template #input>
+												<!-- <span class="rjicon icon-fuxuankuang" style="color:#c5c3c3"></span> -->
+												<van-checkbox 
+													:name="index"  
+													checked-color="#5078fe" 
+													shape="square"
+													:ref="checkBoxs[item.pageId].checkBoxsName" 
+													@click="toggleCheckBox(item.pageId,index)" 
+													:disabled="!isEdit"
+													label-disabled>
+												</van-checkbox>
+											</template>
+											</van-field>
+											
+										</dt>
+										<dd>
+											<van-field
+											input-align="left"
+											size="large"
+											readonly
+											>
+											<template #input>
+												<input style="width: 33.33%;text-align: left;" v-model="invoice.departure" placeholder="出发地" :readonly="!isEdit" />
+												<span style="width: 33.33%;text-align: center;" class="rjicon iconjiantou"></span>
+												<input style="width: 33.33%;text-align: right;" v-model="invoice.destination" placeholder="到达地" :readonly="!isEdit" />
+											</template>
+											</van-field>				
+										</dd> 
+										<dd>
+											<van-field
+												v-model="invoice.date"					
+												input-align="right"
+												label="日期"
+												autosize
+												size="large"
+												@click="showCalendarComponet(index)"
+												placeholder="请选择日期"
+												is-link
+												readonly
+												>
+											</van-field>
+											<van-calendar 
+												v-model="showCalendar" 
+												:show-confirm="false" 
+												:min-date="minDate"
+												:max-date="maxDate"
+												:default-date="defaultDate"
+												color="#5078fe"
+												:style="{ height: '500px' }"
+												@confirm="onConfirmCalendar" 
+											/>
+										</dd>
+										<dd>
+											<van-field
+												v-model="invoice.passenger"					
+												input-align="right"
+												label="乘客"
+												rows="1"
+												autosize
+												size="large"
+												type="textarea"
+												placeholder="乘客"
+												:is-link="isEdit"
+												@click="isEdit?showTreeComponet(index):''"
+												readonly
+												>
+											</van-field>
+											<!-- <Vtreeselect :Trees="userTrees" :id="invoice.id" v-show="isShowTreeSelect"></Vtreeselect> -->
+											<div v-show="isShowTreeSelect" :id="invoice.id" class="box-dept tree-list" @click.stop>
+												<template  v-show="!$.isEmptyObject(userTrees)">								
+													<tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setPassengerTreeValue">
+													</tree>									
+												</template>
+											</div>
+										</dd>
+										<dd><van-field
+											v-model="invoice.banquet"					
+											input-align="right"
+											label="席别"
+											rows="1"
+											autosize
+											size="large"
+											type="textarea"
+											:readonly="!isEdit"
+											placeholder="席别"
+											>
+										</van-field></dd>
+										<dd><van-field
+											v-model="invoice.expenseAmount"					
+											input-align="right"
+											label="发票金额"
+											rows="1"
+											autosize
+											size="large"
+											type="number"
+											:readonly="!isEdit"
+											placeholder="发票金额"
+											>
+										</van-field></dd>
+										<dd><van-field
+											v-model="invoice.amount"					
+											input-align="right"
+											label="报销金额"
+											rows="1"
+											autosize
+											size="large"
+											type="number"
+											:readonly="!isEdit"
+											placeholder="报销金额"
+											>
+										</van-field></dd>
+										<dt><van-field
+											v-model="invoice.invoiceNumber"					
+											input-align="right"
+											label="票据号码"
+											rows="1"
+											autosize
+											size="large"
+											type="textarea"
+											:readonly="!isEdit"
+											placeholder="票据号码"
+											>
+										</van-field></dt>
+									</template>
+								</van-checkbox-group>
+							</dl>
+							<dl v-if="item.pageId == 'trainTicket' && expenseContentJson && expenseContentJson.trainTicket"> 
+								<van-checkbox-group v-model="checkBoxs[item.pageId].checkedIndexs">
+									<template v-for="(invoice,index) in expenseContentJson.trainTicket">
+										<dt>
+											<van-field					
+											input-align="right"
+											:label="'票据'+(index+1)"
+											rows="1"
+											autosize
+											size="large"
+											type="textarea" 
+											readonly
+											>
+											<template #input>
+												<van-checkbox 
+													:name="index"  
+													checked-color="#5078fe" 
+													shape="square"
+													:ref="checkBoxs[item.pageId].checkBoxsName" 
+													@click="toggleCheckBox(item.pageId,index)" 
+													:disabled="!isEdit"
+													label-disabled>
+												</van-checkbox>
+											</template>
+											</van-field>
+											
+										</dt>
+										<dd>
+											<van-field
+											input-align="left"
+											size="large"
+											readonly
+											>
+											<template #input>
+												<input style="width: 33.33%;text-align: left;" v-model="invoice.departure" placeholder="出发地" :readonly="!isEdit"/>
+												<span style="width: 33.33%;text-align: center;" class="rjicon iconjiantou"></span>
+												<input style="width: 33.33%;text-align: right;" v-model="invoice.destination" placeholder="到达地" :readonly="!isEdit"/>
+											</template>
+											</van-field>				
+										</dd> 
+										<dd>
+											<van-field
+												v-model="invoice.date"					
+												input-align="right"
+												label="日期"
+												autosize
+												size="large"
+												@click="showCalendarComponet(index)"
+												placeholder="请选择日期"
+												is-link
+												readonly
+												>
+											</van-field>
+											<van-calendar 
+												v-model="showCalendar" 
+												:show-confirm="false" 
+												:min-date="minDate"
+												:max-date="maxDate"
+												:default-date="defaultDate"
+												color="#5078fe"
+												:style="{ height: '500px' }"
+												@confirm="onConfirmCalendar" 
+											/>
+										</dd>
+										<dd>
+											<van-field
+												v-model="invoice.passenger"					
+												input-align="right"
+												label="乘客"
+												rows="1"
+												autosize
+												size="large"
+												type="textarea"
+												placeholder="乘客"
+												:is-link="isEdit"
+												@click="isEdit?showTreeComponet(index):''"
+												readonly
+												>
+											</van-field>
+											<div v-show="isShowTreeSelect" :id="invoice.id" class="box-dept tree-list" @click.stop>
+												<template  v-show="!$.isEmptyObject(userTrees)">								
+													<tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setPassengerTreeValue">
+													</tree>									
+												</template>
+											</div>
+										</dd>
+										<dd><van-field
+											v-model="invoice.banquet"					
+											input-align="right"
+											label="席别"
+											rows="1"
+											autosize
+											size="large"
+											type="textarea"
+											:readonly="!isEdit"
+											placeholder="席别"
+											>
+										</van-field></dd>
+										<dd><van-field
+											v-model="invoice.expenseAmount"					
+											input-align="right"
+											label="发票金额"
+											rows="1"
+											autosize
+											size="large"
+											type="number"
+											:readonly="!isEdit"
+											placeholder="发票金额"
+											>
+										</van-field></dd>
+										<dd><van-field
+											v-model="invoice.amount"					
+											input-align="right"
+											label="报销金额"
+											rows="1"
+											autosize
+											size="large"
+											type="number"
+											:readonly="!isEdit"
+											placeholder="报销金额"
+											>
+										</van-field></dd>
+										<dt><van-field
+											v-model="invoice.invoiceNumber"					
+											input-align="right"
+											label="票据号码"
+											rows="1"
+											autosize
+											size="large"
+											type="textarea"
+											:readonly="!isEdit"
+											placeholder="票据号码"
+											>
+										</van-field></dt>
+									</template>
+								</van-checkbox-group>
+							</dl>
+							<dl v-if="item.pageId == 'stayList' && expenseContentJson && expenseContentJson.stayList"> 
+								<van-checkbox-group v-model="checkBoxs[item.pageId].checkedIndexs">
+									<template v-for="(invoice,index) in expenseContentJson.stayList">
+										<dt>
+											<van-field					
+											input-align="right"
+											:label="'票据'+(index+1)"
+											rows="1"
+											autosize
+											size="large"
+											type="textarea" 
+											readonly
+											>
+											<template #input>
+												<van-checkbox 
+													:name="index"  
+													checked-color="#5078fe" 
+													shape="square"
+													:ref="checkBoxs[item.pageId].checkBoxsName" 
+													@click="toggleCheckBox(item.pageId,index)" 
+													:disabled="!isEdit"
+													label-disabled>
+												</van-checkbox>
+											</template>
+											</van-field>
+										</dt>
+										
+										<dd><van-field
+											v-model="invoice.stayWhere"					
+											input-align="right"
+											label="住宿地点"
+											rows="1"
+											autosize
+											size="large"
+											type="textarea"
+											:readonly="!isEdit"
+											placeholder="住宿地点"
+											>
+										</van-field></dd>
+										<dd><van-field
+											v-model="invoice.expenseAmount"					
+											input-align="right"
+											label="发票金额"
+											rows="1"
+											autosize
+											size="large"
+											type="number"
+											:readonly="!isEdit"
+											placeholder="发票金额"
+											>
+										</van-field></dd>
+										<dd><van-field
+											v-model="invoice.amount"					
+											input-align="right"
+											label="报销金额"
+											rows="1"
+											autosize
+											size="large"
+											type="number"
+											:readonly="!isEdit"
+											placeholder="报销金额"
+											>
+										</van-field></dd>
+										<template v-for="(peo,pIndex) in invoice.destination.detail">
+											<dt>
+											<dd>
+												<van-field
+												v-model="peo.people"					
+												input-align="right"
+												label="选人"
+												rows="1"
+												autosize
+												size="large"
+												type="textarea"
+												readonly
+												placeholder="选人"
+												:is-link="isEdit"
+												@click="isEdit?showTreeComponet(index,pIndex):''"
+												>
+												</van-field>
+												<div v-show="isShowTreeSelect" :id="peo.id" class="box-dept tree-list" @click.stop>
+													<template  v-show="!$.isEmptyObject(userTrees)">								
+														<tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setPeoTreeValue">
+														</tree>									
+													</template>
+												</div>
+											<!-- <Vtreeselect :Trees="userTrees" :id="peo.id" v-show="isShowTreeSelect"></Vtreeselect> -->
+											</dd>
+											<dd><van-field
+												v-model="peo.days"					
+												input-align="right"
+												label="住几晚"
+												rows="1"
+												autosize
+												size="large"
+												type="textarea"
+												:readonly="!isEdit"
+												placeholder="住几晚"
+												>
+											</van-field></dd>
+											<dd><van-field
+												v-model="peo.amount"					
+												input-align="right"
+												label="报销金额"
+												rows="1"
+												autosize
+												size="large"
+												type="number"
+												:readonly="!isEdit"
+												placeholder="报销金额"
+												>
+											</van-field></dd>
+										</dt>
+										</template>
+										<dt><van-field
+											v-model="invoice.invoiceNumber"					
+											input-align="right"
+											label="票据号码"
+											rows="1"
+											autosize
+											size="large"
+											type="textarea"
+											:readonly="!isEdit"
+											placeholder="票据号码"
+											>
+										</van-field></dt>
+									</template>
+								</van-checkbox-group>
+							</dl>
+							<dl v-if="item.pageId == 'otherList' && expenseContentJson && expenseContentJson.otherList"> 
+								<van-checkbox-group v-model="checkBoxs[item.pageId].checkedIndexs">
+									<template v-for="(invoice,index) in expenseContentJson.otherList">
+										<dt>
+											<van-field					
+											input-align="right"
+											:label="'票据'+(index+1)"
+											rows="1"
+											autosize
+											size="large"
+											type="textarea" 
+											readonly
+											>
+											<template #input>
+												<van-checkbox 
+													:name="index"  
+													checked-color="#5078fe" 
+													shape="square"
+													:ref="checkBoxs[item.pageId].checkBoxsName" 
+													@click="toggleCheckBox(item.pageId,index)" 
+													:disabled="!isEdit"
+													label-disabled>
+												</van-checkbox>
+											</template>
+											</van-field>
+										</dt>
+										
+										<dd><van-field
+											v-model="invoice.content"					
+											input-align="right"
+											label="费用内容"
+											rows="1"
+											autosize
+											size="large"
+											type="textarea"
+											:readonly="!isEdit"
+											placeholder="费用内容"
+											>
+										</van-field></dd>
+										<dd><van-field
+											v-model="invoice.expenseAmount"					
+											input-align="right"
+											label="发票金额"
+											rows="1"
+											autosize
+											size="large"
+											type="number"
+											:readonly="!isEdit"
+											placeholder="发票金额"
+											>
+										</van-field></dd>
+										<dd><van-field
+											v-model="invoice.amount"					
+											input-align="right"
+											label="报销金额"
+											rows="1"
+											autosize
+											size="large"
+											type="number"
+											:readonly="!isEdit"
+											placeholder="报销金额"
+											>
+										</van-field></dd>
+										<template v-for="(peo,pIndex) in invoice.destination.detail">
+											<dt>
+											<dd>
+												<van-field
+												v-model="peo.people"					
+												input-align="right"
+												label="选人"
+												rows="1"
+												autosize
+												size="large"
+												type="textarea"
+												readonly
+												placeholder="选人"
+												:is-link="isEdit"
+												@click="isEdit?showTreeComponet(index,pIndex):''"
+												>
+												</van-field>
+												<div v-show="isShowTreeSelect" :id="peo.id" class="box-dept tree-list" @click.stop>
+													<template  v-show="!$.isEmptyObject(userTrees)">								
+														<tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setPeoTreeValue">
+														</tree>									
+													</template>
+												</div>
+											<!-- <Vtreeselect :Trees="userTrees" :id="peo.id" v-show="isShowTreeSelect"></Vtreeselect> -->
+											</dd>
+											<dd><van-field
+												v-model="peo.amount"					
+												input-align="right"
+												label="报销金额"
+												rows="1"
+												autosize
+												size="large"
+												type="number"
+												:readonly="!isEdit"
+												placeholder="报销金额"
+												>
+											</van-field></dd>
+										</dt>
+										</template>
+										<dt><van-field
+											v-model="invoice.invoiceNumber"					
+											input-align="right"
+											label="票据号码"
+											rows="1"
+											autosize
+											size="large"
+											type="textarea"
+											:readonly="!isEdit"
+											placeholder="票据号码"
+											>
+										</van-field></dt>
+									</template>
+								</van-checkbox-group>
+							</dl>
+						</div>
+					</van-tab>
+				</template>
+			</van-tabs>
+		</div>
+		<style>
+		   dl:first-child {padding-top: .6rem;}
+		   dl{padding: .3rem 0;font-size: .9rem;}
+		   dt{border-bottom: #f1f0f0  solid 1px;background: #fff;}
+		   dd{/*padding: .3rem 0;  border-bottom: #f1f0f0  solid 1px;*/background: #fff;height: auto;  position: relative;color: #313131;white-space: normal !important;line-height: 1rem;    display: flex;    justify-content: space-between;}
+		   dd.chekBox,#basicInfor dd.checked{text-align: left;    padding-left: 0.1rem;    width: 96%;    height: auto;}
+		   dd>span,dt{color: #6C6B6B; display: block;    text-align: left;}
+		   dd.add{padding: 1rem;   font-size: 0.8rem;}
+		   dd.add>span{ color: rgb(28, 149, 255); }
+		   dd>.textcontent { width: 55%;text-align: right;}
+		   dd>textarea.editable{color:#C4CBD3}
+		   dd>.dlspan span { border-bottom: solid 1px #828080;  width: 1rem;  display: inline-block;    line-height: .24rem;}
+
+		   .upload-action{
+			display: -webkit-box;
+			display: -webkit-flex;
+			display: flex;
+			-webkit-flex-wrap: wrap;
+			flex-wrap: wrap;
+			padding: .8rem .6rem;
+			margin-bottom: .3rem; 
+			color: #5078fe;
+			font-size: .8rem;
+			line-height: 1.4rem;
+			background: #ffffff;
+		   }
+	   </style>			
+	</body>
+</html>

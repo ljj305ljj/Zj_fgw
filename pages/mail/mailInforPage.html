@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+  <meta content="email=no" name="format-detection" />
+  <title>基本信息</title>
+  <script type="text/javascript" src="../../js/loadVersion.js"></script>
+  <script>
+    var loadList = [
+      { name: "iconfontcss", type: "css", url: "../../css/iconfont.css" },
+      { name: "commoncss", type: "css", url: "css/email.css" },
+      { name: "indexcss", type: "css", url: "../../css/index.css" },
+      // { name: "handleFilecss", type: "css", url: "../../css/handleFile.css" },
+      { name: "vuejs", type: "js", url: "../../js/vue.min.js" },
+      { name: "jqueryjs", type: "js", url: "../../js/jquery-1.9.1.min.js" },
+      {name:"indexjs",type:"js",url:"../../js/index1.9.12.js"},
+      { name: "vantjs", type: "js", url: "../../js/vant2.7.1.js" },
+      { name: "ipConfigjs", type: "js", url: "../../js/ipConfig.js" },
+      //{name:"commonjs",type:"js",url:"../../js/vconsole.min.js"},
+      { name: "commonjs", type: "js", url: "../../js/common.js" },
+      { name: "mailInforPagejs", type: "js", url: "./js/mailInforPage.js" }
+    ];
+    loadVersion.iniVersion(loadList);
+  </script>
+</head>
+
+<body>
+  <div id="mail" class="page-view" style="width: 100%;height: 100%;">
+    <template>
+    <div style="height: 100vh;width: 100%;    overflow-y: auto;
+    padding-bottom: 60px;">
+      <div id="text6">
+        <!-- tab内容 -->
+        <div id="mailPage" class="maildiv isRead" style="font-size: 0.9444rem;line-height: 1.1667rem;">
+          <div class="email-main">
+            <div id="mail-tit" class="email-title">{{docInfor.subject}}</div>
+            <ul class="email-info">
+              <li><label>发件人：</label><span>{{docInfor.fromAddress}}</span></li>
+              <li><label>时间：</label><span>{{docInfor.receiveDate || docInfor.sentDate}}</span></li>
+              <li style="overflow: auto; max-height: 10rem;"><label>收件人：</label><span>{{docInfor.toAddress}}</span></li>
+              <li style="overflow: auto; max-height: 10rem;"><label>抄送：</label><span>{{docInfor.ccMailAddress}}</span></li>
+              <li style="overflow: auto; max-height: 10rem;" v-show="mailType == 'sent'"><label>密送：</label><span>{{docInfor.bccMailAddress}}</span></li>
+            </ul>
+            <div class="email-title">正文</div>
+            <div class="mail-text" v-html="docInfor.content"></div>
+            <div class="email-title">附件</div>
+            <ul class="main-filelist">
+              <li v-for="(obj,i) in attachList" @click="openFile(obj)">{{i+1 + '.'+obj.fileName+'.'+obj.fileSuffix}}
+              </li>
+            </ul>
+          </div>
+          <van-row type="flex" justify="space-around" id="open-MailBtn" class="mail-Btns" v-if="mailType == 'inbox'">
+              <van-col class="btn" span="11" @click="mailNewID('back');">回复</van-col>
+              <van-col class="btn" span="11" @click="mailNewID('turn');">转发</van-col>
+          </van-row>
+          <van-row type="flex" justify="space-around" id="open-MailBtn" class="mail-Btns" v-else-if="mailType == 'sent' && module == 'MAIL' ">
+            <van-col class="btn" span="23" style="width:98%;" @click="relateMail();">撤回</van-col>
+          </van-row>
+        </div>
+      </div>
+    </div>
+  </template>
+  </div>
+</body>
+
+</html>

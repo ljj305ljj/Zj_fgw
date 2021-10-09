@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<meta name="wpk-bid" content="dta_1_840942484"> <script>    !(function(c,i,e,b){var h=i.createElement("script");var f=i.getElementsByTagName("script")[0];h.type="text/javascript";h.crossorigin=true;h.onload=function(){c[b]||(c[b]=new c.wpkReporter({bid:"dta_1_840942484"}));c[b].installAll()};f.parentNode.insertBefore(h,f);h.src=e})(window,document,"https://g.alicdn.com/woodpeckerx/jssdk??wpkReporter.js","__wpk");</script>
+		<title>表单</title>
+		<script type="text/javascript" src="../../js/loadVersion.js" ></script>	
+		<script>
+			var loadList=[				
+				{name:"iconfontcss",type:"css",url:"../../css/iconfont.css"},
+				{name:"commoncss",type:"css",url:"../../css/common.css"},	
+				{name:"indexcss",type:"css",url:"../../css/index.css"},	
+				{name:"handleFilecss",type:"css",url:"../../css/handleFile.css"},
+				{name:"pdfh5css",type:"css",url:"../../css/pdfh5.css"},			
+				{name:"vuejs",type:"js",url:"../../js/vue.min.js"},
+				{name:"jqueryjs",type:"js",url:"../../js/jquery-1.9.1.min.js"},
+				{name:"indexjs",type:"js",url:"../../js/index1.9.12.js"},	
+				{name:"HandleWriting",type:"js",url:"../../js/HandleWriting.js"},
+				{name:"vantjs",type:"js",url:"../../js/vant.min.js"},
+				{name:"HandleView",type:"js",url:"../../js/HandleView.js"},
+				//{name:"commonjs",type:"js",url:"../../js/vconsole.min.js"},
+				{name:"ipConfigjs",type:"js",url:"../../js/ipConfig.js"},
+				{name:"commonjs",type:"js",url:"../../js/common.js"},
+				{name:"pdfjs",type:"js",url:"../../js/pdf.min.js"},
+				{name:"pdfworkerjs",type:"js",url:"../../js/pdf.worker.min.js"},
+				{name:"pdfh5js",type:"js",url:"../../js/pdfh5.js"},
+				{name:"PDFNotationjs",type:"js",url:"../../js/PDFNotation.js"},
+				{name:"BaseCommonjs",type:"js",url:"js/BaseCommon.js"},
+				{name:"detaiPagejs",type:"js",url:"js/detaiPage.js"},
+				
+			];
+			loadVersion.iniVersion(loadList);
+		</script>
+	</head>
+	<body >
+		<div id="detailPage" class="flex">
+			<template v-if="tabData.length == 1">
+				<div class="flex" :id="tabData[0].pageId"></div>
+			</template>
+			<van-tabs v-else @change="tabclick"  v-model="tabActive"  color="#5078FE" 
+            title-active-color="#5078FE"  line-width="20%" line-height="2px" :lazy-render="true" sticky>
+				<template v-for="(item,x) in tabData">
+					<van-tab :title="item.name"  :name="x"  :id="item.pageId">
+						<div class="flex" :id="item.pageId"></div>
+					</van-tab>
+				</template>
+			</van-tabs>
+		</div>
+		<style>
+			.detail-tab-title{height: 2.5rem;position: absolute;top: 0;left: 0;width: 100%;z-index: 1;box-shadow: 0 0 5px #c8c8c8;}
+			.detail-tab-name{line-height: 2.5rem;text-align: center;}
+			.detail-active{border-bottom: 2px solid #5078FE;}
+			.detail-tab-body{height: 100%;width: 100%;padding-top: 2.5rem;position: relative;top:0;left: 0;}
+		</style>			
+	</body>
+</html>

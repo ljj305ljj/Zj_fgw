@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<title>基本信息</title>
+	</head>
+	<body>
+		<div id="jbxx" class="bldview">			
+            <div style="overflow-y: auto; overflow-x: hidden;padding-bottom:3rem; background: #F1F1F3;">
+                <!-- <div  class="title">{{formData.subject}}</div>    -->
+                <template v-if="businessNo==='TRAVEL_EXPENSE'">           
+                    <!-- <div  class="date">报销时间: {{formData.draftDate}}</div> -->
+                    <van-form validate-first >	
+                          <dl > 
+                            <!-- <dt><van-field label="处室名称" value="" disabled size="large" /></dt> -->
+                            <dd><van-field
+                                v-model="formData.draftOrgName"					
+                                input-align="right"
+                                label="主办处室"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                            <dd><van-field
+                                v-model="formData.draftUserName"					
+                                input-align="right"
+                                label="经办人"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                            <dd><van-field
+                                v-model="formData.docSequence"					
+                                input-align="right"
+                                label="业务编号"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                placeholder="流程启动操作之后自动生成"
+                                readonly
+                                >
+                            </van-field></dd>
+                              <dd><van-field
+                                  v-model="formData.draftDate"					
+                                  input-align="right"
+                                  label="登记时间"
+                                  rows="1"
+                                  autosize
+                                  size="large"
+                                  type="textarea"
+                                  readonly
+                                  >
+                              </van-field></dd>
+                            <dd><van-field
+                                v-model="formData.subjectMatter"					
+                                input-align="right"
+                                label="出差事由"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                :readonly="!isEdit"
+                                placeholder="出差事由"
+                                >
+                            </van-field></dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <van-field label="关联文件" value="" disabled size="large" />
+                                <van-button :disabled="!isEdit" slot="button" size="small" color="#5462E7" @click="openRelativeFiles">关联文件</van-button>
+                            </dt>  
+                            <template  v-for="(reldoc, reldocIndex) in relDocList">    
+                            <dd><van-field
+                                v-model="reldoc.subject"					
+                                input-align="right"
+                                label="标题"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                @click="openFile(reldoc)"
+                                >
+                                <!-- <template #button>
+                                    <van-button plain :disabled="!isEdit" size="mini" color="#e80808" @click="cancelRe(reldoc)">取消关联</van-button>
+                                </template> -->
+                            </van-field> <van-button style="margin: 12px 16px 12px 0;width: 20%;" plain :disabled="!isEdit" size="mini" color="#e80808" @click="cancelRe(reldoc)">取消关联</van-button></dd>
+                            
+                            </template>
+                        </dl>	
+                        <dl> 
+                            <dd><i class="item-vline"></i>
+                                <van-field					
+                                input-align="right"
+                                label="票据上传"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                is-link 
+                                readonly
+                                @click="OpenWebView('pages/expense/BillUploadPage.html');"
+                                >
+                            </van-field></dd>
+                            <!-- <van-cell title="票据上传" is-link url="/vant/mobile.html" /> -->
+                        </dl>
+                        <dl > 
+                            <dd><i class="item-vline"></i>
+                                <van-field 
+                                label="信息登记" 
+                                value="" 
+                                disabled 
+                                size="large"
+                                is-link 
+                                @click="OpenWebView('pages/expense/InforRegistPage.html');" >
+                                </van-field>
+                            </dd> 
+                        </dl>
+                        <dl>
+                            <dt>
+                                <van-field					
+                                input-align="right"
+                                label="支付明细"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea" 
+                                readonly
+                                >
+                                <template #input>
+                                    <span v-if="isEdit" class="rjicon iconzengjia" style="color:#5078fe; padding: 0 .8rem;" @click="addPayDetail()"></span>
+                                    <span v-if="isEdit" class="rjicon  rjicon-del" style="color:#e80808" @click="deletePayDetail()"></span>
+                                </template>
+                                </van-field>
+                            </dt>
+                            <van-checkbox-group v-model="checkedPayDetailIndex">
+                            <template v-for="(expenseData, expenseIndex) in payMethodDetail">
+                                  <dd>
+                                    <van-checkbox 
+                                        :name="expenseIndex"  
+                                        checked-color="#5078fe" 
+                                        style="padding: 14px 5px 14px 16px;" 
+                                        shape="square"
+                                        ref="checkboxes" 
+                                        @click="toggleCheckBox(expenseIndex)" 
+                                        :disabled="!isEdit"
+                                        label-disabled>
+                                    </van-checkbox>
+                                    <!-- <span class="rjicon icon-fuxuankuang" style="color:#c5c3c3; padding: 14px 0 14px 16px;" @click=""></span> -->
+                                      <van-field
+                                      v-model="expenseData.name"					
+                                      input-align="right"
+                                      label="收款人"
+                                      rows="1"
+                                      autosize
+                                      size="large"
+                                      type="textarea"
+                                      readonly
+                                      placeholder="收款人"
+                                      :is-link="isEdit"
+                                      @click="isEdit?showTreeComponet(expenseIndex):''"
+                                      >
+                                  </van-field>
+                                  <div v-show="isShowTreeSelect" :id="expenseData.id" class="box-dept tree-list" @click.stop>
+                                    <template  v-show="!$.isEmptyObject(userTrees)">								
+                                        <tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setTreeValue">
+                                        </tree>									
+                                    </template>
+                                </div>
+                                  <!-- <Vtreeselect :Trees="userTrees" :id="expenseData.id" v-show="isShowTreeSelect" :setValue="setInforMation"></Vtreeselect> -->
+                                </dd>                         
+                                    <dd><van-field
+                                        v-model="expenseData.amount"					
+                                        input-align="right"
+                                        label="金额"
+                                        rows="1"
+                                        autosize
+                                        size="large"
+                                        type="number"
+                                        :readonly="!isEdit"
+                                        placeholder="金额"
+                                        >
+                                    </van-field></dd>
+                                  <dt><van-field
+                                      v-model="expenseData.remark"					
+                                      input-align="right"
+                                      label="备注"
+                                      rows="1"
+                                      autosize
+                                      size="large"
+                                      type="textarea"
+                                      :readonly="!isEdit"
+                                      placeholder="备注"
+                                      >
+                                  </van-field></dt>
+                            </template>
+                        </van-checkbox-group>
+                        </dl>
+                        <dl>
+                            <dd><van-field
+                                v-model="formData.otherAmountDetail"					
+                                input-align="right"
+                                label="其他需说明事项"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                :readonly="!isEdit"
+                                placeholder="其他需说明事项"
+                                >
+                            </van-field></dd>
+                            <dd><van-field
+                                v-model="formData.needHandOriginalBill"					
+                                input-align="right"
+                                label="需移交的原始票据"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                :readonly="!isEdit"
+                                placeholder="需移交的原始票据，多个请用逗号隔开"
+                                >
+                            </van-field></dd>
+                         </dl>
+                    </van-form>	 
+                 </template>  
+                  <template v-else>
+                      <van-form validate-first >	
+                            <dl > 
+                              <!-- <dt><van-field label="处室名称" value="" disabled size="large" /></dt> -->
+                              <dd><van-field
+                                  v-model="formData.draftOrgName"					
+                                  input-align="right"
+                                  label="主办处室"
+                                  rows="1"
+                                  autosize
+                                  size="large"
+                                  type="textarea"
+                                  readonly
+                                  >
+                              </van-field></dd>
+                              <dd><van-field
+                                  v-model="formData.draftUserName"					
+                                  input-align="right"
+                                  label="经办人"
+                                  rows="1"
+                                  autosize
+                                  size="large"
+                                  type="textarea"
+                                  readonly
+                                  >
+                              </van-field></dd>
+                              <dd><van-field
+                                v-model="formData.docSequence"					
+                                input-align="right"
+                                label="业务编号"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                              <dd><van-field
+                                  v-model="formData.draftDate"					
+                                  input-align="right"
+                                  label="登记时间"
+                                  rows="1"
+                                  autosize
+                                  size="large"
+                                  type="textarea"
+                                  readonly
+                                  >
+                              </van-field></dd>
+                              <dd><van-field
+                                v-model="formData.content"					
+                                input-align="right"
+                                label="报销内容"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                            <dd><van-field
+                                v-model="formData.isOfficialReception == '0' ? '否' : '是'"					
+                                input-align="right"
+                                label="是否公务接待"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                          </dl>	
+                          <template  v-for="(expenseData, expenseIndex) in expenseContentJson">
+                              <dl > 
+                               <dt><van-field label="报销明细" value="" disabled size="large" /></dt>     
+                                <dd><van-field
+                                    v-model="expenseData.content"					
+                                    input-align="right"
+                                    label="费用内容"
+                                    rows="1"
+                                    autosize
+                                    size="large"
+                                    type="textarea"
+                                    readonly
+                                    >
+                                </van-field></dd>                         
+                                  <dd><van-field
+                                      v-model="expenseData.invoiceAmount"					
+                                      input-align="right"
+                                      label="发票金额"
+                                      rows="1"
+                                      autosize
+                                      size="large"
+                                      type="textarea"
+                                      readonly
+                                      >
+                                  </van-field></dd>
+                                  <dd><van-field
+                                      v-model="expenseData.amount"					
+                                      input-align="right"
+                                      label="报销金额"
+                                      rows="1"
+                                      autosize
+                                      size="large"
+                                      type="textarea"
+                                      readonly
+                                      >
+                                  </van-field></dd>
+                              <!-- <dd><van-field
+                                  v-model="expenseData.payMethod"					
+                                  input-align="right"
+                                  label="付款方式"
+                                  rows="1"
+                                  autosize
+                                  size="large"
+                                  type="textarea"
+                                  >
+                              </van-field></dd> -->
+                                <dd><van-field
+                                    v-model="expenseData.remark"					
+                                    input-align="right"
+                                    label="备注"
+                                    rows="1"
+                                    autosize
+                                    size="large"
+                                    type="textarea"
+                                    readonly
+                                    >
+                                </van-field></dd>
+                              <!-- <dl >
+                                  <dd><van-field
+                                      v-model="expenseData.amount"					
+                                      input-align="right"
+                                      label="报销金额合计"
+                                      rows="1"
+                                      autosize
+                                      size="large"
+                                      type="textarea"
+                                      >
+                                  </van-field></dd>
+                                  <dd><van-field
+                                      v-model="formData.amount"					
+                                      input-align="right"
+                                      label="单据合计"
+                                      rows="1"
+                                      autosize
+                                      size="large"
+                                      type="textarea"
+                                      >
+                                  </van-field></dd></dd>                            
+                              </dl>   -->
+                          </template>	
+                          <template  v-for="(expenseData, expenseIndex) in signJson">
+                            <dl > 
+                             <dt><van-field label="支付明细" value="" disabled size="large" /></dt>     
+                              <dd><van-field
+                                  v-model="expenseData.payee"					
+                                  input-align="right"
+                                  label="收款人"
+                                  rows="1"
+                                  autosize
+                                  size="large"
+                                  type="textarea"
+                                  readonly
+                                  >
+                              </van-field></dd>                         
+                                <dd><van-field
+                                    v-model="expenseData.amount"					
+                                    input-align="right"
+                                    label="金额"
+                                    rows="1"
+                                    autosize
+                                    size="large"
+                                    type="textarea"
+                                    readonly
+                                    >
+                                </van-field></dd>
+                              <dd><van-field
+                                  v-model="expenseData.remark"					
+                                  input-align="right"
+                                  label="备注"
+                                  rows="1"
+                                  autosize
+                                  size="large"
+                                  type="textarea"
+                                  readonly
+                                  >
+                              </van-field></dd>
+                          
+                        </template>
+                      </dl>
+                      <dl>
+                        <dd><van-field
+                            v-model="formData.otherAmountDetail"					
+                            input-align="right"
+                            label="其他需说明事项"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                      </dl>
+                      </van-form>	 
+                  </template>
+            </div>	
+            <div id="FileBtn2" v-if="btnArrs2.length>0" class="foot-btn" >
+                <template v-for="(item,i) in btnArrs2">
+                    <div class="bottom-nav-box"  @click="toEvents(item.toEvent,$event)"  v-show="btnArrs2.length <= 3 || (btnArrs2.length >3 && i < 2)"><span class="rjicon" :class="'rjicon-' + item.iconCss"></span><span v-cloak>{{item.btnName}}</span></div>
+                </template>
+            </div>			
+		</div>
+		<script>
+			var docInfor = toArr(App.LS.get("docInfor"));
+			let stateBusiness = toArr(App.LS.get("stateBusiness"));
+            let thisModule = App.LS.get("module");
+           console.log("基本信息");
+			var jbxx=new Vue({
+                el: '#jbxx',
+                data(){
+                    return{
+                        btnArrs2:[],
+                        formData:docInfor,
+                        relDocList:toArr(docInfor.relDocList) || [],
+                        expenseContentJson:toArr(App.LS.get("expenseContentJson")) || toArr(docInfor.expenseContentJson) || {},
+                        signJson:toArr(App.LS.get("signJson")) || toArr(docInfor.signJson) || {signJsonList:[]},
+                        payMethodDetail:toArr(docInfor.payMethodDetail) || [],//支付明细
+                        businessNo: toArr(App.LS.get("listInfo")).businessNo,
+                        isEdit:false,//是否可编辑
+                        checkedPayDetailIndex:[],//选中的支付明细的索引
+                        userTrees:[],//人员组织结构
+                        isShowTreeSelect:false,
+                        payIndex:0,//支付明细
+                    }
+                },
+                created:function(){
+                    try {wispApp.UI.dismissProgressDialog();} catch(e) {}
+                    this.backListening();
+                    this.initBtn();
+                },
+                methods:{
+                    initBtn(){
+                        let docStatus = getFlowStatus(docInfor,detailPage.proPermission);//文档状态
+                        let isEdit = FormIsEdit(docStatus,detailPage.proPermission);//表单是否可编辑
+                        this.isEdit = isEdit;
+                        App.LS.set("isEdit",this.isEdit);
+                        let baseAction = [];
+                        if( detailPage.proPermission && detailPage.proPermission.baseAction && detailPage.proPermission.flowStatus != "read"){	
+                            $.each(detailPage.proPermission.baseAction,function(i,action){
+                                baseAction.push(action.split("|")[1]);
+                            })
+                        }
+                        if(isEdit){
+                            getUserTrees(this);
+                            //保存
+                            this.btnArrs2.push({btnName:"保存",iconCss:"save",toEvent:"saveForm"});
+                            if($.inArray("send",baseAction)>-1 ){
+                                //删除
+                                this.btnArrs2.push({btnName:"删除",iconCss:"del",toEvent:"jsRevoke"});
+                            }
+                        }
+                    },
+                    cancelRe:function(file){//取消关联
+                        let _self=this;
+                        App.UI('dialog', {
+                            type : 'confirm',
+                            title: 'queren',
+                            OkTxt: '确定',
+                            CancelTxt: '取消',
+                            msg	 : '是否取消关联？'
+                        },function(_action){
+                            if(_action==='OK'){
+                                let _url = ZjgyHost + ZjgyUrl["save-"+App.LS.get("module")];
+                                let viewType = App.LS.get('viewType');
+                                _self.relDocList.forEach((item,i) => {
+                                    if(item.docId == file.docId){
+                                        _self.relDocList.splice(i,1);
+                                        console.log(_self.relDocList);
+                                    }
+                                })
+                                docInfor.relDocList = JSON.stringify(_self.relDocList);
+                                if(viewType != "newDraft"){//新起草的话不用保存
+                                    ajaxRequst(_url,'post','application/json;charset=UTF-8','json',JSON.stringify(docInfor)).then(function(json){
+                                        // console.log(json);
+                                        toast("保存成功！");
+                                        App.LS.set("docInfor",JSON.stringify(json));
+                                    })
+                                }else{
+                                    App.LS.set("relDocList",JSON.stringify(_self.relDocList));
+                                }
+                            }
+                        })
+                    },
+                    openFile:function(fileobj){
+					try {wispApp.UI.showProgressDialog("加载中...");	} catch(e) {}
+						//openFile(fileUrl);
+						//var pdfUrl=outerBasehost + '/wisp_fcs/conversion/conved/' +getpdfFile(fileUrl);
+						var obj = {
+							id:App.LS.get("workTodoId"),
+							businessDocId:fileobj.docId,
+							businessNo:fileobj.moduleId,
+						};
+						App.LS.set("preListInfo",App.LS.get("listInfo"));//前一份文的
+						addCookie("callback", 'ListInfoCallback()', 7, "/");
+						App.LS.set("listInfo",JSON.stringify(obj));
+						let detailPage = "DetailPage.html";
+                        switch (obj.businessNo) {
+                            case "RECEIVAL"://收文处理
+                            case "DISPATCH"://发文处理
+                            case "SPECIAL_WORK"://专班工作
+                            case "LEAVE"://请假审批
+                            case "OVERTIME"://加班审批
+                            case "TRAVEL_APPROVAL"://出差审批
+                                detailPage = "DetailPage.html";
+                                break;
+                            case "CAR_APPLY"://车辆管理
+                                detailPage = "pages/clgl/DetailPage.html";
+                                break;
+                            case "MEETING_BOOK"://会议室预订
+                            case "MEETING_ISSUE"://党组会议-会议议题
+                            case "MEETING"://专题会议
+                            case "MEETING_OFFICE"://党组会议、主任办公会议
+                            case "MEETING_EXTERNAL"://会议安排
+                            case "MEETING_ACTIVITY"://会议、活动交办事项处理
+                                detailPage = "pages/meeting/DetailPage.html";
+                                break;
+                            case "URGERCLIENT"://委重点工作督查
+                            case "MAJORURGER"://委领导批示督办
+                            case "LISTURGER"://省领导批示督办
+                                detailPage = "pages/urger/DetailPage.html";
+                                break;
+                            // case "SPECIAL_WORK"://专班工作
+                            // 	detailPage = "pages/zbgz/DetailPage.html";
+                            // 	break;
+                            case "INFOREPORT": //信息上报
+                                detailPage = "pages/xxgl/DetailPage.html";
+                                break;
+                            case "INFO"://信息编审
+                                detailPage = "pages/zwxx/DetailPage.html";
+                                break;
+                            case "GOODS"://办公用品
+                            case "SUPPLIES"://办公耗材
+                                detailPage = "pages/goods/DetailPage.html";
+                                break;
+                            // case "SUPPLIES"://办公耗材
+                            // 	detailPage = "pages/supplies/DetailPage.html";
+                            // 	break;
+                            // case "SCRAP"://资产报废
+                            // 	detailPage = "pages/transfer/DetailPage.html";
+                            // 	break;
+                            case "INFORMAL"://征求意见
+                                detailPage = "pages/informal/DetailPage.html";
+                                break;
+                            case "TRAVEL_EXPENSE"://经费报销-差旅报销
+                            case "OTHER_EXPENSE"://经费报销-业务报销
+                            case "LABOR_UNION_EXPENSE"://经费报销-工会报销
+                            case "PARTY_UNION_EXPENSE"://经费报销-党费报销
+                            case "CONTRACT_APPROVE"://合同管理
+                            case "PURCHASE_NOTICE"://采购管理-采购公告审批
+                            case "PURCHASE_RESULT"://采购管理-采购结果审批
+                            case "MEETING_PAY_ISSUED"://支出预算审批-会议、培训、活动支出预算审批
+                            case "OFFICIAL_RECEPTION"://支出预算审批-公务接待预算审批
+                            case "UNION_ACTIVITIES"://支出预算审批-工会活动支出预算审批
+                            case "PROJECT_PLANNING_SERVICE"://支出预算审批-服务采购支出预算审批
+                            case "GOODS_PURCHASE"://支出预算审批-货物采购审批
+                                detailPage = "pages/expense/DetailPage.html";
+                                break;
+                            case "YOUTH_WORK"://团青工作
+                                detailPage = "pages/youthWork/DetailPage.html";
+                                break;
+                            default:
+                                if(obj.urgerId){
+                                    detailPage = "pages/urger/DetailPage.html";
+                                }else{
+                                    toast("暂未开发！");
+                                    try {wispApp.UI.dismissProgressDialog();} catch(e) {}
+                                    return;
+                                }
+                                break;
+						}
+                        if (obj.businessDocId) {
+                            App.LS.set('viewType', 'todo');
+                            OpenWebView(detailPage, { title: "表单页" });
+                        } else {
+                            OpenWebView(detailPage, { title: "表单页" });
+                        }
+						
+					},
+                    addPayDetail(){//增加支付明细
+                        let index = this.payMethodDetail.length;
+                        this.payMethodDetail.push({id: generateUUID(), index: index});
+                    },
+                    deletePayDetail(){//删除支付明细
+                        let _this = this;
+                        if(!_this.checkedPayDetailIndex || _this.checkedPayDetailIndex.length === 0){
+                            toast("未选中删除项！");
+                            return false;
+                        }
+                        App.UI('dialog', {
+                            type : 'confirm',
+                            title: 'queren',
+                            OkTxt: '确定',
+                            CancelTxt: '取消',
+                            msg	 : '是否确定删除？'
+                        },function(_action){
+                            if(_action==='OK'){
+                                /**因为splice是从第二次的时候出现bug的，
+                                 *所以我们第一个索引的位置是正确的，
+                                *从第二次开始 “n-1”，也就是刚好对应索引数组的索引。**/
+                                let newIndexs = _this.checkedPayDetailIndex.map(function(val, idx) {
+                                    return val - idx;
+                                });
+                                _this.checkedPayDetailIndex.forEach((val, idx) => {
+                                    _this.$refs.checkboxes[val].toggle();
+                                });
+                                newIndexs.forEach((checked,cIndex) => {
+                                    _this.payMethodDetail.splice(checked,1);
+                                });
+                            }
+                        });
+                        
+                    },
+                    toggleCheckBox(index){
+                        if(this.isEdit){
+                            this.$refs.checkboxes[index].toggle();
+                        }
+                    },
+                    toEvents: function(name,thisObj){
+						//closePage();
+						if(name== "saveForm" || name == "jsRevoke"){
+							eval("("+name+"())");
+						}
+					},
+                    showTreeComponet(index){
+                        this.isShowTreeSelect = true;
+                        this.payIndex = index;
+                    },
+                    setTreeValue(name){
+                        this.payMethodDetail[this.payIndex].name = name;
+                        this.isShowTreeSelect = false;
+                    },
+                    updateForm(){
+                        this.expenseContentJson = toArr(App.LS.get("expenseContentJson"));
+                        this.signJson = toArr(App.LS.get("signJson"));
+                        this.payMethodDetail = toArr(App.LS.get("payMethodDetail"));
+                    },
+                    updateRelDocList(){
+                        this.relDocList = toArr(App.LS.get("relDocList"));
+                    },
+                    openRelativeFiles(){//打开关联文件
+                        App.LS.set("expenseContentJson",JSON.stringify(this.expenseContentJson));
+                        App.LS.set("signJson",JSON.stringify(this.signJson));
+                        App.LS.set("payMethodDetail",JSON.stringify(this.payMethodDetail));
+                        App.LS.set("relDocList",JSON.stringify(this.relDocList));
+                        OpenWebView('pages/expense/relative.html');
+                    },
+                    backListening(){ //返回监听
+                        let _this = this;
+                        _this.formData.relDocList = JSON.stringify(_this.relDocList);
+                        _this.formData.payMethodDetail = JSON.stringify(_this.payMethodDetail);
+                        if(App.LS.get("expenseContentJson")){
+                            _this.formData.expenseContentJson =  App.LS.get("expenseContentJson");
+                        }
+                        if(App.LS.get("signJson")){
+                            _this.formData.signJson =  App.LS.get("signJson");
+                        }
+                        
+                        document.addEventListener('back', function(e) {
+                            if(_this.isShowTreeSelect){
+                                _this.isShowTreeSelect = false;
+                                e.preventDefault(); 
+                                return;
+                            }
+                            if(_this.isEdit){
+                                if(JSON.stringify(_this.formData) != App.LS.get("docInfor")){//数据有变化
+                                    App.UI('dialog', {
+                                        type : 'confirm',
+                                        title: 'queren',
+                                        OkTxt: '确定',
+                                        CancelTxt: '取消',
+                                        msg	 : '数据未保存,请确认是否关闭！'
+                                    },function(_action){
+                                        if(_action==='OK'){
+                                            closePage();
+                                        }
+                                    })
+                                }else{
+                                    closePage();
+                                }
+                                
+                            }else{
+                                closePage();
+                            }
+                            e.preventDefault(); 
+                        })
+                    }
+                },
+             })
+             function saveForm(){ //保存
+                // toast("正在开发中…");
+                // return;
+                let _url =  ZjgyHost + ZjgyUrl["save-travel_expense"];
+                if(viewType == "newDraft"){//起草
+                    _url =  ZjgyHost + ZjgyUrl["insert-travel_expense"];
+                }
+                jbxx.formData.relDocList = JSON.stringify(jbxx.relDocList);
+                jbxx.formData.payMethodDetail = JSON.stringify(jbxx.payMethodDetail);
+                if(App.LS.get("expenseContentJson")){
+                    jbxx.formData.expenseContentJson =  App.LS.get("expenseContentJson");
+                }
+                if(App.LS.get("signJson")){
+                    jbxx.formData.signJson =  App.LS.get("signJson");
+                }
+                // _this.payMethodDetail
+                ajaxRequst(_url,'post','application/json;charset=UTF-8','json',JSON.stringify(jbxx.formData)).then(function(json){
+                    // console.log(json);
+                    toast("保存成功！");
+                    if(viewType == "newDraft"){//起草
+                        startProcess();
+                    }
+                })
+            }
+            function startProcess(){//启用流程
+                wispApp.UI.showProgressDialog("启用流程中...");
+                let listFlowInfoUrl = ZjgyHost+ZjgyUrl["listFlowInfo"] + "?businessNo="+ thisModule.toUpperCase() +"&status=1";
+                ajaxRequst( listFlowInfoUrl,'get','application/json;charset=UTF-8','json').then(function(res) {
+                    let initProcessUrl =  ZjgyHost+ZjgyUrl["initProcess-" + thisModule]+"?flowLabel="+res[0].flowLabel+"&flowVersion="+res[0].flowVersion+ "&systemNo=" + docInfor.systemNo + "&docId="+docInfor.tempId;			
+                    ajaxRequst( initProcessUrl,'get','application/json;charset=UTF-8','json').then(function(result) {
+                        // if(curPage=="draft"){
+                            docInfor.flowStatus = "running";
+                            listInfo.flowStatus = "running";
+                            listInfo.moduleId = thisModule;
+                            listInfo.id = result;
+                            listInfo.businessDocId = docInfor.tempId;
+                            App.LS.set("docInfor",JSON.stringify(docInfor));
+                            App.LS.set("listInfo",JSON.stringify(listInfo));
+                            App.LS.set('aid',result);
+                            App.LS.set('viewType','draft');
+                            // App.LS.set("comfrom",'draft')//表明从起草而来
+                        // }
+                        try {wispApp.UI.dismissProgressDialog();} catch(e) {}
+                        toast("流程启用成功！");
+                        closePage("refreshList()",false);
+                        location.reload();
+                    })               
+                })
+            } 
+
+            function jsRevoke(){ //删除
+                App.UI('dialog', {
+                    type : 'confirm',
+                    title: 'queren',
+                    OkTxt: '确定',
+                    CancelTxt: '取消',
+                    msg	 : '是否进行流程删除？'
+                },function(_action){
+                    if(_action==='OK'){
+                        let _url =  ZjgyHost + ZjgyUrl["revoke-" + thisModule];
+                        ajaxRequst(_url,'post','application/json;charset=UTF-8','json',JSON.stringify([docInfor.flowProcessId])).then(function(res){
+                            // console.log(json);
+                            if(res){
+                                toast("删除成功！");
+                                closePage("refreshList()");
+                            }else{
+                                toast("删除失败！");
+                            }
+                        })
+                    }
+                })
+                
+            }
+		</script>
+		<style>
+             .title{
+              font-size: 1rem;
+              text-align: center;
+              color: #606061;
+              padding: .8rem 0 .5rem 0;
+              background: #fff;
+            }
+            /* .date{
+                font-size: .8rem;
+                text-align: right;
+                padding-right: .5rem;
+                padding-bottom: .8rem;
+                background: #fff;
+            } */
+            dl:first-child {padding-top: .6rem;}
+            dl{padding: .3rem 0;font-size: .9rem;}
+            dt{border-bottom: #f1f0f0  solid 1px;background: #fff;}
+            dd{/*padding: .3rem 0;  border-bottom: #f1f0f0  solid 1px;*/background: #fff;height: auto;  position: relative;color: #313131;white-space: normal !important;line-height: 1rem;    display: flex;    justify-content: space-between;}
+            dd.chekBox,#basicInfor dd.checked{text-align: left;    padding-left: 0.1rem;    width: 96%;    height: auto;}
+            dd>span,dt{color: #6C6B6B; display: block;    text-align: left;}
+            dd.add{padding: 1rem;   font-size: 0.8rem;}
+            dd.add>span{ color: rgb(28, 149, 255); }
+            dd>.textcontent { width: 55%;text-align: right;}
+            dd>textarea.editable{color:#C4CBD3}
+            dd>.dlspan span { border-bottom: solid 1px #828080;  width: 1rem;  display: inline-block;    line-height: .24rem;}
+
+            .item-vline{ /*条目左侧竖线*/
+                width:4px;
+                background-color:rgb(80, 120, 254);
+                height: 1.4rem; 
+                margin-top: 12px; 
+                margin-left: 4px;
+            }
+		</style>
+	</body>
+</html>

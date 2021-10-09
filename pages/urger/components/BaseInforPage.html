@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<title>办理单</title>
+	</head>
+	<body>
+		<div id="BLD" class="bldview">
+			<div id="text4" class="bldpage" :style="'height:'+getDetailHeight()">
+				<div class="bld-note" v-show="noteDate.length>0">
+					<div class="bld-note-title" @click="showNote=!showNote" :class="showNote?'':'noshow'"><span class="rjicon icon-feedback"></span></div>
+					<ul v-show="showNote" class="bld-note-div">
+						<template>
+							<li class="bld-note-li" v-for="(obj,i) in noteDate">
+								<div>{{obj.sendUserName}}</div>
+								<div>{{obj.sendTime}}</div>
+								<div>{{obj.content}}</div>
+							</li>
+						</template>
+					</ul>
+				</div>
+				<div id="tempDiv" style="display: none;"></div><div id="Bldbox"></div>
+			</div>
+			<div id="FileBtn" v-if="btnArrs.length>0" class="foot-btn" :style="moreBtn?'height:auto':''">
+				<template v-for="(item,i) in btnArrs">
+					<div class="bottom-nav-box"   @click="toEvents(item.toEvent,$event)" v-show="btnArrs.length <= 3 || (btnArrs.length >3 && i < 2)"><span class="rjicon" :class="'rjicon-' + item.iconCss"></span><span v-cloak>{{item.btnName}}</span></div>
+				</template>
+				<div class="bottom-nav-box"  @click="showGengduo" v-show="btnArrs.length > 3"><span class="rjicon icon-gengduo" ></span><span v-cloak>更多</span></div>
+				
+			</div>
+			<div id="gengduo" ></div>
+			<van-popup id="popup-gengduo" v-model="isShowGengduoMenu" get-container="#gengduo"  class="more-btn" >
+				<div v-for="(item,i) in btnArrs">
+					<van-cell style="color:#7B86EC;" center :title="item.btnName" icon-prefix="rjicon" :icon="item.iconCss" v-show="i >= 2"  @click="toEvents(item.toEvent,$event)"/>
+				</div>
+			</van-popup>
+		</div>
+		<script>
+			var docInfor = toArr(App.LS.get("docInfor"));
+			let stateBusiness = toArr(App.LS.get("stateBusiness"));
+			var vFBD=new Vue({
+				el: '#BLD',
+				data(){
+				    return{
+				      	btnArrs:[],
+				      	moreBtn:false,
+				      	showNote:false,
+				      	noteDate:[],
+						isShowGengduoMenu:false,
+						couldOperateFeedbackForm: true
+						
+				    }
+				},
+				mounted : function(){
+					// wispApp.UI.showProgressDialog("正在加载办理单...");
+					console.log("办理单");
+					//App.LS.remove("flowOpinion");
+					baseCommon.getOpinionList();
+					if(docInfor.urgerTaskNodes){
+						this.initUrgerTaskBtnData();
+					}else{
+						this.initBtnData();
+					}
+					
+					//this.getNoteList();
+				},
+				methods : {
+					getDetailHeight:function(){
+						return ($("body").height()-44-54 + "px");
+					},
+					// 当前办理单位
+					urgerTaskSignUnit(){
+						let urgerTaskSignUnit = {};
+						docInfor.urgerTaskSignUnits.forEach((item)=>{
+							if (item.handleObjectNo == userInfo.orgNo){ //todo:
+								urgerTaskSignUnit = item;
+							}
+						});
+						return urgerTaskSignUnit;
+					},
+					menuBarTitle: function () {
+						let signUserName = docInfor ? this.urgerTaskSignUnit().signUserName : '';
+						let currObjectFeedback = this.getLastNodeFeedback();
+						const hasFeedback = '1';
+						if (signUserName){
+							if (currObjectFeedback  && currObjectFeedback.feedbackStatus == hasFeedback){
+								return "处长审核";
+							} else{
+								return "经办反馈";
+							}
+						} else {
+							return "处长分办";
+						}
+					},
+					//获取最新一个节点的对应反馈件
+					getLastNode(){
+						if (!docInfor || !docInfor.urgerTaskNodes) {
+							return null;
+						}
+						let node = docInfor.urgerTaskNodes[docInfor.urgerTaskNodes.length - 1];
+						return node;
+					},
+					//获取最新一个节点的对应反馈件
+					getLastNodeFeedback(){
+						if (!docInfor || !docInfor.urgerTaskNodes) {
+							return null;
+						}
+						console.log(docInfor);
+						let node = docInfor.urgerTaskNodes[docInfor.urgerTaskNodes.length - 1];
+						console.log(node);
+						let currObjectFeedback = null;
+
+						if (node.urgerTaskFeedbacks.length > 0){
+							node.urgerTaskFeedbacks.forEach((item)=>{
+								if (item.handleObjectNo == userInfo.orgNo){ //todo:
+									currObjectFeedback = item;
+								}
+							});
+						}
+						return currObjectFeedback;
+					},
+					//获取最新一个节点的对应反馈件Id
+					getLastNodeFeedbackId(){
+						if (!docInfor || !docInfor.urgerTaskNodes) {
+							return '';
+						}
+						console.log(docInfor);
+						let node = docInfor.urgerTaskNodes[docInfor.urgerTaskNodes.length - 1];
+						console.log(node);
+						let currObjectFeedbackId = '';
+
+						if (node.urgerTaskFeedbacks.length > 0){
+							node.urgerTaskFeedbacks.forEach((item)=>{
+								if (item.handleObjectNo == userInfo.orgNo){ //todo:
+									currObjectFeedbackId = item.id;
+								}
+							});
+						}
+						return currObjectFeedbackId;
+					},
+					feedbackShow: function () {
+						if( this.menuBarTitle() !== "经办反馈"){
+							return false;
+						}
+						let currObjectFeedbackId = this.getLastNodeFeedbackId();
+						let currObjectFeedback = this.getLastNodeFeedback();
+						const hasFeedback = '1';
+						if (this.couldOperateFeedbackForm && currObjectFeedbackId && (currObjectFeedback  && currObjectFeedback.feedbackStatus != hasFeedback)) {
+							return true;
+						} else {
+							return false;
+						}
+					},
+					feedbackCompleteShow: function () {
+						let currObjectFeedbackId = this.getLastNodeFeedbackId();
+						let currObjectFeedback = this.getLastNodeFeedback();
+						const hasFeedback = '1';
+						if (this.couldOperateFeedbackForm && currObjectFeedbackId && (currObjectFeedback  && currObjectFeedback.feedbackStatus == hasFeedback)) {
+							return true;
+						} else {
+							return false;
+						}
+					},
+					toEvents: function(name,thisObj){
+						console.log(name);
+						this.isShowGengduoMenu = false;
+						//closePage();
+						if(name=="jsEnd" || name=="jsOver" || name=="jsFreeReturn" || name=="jsCancle" || name=="startProcess" || name=="saveForm" || name=="jsAutoSend" || name == "jsFeedBackComplete" || name == "jsResetSignUser"){
+							eval("("+name+"())");
+						}else{
+							App.LS.set("flowType",name);
+							if(name == "jsFeedBack" || name == "jsFeedBackReturn"){
+								OpenWebView("/pages/urger/OpinionSendPage.html");
+							}else if(name == "jsAssignSignUser"){//发送
+								OpenWebView("/pages/urger/SendPage.html");
+							}else if(name == "openFeedbackFormBySign"){//填报
+								OpenWebView("/pages/urger/FeedbackFormPage.html");
+							}else{
+								OpenWebView("/FlowBoxPage.html");
+							}
+						}
+					},
+					initBtnData : function(){	
+						if(detailPage.proPermission && detailPage.proPermission.stateBusiness && detailPage.proPermission.stateBusiness.businessHandle && detailPage.proPermission.flowStatus != "read"){	
+							let stateBusiness = detailPage.proPermission.stateBusiness;
+							console.log(stateBusiness);
+							let businessHandle = [];//环节可操作按钮
+							$.each( stateBusiness.businessHandle,function(h,handle){
+								businessHandle.push(handle.handleNo);
+							})
+
+							let baseAction = [];
+							$.each(toArr(App.LS.get("baseAction")),function(i,action){
+								baseAction.push(action.split("|")[1]);
+							})
+							
+							console.log(baseAction);
+							var btns=[];
+							var formisEdit=false;					
+							if($.inArray("pdfNotation",businessHandle)>-1){
+								//_MenuList.push('<a class="bottom-3nav-box" onclick=pdfFileList()><span class="iconfont piyue"></span><p>正文批注</p></a>');
+								//hasNotationBtn=true;
+								haveSignbtn = true;
+								//btns.push({btnName:"手写签批",iconCss:"piyue",toEvent:"pdfNotation"});
+							}
+							if($.inArray("send",baseAction)>-1 ){
+								//发送
+								btns.push({btnName:"发送",iconCss:"fasong",toEvent:"jsSend"});
+							}
+							if($.inArray("autosend",baseAction)>-1){
+								//自动发送
+								btns.push({btnName:"发送",iconCss:"fasong",toEvent:"jsAutoSend"});
+							}
+							if($.inArray("freedomSend",baseAction)>-1){
+								//自由流发送
+								btns.push({btnName:"发送",iconCss:"fasong",toEvent:"jsSendfreedom"});
+							}
+							if($.inArray("transfer",baseAction)>-1){
+								//转办
+								btns.push({btnName:"转办",iconCss:"zhuanban",toEvent:"jsPass"});
+							}			
+							if($.inArray("return",baseAction)>-1 || $.inArray("returnPre",baseAction)>-1){
+								//退回
+								btns.push({btnName:"退回",iconCss:"tuihui",toEvent:"jsFreeReturn"});
+							}
+							if($.inArray("returnPre",businessHandle)>-1 || $.inArray("returnPre",baseAction)>-1 ||  $.inArray("freedomReturn",baseAction)>-1){
+								//退还
+								btns.push({btnName:"退回",iconCss:"tuihui",toEvent:"jsFreeReturn"});
+							}
+							if($.inArray("forcefinish",baseAction)>-1 ){
+								//办结
+								btns.push({btnName:"办结",iconCss:"banjie",toEvent:"jsOver"});
+							}
+							if( $.inArray("finish",baseAction)>-1 ){
+								//办结
+								btns.push({btnName:"办结",iconCss:"banjie",toEvent:"jsOver"});
+							}
+							if( $.inArray("done",baseAction)>-1){
+								//办结
+								btns.push({btnName:"办结",iconCss:"banjie",toEvent:"jsEnd"});
+							}
+							/*if( $.inArray("finish",baseAction)>-1){
+								//办理完毕
+								btns.push({btnName:"办理完毕",iconCss:"chuliwancheng",toEvent:"jsEnd"});
+							}*/
+							//}
+							
+							if( $.inArray("cancel",baseAction)>-1){
+								//撤办
+								btns.push({btnName:"撤办",iconCss:"chexiao",toEvent:"jsCancle"});
+							}
+							this.btnArrs = btns;
+							//detailCommon.getCollecFlag(this.btnArrs);
+						}
+					},
+					getUserTrees(){//获取某部门的人员列表
+						let _this = this;
+						let _url = ZjgyHost + ZjgyUrl["user-trees"] + "?treeType=user&orgNo=" + userInfo.orgNo + "&range=recursion";
+						ajaxRequst(_url, 'get', 'application/json;charset=UTF-8', 'json').then((treeResult) => {
+							if (treeResult) {
+								//console.log(treeResult);
+								//let orgName = userInfo.orgName || userInfo.orgNo;
+								let orgName = treeResult.filter(user => user.treeId == userInfo.orgNo)[0].treeName;
+								//orgName = orgName.substring(orgName.lastIndexOf("/") + 1);
+								let userTrees = {};
+								if(typeof(userTrees[orgName])=="undefined") userTrees[orgName]=[];
+								userTrees[orgName] = treeResult.filter(user => user.treePid == userInfo.orgNo);
+								App.LS.set("userTrees",JSON.stringify(userTrees));
+							}
+						});
+					},
+					initUrgerTaskBtnData(){
+						let btns = [];
+						if( this.menuBarTitle() == '处长分办' && this.couldOperateFeedbackForm  == true ){
+							//发送
+							this.getUserTrees();
+							btns.push({btnName:"发送",iconCss:"fasong",toEvent:"jsAssignSignUser"});
+						}
+						if(this.menuBarTitle() == '经办反馈' && this.couldOperateFeedbackForm  == true){
+							//'移交',指定部门内具体的办理人员
+							this.getUserTrees();
+							btns.push({btnName:"移交",iconCss:"fasong",toEvent:"jsAssignSignUser"});
+						}
+						if(this.menuBarTitle() == '处长审核' && this.couldOperateFeedbackForm  == true){
+							//办理人员反馈给处长，给处长审核，处长可以修改反馈记录然后办理完毕当前节点
+							//this.getUserTrees();
+							this.openFeedbackFormBySign(true);
+							btns.push({btnName:"填报",iconCss:"fasong",toEvent:"openFeedbackFormBySign"});
+						}
+						if(this.menuBarTitle() === "经办反馈" && this.couldOperateFeedbackForm  == true){
+							//退回。办理人员退回给指派人，重新分发
+							//this.getUserTrees();
+							btns.push({btnName:"退回",iconCss:"tuihui",toEvent:"jsResetSignUser"});
+						}
+						if((this.menuBarTitle() == '经办反馈' || this.menuBarTitle() == '处长分办') && this.couldOperateFeedbackForm  == true){
+							//办理人员反馈
+							this.openFeedbackFormBySign();
+							btns.push({btnName:"填报",iconCss:"fasong",toEvent:"openFeedbackFormBySign"});
+						}
+						
+						if(this.feedbackShow()){
+							//办理人员反馈给处长，给处长审核
+							btns.push({btnName:"发送",iconCss:"fasong",toEvent:"jsFeedBack"});
+						}
+						if(this.feedbackCompleteShow()){
+							//处长审核完毕，督查反馈完毕。
+							btns.push({btnName:"发送",iconCss:"fasong",toEvent:"jsFeedBackComplete"});
+						}
+						if(this.feedbackCompleteShow()){
+							btns.push({btnName:"退回",iconCss:"tuihui",toEvent:"jsFeedBackReturn"});
+						}
+						this.btnArrs = btns;
+					},
+					getFlowOpinion:function(){
+				    	baseCommon.getFlowOpinion();
+				    },
+				    getNoteList:function(){
+				    	baseCommon.getNoteList(this.noteDate);
+				    },
+					showGengduo:function(){
+						if(this.isShowGengduoMenu){
+							this.isShowGengduoMenu = false;
+						}else{
+							this.isShowGengduoMenu = true;
+						}
+					},
+					openFeedbackFormBySign(openFeedbackButton) {
+						if (openFeedbackButton !== true){
+							openFeedbackButton = false;
+						}
+						let node = this.getLastNode();
+						let currObjectFeedbackId = this.getLastNodeFeedbackId();
+						//构造反馈件表单
+						const feedbackForm = {
+							id: currObjectFeedbackId,
+							subject: docInfor.subject,
+							nodeId: node.id,
+							urgerId: listInfo.urgerId,
+							taskId: listInfo.taskId,
+							taskSignId: listInfo.id,
+							handleObjectLevel: listInfo.handleObjectLevel
+						};
+						let nodeTime = new Date(node.nodeTime).Format('yyyy-MM-dd');
+						App.LS.set("nodeTime",nodeTime);
+						App.LS.set("feedbackForm",JSON.stringify(feedbackForm));
+					}
+				}
+			});
+			
+		</script>
+		<style>
+			/*查看办理单*/
+			[v-cloak] {display: none;}
+			.bldview{height: 100%;width: 100%;padding-bottom: 3rem;}
+			.bldpage{height: 100%;width: 100%;overflow-y: auto;}
+			/* .foot-btn{height: 3rem;position: fixed;bottom: 0;left: 0;width: 100%;border-top: 1px solid #ccc;background: #fff; color: #A1A1A3;}
+			.bottom-nav-box{height: 3rem;display: inline-block;width: 33.33%;text-align: center;line-height: 3rem;}
+			.bottom-nav-box>span.rjicon{font-size: 1.2rem;position: relative;display: block;line-height: 1.5rem;padding-top: .2rem;}
+			.bottom-nav-box>span:nth-child(2){position: relative;top: -1rem;line-height: 1.2rem;height: 1rem;font-size: .8rem;} */
+			.more-btn{
+				position:fixed;
+				left: 66.66%;
+				top:auto;
+				bottom: 3rem;
+				width: 33.33%;
+				height: auto;
+				color:#7B86EC;
+			}
+			.bldbox{position: relative;top:0;left: 0;}
+			.bld-note{position: absolute;top:30px;right: 0;z-index: 2;max-width: 40%;text-align: right;font-size: 1rem;max-width: 100%;}
+			.bld-note-title{position: absolute;top:0;left: -3rem;background: var(--wisp-color);color: #fff;padding: 0 1rem;border-top-left-radius: 30px;border-bottom-left-radius: 30px;line-height: 30px;text-align: center;float: right;}
+			.bld-note-div{box-shadow: 0px 2px 5px rgba(0,0,0,.1);width: 15rem;font-size: .8rem;background: rgba(249,249,249,.9);text-align: left;border-top: 1px solid var(--wisp-color);}
+			.bld-note-li{padding: 10px 6px 10px 10px;}
+			.bld-note-li:nth-of-type(even){background: rgba(222, 222, 222, 0.5);}
+			.noshow{opacity: .5;}
+			.van-overlay{ top: -3rem;}
+			.van-popup--center {
+				/* top: 0; */
+				-webkit-transform: translate3d(0,0,0);
+				transform: translate3d(0,0,0); 
+			}
+			.van-cell{
+				font-size: .8rem;
+				text-align: center;
+			}
+		</style>
+	</body>
+</html>

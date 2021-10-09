@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html >
+	<body>
+		<style>
+			.therr1{margin: .8rem .8rem 0 .8rem;}
+			.material{   
+				 border-radius: .2rem;
+				background: #fff;
+				width: 100%;
+				padding: 0 1rem;
+				margin-top: .5rem;
+			}
+			.material .title {
+				display: flex;
+				justify-content: space-between;
+				padding-left: 1.5rem;
+				align-items: center;
+				height: 4rem;
+				line-height: 1rem;
+			}
+			.material .title:before {
+				position: absolute;
+				left: 1rem;
+				font-size: 1rem;
+				height: 2rem;
+				line-height: 2rem;
+				border-radius: 2rem;
+				width: 2rem;
+				text-align: center;
+			}
+			.material .upload {
+				background: #009BFF;
+				border-radius: .2rem;
+				color: #fff;
+				font-size: .68rem;
+				padding: .1rem;
+			}
+			.material .upload input {
+				opacity: 0;
+				position: absolute;
+			}
+			.material ul{border-top: solid 1px #EBEBEB;}
+			.material li {
+				padding: .5rem 0 .5rem .5rem;
+				line-height: 1.5rem;
+				text-align: left;
+			}
+			.material .subject {
+				font-size: .8rem;
+			}
+			.material .bottom {
+				display: flex;
+				justify-content: flex-start;
+				color: #0094FF;
+			}
+			.material .bottom>div {
+				padding-right:.5rem ;
+			}
+			.material .smallFont{font-size: .68rem;}
+			
+		</style>
+		<div id="fileList" class="page-view" style="height:100%" style="background: #F7F7F7;">
+			<div class="therr1" >
+				<div class="material">
+					<template v-if="otherAllDocMark.length>0">
+						<ul>
+							<li v-for="(mainItem,i) in otherAllDocMark">
+								<div class="subject" @click="openFile(mainItem.fcs_fileUrl)">{{mainItem.subject}}</div>
+							<div class="bottom">
+								<div class="smallFont " @click="delFile(mainItem.fileId)" >删除</div>
+								<!--<div class="rjicon smallFont icon-download"  @click="downFile(mainItem.fileUrl,mainItem.fileTitle)">下载</div>-->
+							</div>
+							</li>
+						</ul>
+					</template>
+				</div>
+			</div>
+		</div>
+		<script>
+			window.FileList=new Vue({
+				el: '#fileList',
+				data(){
+				    return{
+						otherAllDocMark:[]
+				    }
+				},
+				created:function(){
+					try {this.otherAllDocMark = toArr(toArr(App.LS.get("docInfor")).otherAllDocMark);} catch (error) {}
+					this.loadfile();
+				},
+				methods:{
+					loadfile:function(){
+						console.log(123);
+						var _this=this;
+						var obj = {docId:this.docId};	
+						var _url=ZjgyHost + ZjgyUrl["getEgovAtt"];	
+						ajaxRequst(_url,'GET','application/x-www-form-urlencoded','json',obj).then(function(list){
+							console.log(list);
+							_this.ArrsList={mainFileArray:[],attachArray:[],notationArray:[]};
+							var mainLen = 0;
+							//if(list.length>0)dingAuth();						
+							$.each(list, function(i,item) {
+								//正文
+								var fileUrl= ZjgyHost+ZjgyUrl["File-download"]+ '?id='+item.id+"&x-auth-token="+getCookieValue("x-auth-token");							 
+								var tempurl= innerOA+ZjgyUrl["File-download"]+ '?id='+item.id+"&x-auth-token="+getCookieValue("x-auth-token");							 
+								var fileSuffix=item.fileSuffix.toLowerCase();
+								var expires = new Date();
+								var filetask = getFileTask(fileSuffix);
+								//tempurl=fcsurl+'fileurl='+encodeURIComponent(tempurl)+"&task=none&type=src&res=url&filetype="+fileSuffix
+								//autoflag=true;
+								//var tempurl= outerBasehost + '/wisp_fcs/conversion/conved' + result.Content;
+								var _url=fcsurl + 'fileurl=' + encodeURIComponent(tempurl+'&tTime='+(expires.getTime()))+'&task='+filetask+'&type=src&res=url&filetype='+fileSuffix+'&jsoncallback=?';		
+								//console.log(_url);			
+									var obj = {
+											"fileTitle":item.fileName,
+											"fileId":item.id,
+											"fcs_fileUrl":_url,
+											"fileUrl":fileUrl,
+											"pdfurl":"",
+											"fileSuffix":fileSuffix,
+											"createUserName":item.createUserName,
+											"createTime":item.createTime
+										};
+									// 正文：main_doc 附件：attach
+									if(item.type=="main_doc"){
+										obj.filetypeid = "mainFileArray";
+										obj.filetypename = "正文";
+										obj.childFileId = [];
+										obj.notationType="notation"
+										if(filetask==1){obj.pdfurl="False"}
+										_this.ArrsList.mainFileArray.push(obj);
+									}else if(item.type=="attach"){//背景材料
+										obj.filetypeid = "attachArray";
+										obj.filetypename = "附件";
+										obj.childFileId = [];
+										obj.notationType="att_notation"
+										if(filetask==1){obj.pdfurl="False"}
+										_this.ArrsList.attachArray.push(obj);
+									}
+								});
+						})
+						//console.log(_this.ArrsList);	
+					},
+					downFile:function(fileUrl,name){
+						downFile(fileUrl,name)
+					},
+					openFile:function(fileUrl){
+					try {wispApp.UI.showProgressDialog("加载中...");	} catch(e) {}
+						openFile(fileUrl);
+					},
+					delFile:function(id){
+						var _self=this;
+						var _url = ZjgyHost + ZjgyUrl["File-del"];
+						var obj = [id];
+						console.log(obj);
+						ajaxRequst(_url,'post','','json',JSON.stringify(obj)).then((json) => {
+							_self.loadfile();
+						});
+					},
+					uploadFile : function (source){	
+						var _self=this;
+						try {wispApp.UI.showProgressDialog("上传中...");	} catch(e) {}
+						var _type=$(source.target).attr("data-type");
+						var fileObj = source.target.files[0]; // js 获取文件对象
+						var url =  ZjgyHost + ZjgyUrl["File-upload"]; // 接收上传文件的后台地址
+						var fileName=fileObj.name;
+						var fileType=fileName.substr(fileName.lastIndexOf(".") + 1).toLowerCase();	
+						//alert(fileType);
+						if(!/jpg|png|txt|xls|doc|ppt|pdf/i.test(fileType)){//文件类型的控制
+							alert("不支持此类型文件");
+							try {wispApp.UI.dismissProgressDialog();} catch(e) {}	
+							return false;
+						}
+						//var newfile = new File([fileObj],(new Date().getTime())+"."+fileType);//以文件名编码方式支持中文名字的文件。
+						$(source)[0].outerHTML =  $(source)[0].outerHTML; 
+						//var re=/[\u0391-\uFFE5]+/g
+						//if (newfile.name.match(re)!=null)alert('文件名不能包含汉字！')
+						var form = new FormData(); // FormData 对象
+						form.append("file", fileObj); // 文件对象
+						form.append("type",_type);
+						form.append("moduleId", detailPage.moduleId);
+						form.append("docId", this.docId);
+						xhr = new XMLHttpRequest();  // XMLHttpRequest 对象
+						xhr.open("post", url, true); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
+						xhr.onload = function(data){		
+							toast("上传成功！");	
+							try {wispApp.UI.dismissProgressDialog();} catch(e) {}
+							_self.loadfile();
+						}; //请求完成
+						xhr.onerror = function(evt) {//请求失败	
+							try {wispApp.UI.dismissProgressDialog();} catch(e) {}	
+							document.getElementById("file").value = ''; 
+							toast("上传失败！");
+							
+						}; 
+						xhr.upload.onloadstart = function(){//上传开始执行方法
+							ot = new Date().getTime();   //设置上传开始时间
+							oloaded = 0;//设置上传开始时，以上传的文件大小为0
+						};
+						xhr.send(form); //开始上传，发送form数据
+					}
+				}
+				
+			});
+		</script>
+	</body>
+</html>

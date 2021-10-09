@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<meta name="wpk-bid" content="dta_1_840942484"> 
+		<script> !(function(c,i,e,b){var h=i.createElement("script");var f=i.getElementsByTagName("script")[0];h.type="text/javascript";h.crossorigin=true;h.onload=function(){c[b]||(c[b]=new c.wpkReporter({bid:"dta_1_840942484"}));c[b].installAll()};f.parentNode.insertBefore(h,f);h.src=e})(window,document,"https://g.alicdn.com/woodpeckerx/jssdk??wpkReporter.js","__wpk");</script>
+		<title>独立流程操作</title>			
+		<script type="text/javascript" src="../../js/loadVersion.js" ></script>	
+		<script>
+			var loadList=[											
+				{name:"vuejs",type:"js",url:"../../js/vue.min.js"},
+				{name:"iconfontcss",type:"css",url:"../../css/iconfont.css"},
+				{name:"commoncss",type:"css",url:"../../css/common.css"},	
+				{name:"flowPagecss",type:"css",url:"../../css/flowPage.css"},					
+				{name:"swipercss",type:"css",url:"../../css/swiper.min.css"},	
+				{name:"jqueryjs",type:"js",url:"../../js/jquery-1.9.1.min.js"},
+				{name:"indexjs",type:"js",url:"../../js/index1.9.12.js"},
+				{name:"ipConfigjs",type:"js",url:"../../js/ipConfig.js"},
+				{name:"commonjs",type:"js",url:"../../js/common.js"},
+				{name:"flowpagejs",type:"js",url:"js/flowpage.js"}
+			];
+			loadVersion.iniVersion(loadList);
+		</script>
+	</head>
+	<body >
+	<div id="flowPages" >	
+		<template>
+		<div  v-if="flowtype=='jsSend' || flowtype=='jsPass'" id="sendPage" class="sendDiv">		
+			<div  v-if="!$.isEmptyObject(dataResult) || !$.isEmptyObject(objResult)" class="send-body">
+				<div id="leftDiv">
+					<ul class="leftDiv-ul" v-show="!$.isEmptyObject(objResult) && objResult.length>0"><!-- 发送的并发环节才显示  -->
+						<li class="leftDiv-li">
+							<a class="send-tit" id="valObj">
+								<span class="">发送对象</span>
+							</a>
+							<div id="Obj-btn"  class="bak-Sel">		
+								<template v-if="objResult">
+									<label v-show="objResult.length>0" v-for="(item,i) in objResult" :class="{'action-sel': i==0,'unit-nums':true}"   :data-nums='i' :data-back="item.toslab+':'+item.tlab" @click="ObjEvent($event)" >{{item.transitionName}}</label>
+								</template>					
+							</div>
+						</li>
+					</ul>
+					<ul class="leftDiv-ul" v-show="!$.isEmptyObject(dataResult) && dataResult.assigndStates.length>1">
+						<li class="leftDiv-li">
+							<a class="send-tit" id="valUnit">
+								<span class="">环节名称</span>
+							</a>
+							<div id="Unit-btn"  class="bak-Sel">		
+								<template v-if="flowtype=='jsSend' && dataResult">
+									<template v-for="(item,j) in dataResult.assigndStates"   >
+										<label :class="{'action-sel': j==0,'unit-nums':true}" :data-nums='j'   @click="UnitEvent($event)" >{{item.stateName}}</label>
+									</template>
+								</template>
+								<template v-else-if="flowtype=='jsPass'">
+									<label  v-if="dataResult.assigndStates" v-for="(item,i) in dataResult.assigndStates" :class="{'action-sel': i==0,'unit-nums':true}" :data-nums='i'  @click="UnitEvent($event)">{{item.stateName}}</label>
+								</template>		
+							</div>
+						</li>
+					</ul>
+					 <ul class="leftDiv-ul">
+						<li class="leftDiv-li">
+							<a class="send-tit" id="valDept">
+								<span class="">人员范围</span>
+							</a>
+							<ul id="box-deptList" class="box-dept">
+							<template   v-show="!$.isEmptyObject(selResult)">
+								<li class="lab-sel" v-for="(itemUer,m) in selResult.selUsers" >
+								<label  :class="{'sel-act': Object.keys(flowPage.selResult.selUsers)[0]==m}" @click="deptEvent($event)"><span :class="Object.keys(flowPage.selResult.selUsers)[0]==m?'rjicon icon-subup span-chack':'rjicon icon-addup span-chack'"></span>{{m}}</label>
+								<div class="dept-p">	
+									<div  v-for="(user,j) in itemUer" :class="(((!$.isEmptyObject(dataResult) && dataResult.assigndStates[objIndex].autoType==1) || $.inArray(user,selUsers)>-1))?'pp-act':''" :data-uid="user.uid" class="pp-sel" :data-num="j" @click="userEvent($event,user)">{{user.userName}}</div>
+								</div>
+								</li>
+							</template>								
+							</ul>
+						</li>
+					</ul>
+					<ul class="leftDiv-ul">
+						<li class="leftDiv-li">
+							<div class="sel-people-div">
+								<div id="send-tip-num" class="sel-people-tip">已选人员</div>
+								<div class="bak-Sel" id="resultUser">								
+								<template  v-show="selUsers.length>0" v-for="(peoples,j) in selUsers">
+									<label :uid="peoples.uid" :data-rnum="j" :data-back="peoples.userNo+':'+peoples.orgNo+':'+peoples.userName+':'+peoples.orgName" :data-uid="peoples.userNo" @click="selUserEvent($event,peoples)">{{peoples.userName}}({{peoples.orgName}})<span class="rjicon icon-cuowu"></span></label>	
+								</template>						
+								</div>
+							</div>
+						</li>
+					</ul> 
+					<!-- <ul class="leftDiv-ul">
+						<li class="leftDiv-li">
+							<a id="valMsm"  class="msmtype rjicon icon-chekbox icon-selected"  @click="smsEvent($event)"> 短信提醒</a>
+						</li>
+					</ul> -->
+				</div>
+			</div>
+			<div class="send-Btns"><span class="send-cancel" onclick="closePage();">取 消</span><span id="flowSend" :style="{background: selUsers.length==0?'#c8c8c8':'#0086cf'}" @click="selUsers.length==0?'':submitSend()">确定发送</span></div>
+		</div>	
+		<div  v-if="flowtype=='jsSendfreedom' || flowtype=='toRead' || flowtype=='toSend' || flowtype=='leaderSend'" id="sendPage" class="sendDiv">		
+			<div  v-show="!$.isEmptyObject(dataResult)" class="send-body">
+				<div id="leftDiv">					
+					<ul class="leftDiv-ul">
+						<li class="leftDiv-li">
+							<a class="send-tit" id="valUnit">
+								<span class="">环节名称</span>
+							</a>
+							<div id="Unit-btn"  class="bak-Sel">	
+								<template   v-for="(unitPeople,unitName) in dataResult"  v-if="typeof(unitPeople)!='undefined'" >
+									<label  :class="{'action-sel': Object.keys(dataResult)[0]==unitName,'unit-nums':true}"   :data-nums='$.inArray(unitName,Object.keys(dataResult))'  @click="UnitEvent($event)" >{{unitName}}</label>
+								</template>
+								
+							</div>
+						</li>
+					</ul>
+					<ul class="leftDiv-ul">
+						<li class="leftDiv-li">
+							<a class="send-tit" id="valDept">
+								<span class="">人员范围</span>
+							</a>
+							<ul id="box-deptList" class="box-dept">
+								<template  v-show="!$.isEmptyObject(selResult)">								
+									<tree v-for="(item,index) in selResult" :item='{data:item,key:index,lever:0}' >
+										
+									</tree>									
+								</template>
+							</ul>
+						</li>
+					</ul>
+					<ul class="leftDiv-ul">
+						<li class="leftDiv-li">
+							<div class="sel-people-div">
+								<div id="send-tip-num" class="sel-people-tip">已选人员</div>
+								<div class="bak-Sel" id="resultUser">
+								<template  v-show="selUsers.length>0" v-for="(peoples,j) in selUsers">
+									<label :uid="peoples.uid" :data-rnum="j" :data-uid="peoples.treeId" @click="selUserEvent($event,peoples)">{{peoples.treeName}}<span class="rjicon icon-cuowu"></span></label>	
+								</template>
+																	
+								</div>
+							</div>
+						</li>
+					</ul>
+					<ul class="leftDiv-ul" v-show="flowtype=='jsSendfreedom'||flowtype=='leaderSend'">
+						<li class="leftDiv-li">
+							<a id="valMsm"  class="msmtype rjicon icon-chekbox icon-selected"  @click="smsEvent($event)"> 短信提醒</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="send-Btns"><span class="send-cancel" onclick="closePage();">取 消</span><span id="flowSend" :style="{background: selUsers.length==0?'#c8c8c8':'#0086cf'}" @click="selUsers.length==0?'':(flowtype=='jsSendfreedom'?submitFreeSend():(flowtype=='leaderSend'?submitLeaderSend():submitToReadSend()))">确定发送</span></div>
+		</div>		
+		<div v-else-if="flowtype=='jsReturn'" id="rebackPage" class="sendDiv">
+			<div class="send-body">
+				<div id="leftDiv">
+					<ul class="leftDiv-ul">
+						<li class="leftDiv-li">
+							<a class="send-tit" id="valUnit-reback">
+								<span class="">环节名称</span>
+							</a>
+							<div id="Unit-btn-reback" class="bak-Sel">
+								<label v-for="(item,i) in dataResult" class="unit-nums" :class="{'action-sel': i==0}"  :data-nums='i' :data-back="item.stateLabel" @click="UnitEvent($event)">{{item.stateName}}</label>
+							</div>
+						</li>
+					</ul>
+					<ul class="leftDiv-ul">
+						<li class="leftDiv-li">
+							<a class="send-tit" id="valPeople-reback">
+								<span class="">待选人员</span>
+							</a>
+							<div id="People-btn-reback" class="bak-Sel">
+								<label  v-for="(obj,i) in selResult" :class="selResult.length==1 ?'action-sel':''" :data-uid="obj.uid" @click="userEvent($event,obj,'action-sel')">{{obj.userName}}({{obj.orgNameChain.substring(obj.orgNameChain.lastIndexOf("/")+1)}})</label>
+							</div>
+						</li>
+					</ul>
+					<ul class="leftDiv-ul">
+						<li class="leftDiv-li">
+							<div class="sel-people-div">
+								<div class="sel-people-tip">已选人员</div>
+								<div class="bak-Sel" id="resultUser-reback">
+									<label v-for="(obj,i) in selUsers"   :data-uid="obj.uid" @click="selUserEvent($event,obj,'action-sel')">{{obj.userName}}({{obj.orgNameChain.substring(obj.orgNameChain.lastIndexOf("/")+1)}})<span class="rjicon icon-cuowu"></span></label>
+								</div>
+							</div>
+						</li>
+					</ul>
+					<div id="writOpinion"></div>
+				</div>
+			</div>
+			<div class="send-Btns"><span class="send-cancel" onclick="closePage();">取 消</span><span 
+			:style="{background: selUsers.length==0 || buttonDisable?'#c8c8c8':'#0086cf'}" @click="selUsers.length==0 || buttonDisable?'':submitCancel('jsReturn')">确定退回</span></div>
+		</div>
+		<div v-else-if="flowtype=='cancleFinished'" class="sendDiv">
+			<div class="send-body">
+				<div id="leftDiv">
+					<ul class="leftDiv-ul">
+						<li class="leftDiv-li">
+							<a class="send-tit" id="valUnit-reback">
+								<span class="">取消办结</span>
+							</a>
+						</li>
+					</ul>
+					<ul class="leftDiv-ul">
+						<li class="leftDiv-li">
+							<a class="send-tit" id="valPeople-reback">
+								<span class="">待选人员</span>
+							</a>
+							<div id="People-btn-reback" class="bak-Sel">
+								<label  v-for="(obj,i) in selResult" :class="selResult.length==1 ?'action-sel':''" :data-uid="obj.uid" @click="userEvent($event,obj,'action-sel')">{{obj.uname}}({{obj.fname.substring(obj.fname.lastIndexOf("/")+1)}})</label>
+							</div>
+						</li>
+					</ul>
+					<ul class="leftDiv-ul">
+						<li class="leftDiv-li">
+							<div class="sel-people-div">
+								<div class="sel-people-tip">已选人员</div>
+								<div class="bak-Sel" id="resultUser-reback">
+									<label v-for="(obj,i) in selUsers"   :data-uid="obj.uid" @click="selUserEvent($event,obj,'action-sel')">{{obj.uname}}({{obj.fname.substring(obj.fname.lastIndexOf("/")+1)}})<span class="rjicon icon-cuowu"></span></label>
+								</div>
+							</div>
+						</li>
+					</ul>
+					<div id="writOpinion"></div>
+				</div>
+			</div>
+			<div class="send-Btns"><span class="send-cancel" onclick="closePage();">取 消</span><span 
+				:style="{background: selUsers.length==0 || buttonDisable?'#c8c8c8':'#0086cf'}" @click="selUsers.length==0 || buttonDisable?'':submitCancel('cancleFinished')">确定取消</span></div>
+		</div>
+		<div v-else-if="flowtype=='writeOpin'" id="writeOpin" class="sendDiv">
+			<!--<header class="flow-header">
+				<div onclick="$('#writeOpin').hide();" class="send-cancel rjicon icon-huitui" style=" float: left; padding-left: 0.1rem;"></div>
+				<div id="flowTitle-opin">意见填写</div>
+			</header>-->
+			<div class="opin-body">
+				<div id="writInput" class="opin-div"><div class="opin-top-btn"><label>意见内容：</label><label><span class="clera-textarea" @click="claerOpinion()" >清空</span></label></div><textarea v-model="opinion.opinionBody" id="valOpinion" class="opintext-area" placeholder="请输入内容" >{{opinion.opinionBody}}</textarea></div>
+				<div class="opin-type-btn" ><label v-for="(opins,x) in opinion.CommonOpinion" :class="{'type-atc': opinion.CommonTab==x}" @click="opinionchange(x)">{{opins.name}}</label></div>
+				<div class="opin-tab" >
+					<ul v-for="(opins,x) in opinion.CommonOpinion" v-show="opinion.CommonTab==x" class="opinList">
+						<li v-for="(item,i) in opins.datalist"  class='opin-val' @click="opinionEvent($event,item)" data-per='0' :data-val='item.opinionContent'>{{item.opinionContent}}<span class='rjicon icon-chekbox' ></span></li>
+						<li v-show="opins.datalist.length==0" style="color:#c7c6c6;text-align: center;">暂无意见内容</li>
+					</ul>
+				</div>
+			</div>
+			<div class="send-Btns"><span class="send-cancel" onclick="closePage();">取 消</span><span 
+			:style="{background: (opinion.opinionBody=='' || buttonDisable?'#c8c8c8':'#0086cf')}"   id="opinBack" @click="opinion.opinionBody==''?'':submitOpin()" >保存并提交</span></div>
+		</div>
+		<div v-else >
+
+		</div>
+		</template>
+	</div>
+	</body>
+</html>

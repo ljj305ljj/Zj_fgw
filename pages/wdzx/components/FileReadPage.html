@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<title>文件查看</title>
+	</head>
+	<body>
+		<link rel="stylesheet" href="./css/pdfh5.css" />
+		<style>
+			.detail-flex{height: 100%;width: 100%;overflow: hidden;}
+			.domeBox{height: 100%;;width: 100%;padding-bottom: 2.5rem;position: relative;}
+			.file-view{height: 100%;width: 100%;background: rgba(0,0,0,.3);position: absolute;top: 0;left: 0;z-index: 100;}
+			.file-ul{position: absolute;bottom: 2.5rem;left: 0;width: 100%;max-height: 80vh;overflow-y: auto;background: #fff;padding: .6rem;}
+			.fileListBtn{position: absolute;font-size:.7rem;bottom: 0;left: 0;height: 2.5rem;line-height: 2.5rem;text-align: center;width: 100%;border-top: 1px solid #f1f1f1;}
+			.file-list{padding: .1rem .2rem;position:  relative;}
+			.file-list p{padding: .3rem;font-size: .75rem;line-height: 1rem;white-space: normal;}
+			.file-active{color: #5462E7;  padding-right: 1rem;}
+			.file-icon{position: absolute;top: 50%;left: 0;text-align: center;margin-top: -1.5rem;display: block;width: 3rem;height: 3rem;line-height: 3rem;}
+			.file-icon.rjicon{font-size: 2rem;padding: 0;}
+			.pdf-more-close{z-index: 10;position: absolute;bottom: 0;left: 0;text-align: center;line-height: 2.5rem;width: 100%;border-top: 1px solid #f1f1f1;font-size:.8rem;background: #ffffff;}			
+			.fileError{width: 100%;height: 100%;padding: 3rem 1rem;text-align: center;font-size: 1rem;color: red;}
+			.singBtn{margin-bottom: 3rem;color: #ffffff;width: 2.5rem;height: 2.5rem;line-height: 2.5rem;text-align: center;position: absolute;bottom: 3.5rem;right: 1rem;font-size: .8rem;z-index: 99;border-radius: 50%;background: #389ef3;}
+			.pdfjs .backTop{left:15px}
+			.file-active::after{ content: "\e6b0";    color: #6C78EA;  position: absolute;  top: .5rem;  right: .5rem;font-size:.7rem}
+		</style>
+		<div id="File" class="detail-flex">
+			<div class="domeBox">
+				<span v-show="pdfInfo.canSign" class="singBtn" @click="openSingFile">签批</span>
+				<span v-show="sendBtn" class="singBtn" style="bottom:6.5rem" @click="sendAction">发送</span>
+				<div :style="'height:'+getDetailHeight()" id="dome"></div>
+				<div class="fileListBtn" @click="showMorePage">文件清单</div>
+				<div v-show="showMore" class="file-view" @click="hideMorePage">
+					<ul class="file-ul">
+						<li v-for="(mainItem,i) in ArrsList.mainFileArray" >
+							<dl v-for="(child,k) in mainItem.childFileId">
+								<dd v-for="(notiItem,j) in ArrsList.notationArray" v-if="child==j" :class="(pdfInfo.type=='notationArray'&& pdfInfo.index==j)?'file-active rjicon':''">
+									<div class="file-list" @click="showPdf(notiItem.filetypeid,i)" @click.stop>
+										<p>【批注】{{notiItem.fileTitle}}</p>
+									</div>
+								</dd>
+							</dl>
+							<div :class="(pdfInfo.type=='mainFileArray' && pdfInfo.index==i)?'file-active rjicon':''" class="file-list" @click="showPdf(mainItem.filetypeid,i)" @click.stop>
+								<p>{{i+1}}、【附件】{{mainItem.fileTitle}}</p>
+							</div>
+						</li>
+						<li v-for="(attaItem,i) in ArrsList.attachArray" >
+							<dl v-for="(child,k) in attaItem.childFileId">
+								<dd v-for="(notiItem,j) in ArrsList.notationArray" v-if="child==j" :class="(pdfInfo.type=='notationArray'&& pdfInfo.index==j)?'file-active rjicon':''">
+									<div class="file-list" @click="showPdf(notiItem.filetypeid,j)" @click.stop>
+									<p>【批注】{{notiItem.fileTitle}}</p>
+									</div>
+								</dd>
+							</dl>
+							<div :class="(pdfInfo.type=='attachArray' && pdfInfo.index==i)?'file-active rjicon':''" class="file-list" @click="showPdf(attaItem.filetypeid,i)" @click.stop>
+								<p>{{ArrsList.mainFileArray.length+i+1}}、【附件】{{attaItem.fileTitle}}</p>
+							</div>							
+						</li>
+					</ul>
+					<div class="pdf-more-close" @click="hideMorePage" @click.stop>文件清单</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			var vFile=new Vue({
+				el: '#File',
+				data(){
+				    return{
+						pdfInfo:{type:"mainFileArray",index:0,canSign:false},
+				      	ArrsList:{mainFileArray:[],attachArray:[],notationArray:[]},
+						showMore:false,
+						haveSignbtn:false,
+						sendBtn:false
+				    }
+				},
+				created:function(){
+					console.info("vFile");
+					//h5Wisp.UI.showwaiting("正在打开...");
+					var docInfor = toArr(App.LS.get("docInfor"));					
+					try{var isPizhu=App.LS.get("baseAction");}catch(e){var isPizhu="";}
+					if(isPizhu && (isPizhu.indexOf("手写签批")>-1||isPizhu.indexOf("pdfNotation")>-1) && (docInfor.permission.astatus=="1")){
+						//console.info("手写签批");
+						this.haveSignbtn = true;
+					}
+					if(attList.length>0)this.pdflist(attList);
+				},
+				methods:{
+					getDetailHeight:function(){
+						return (($(window).height()-44-45 ) +"px");
+					},					
+					sendAction:function(){
+						App.LS.set("flowType",this.sendBtn);
+						OpenWebView("/FlowBoxPage.html")
+					},
+					showSignBtn : function(fileinfo,type){
+						if(isPad() && this.haveSignbtn && (((type=="mainFileArray" ||type=="attachArray") && fileinfo.childFileId.length==0 ) || type=="notationArray")){
+							this.pdfInfo.canSign = true;							
+						}else{
+							this.pdfInfo.canSign = false;
+						}
+					},
+					pdflist: function(list){
+					console.log(list);
+				    	var _this = this;
+				    	var mainLen = 0;
+				    	var docInfor = toArr(App.LS.get("docInfor"));						
+				    	$.each(list, function(i,item) {
+							//正文
+							var tempurl= innerOA  + ZjgyUrl["File-download"]+ '?id='+item.id+"&x-auth-token="+getCookieValue("x-auth-token") +"&tTime="+(new Date()).getTime();							 
+							var fileSuffix=item.fileSuffix.toLowerCase();
+							var expires = new Date();
+							var filetask = getFileTask(fileSuffix);
+							//tempurl=fcsurl+'fileurl='+encodeURIComponent(tempurl)+"&task=none&type=src&res=url&filetype="+fileSuffix
+							//autoflag=true;
+							//var tempurl= outerBasehost + '/wisp_fcs/conversion/conved' + result.Content;
+							var _url = fcsurl + 'fileurl=' + encodeURIComponent(tempurl)+'&task='+filetask+'&type=src&res=url&filetype='+fileSuffix+'&reqType=app';
+							//var _url= fcsurl + 'fileurl=' + encodeURIComponent(tempurl+'&tTime='+(expires.getTime()))+'&task='+filetask+'&type=src&res=url&filetype='+fileSuffix+'&jsoncallback=?';		
+							//console.log(_url);				
+								var obj = {
+										"fileTitle":item.fileName,
+										"fileId":item.id,
+										"fileUrl":_url,
+										"pdfurl":"",
+										"fileSuffix":fileSuffix,
+										"createUserName":item.createUserName,
+										"createTime":item.createTime
+									};
+								
+								//正式成文：main_pdf  正文：main_doc   痕迹文：main_trace 附件：attach
+								if(item.type.indexOf("main_")>-1){
+									if(item.type=="main_doc"){
+										obj.filetypeid = "mainFileArray";
+										obj.filetypename = "原文";
+										obj.childFileId = [];
+										obj.notationType="notation"
+										if(filetask==1){obj.pdfurl="False"}
+										_this.ArrsList.mainFileArray.push(obj);
+									}else if(item.type=="main_pdf" ){//版式文件
+										obj.filetypeid = "mainFileArray";										
+										filetypename = "版式文件";
+										obj.filetypename = filetypename;
+										obj.childFileId = ["false"];
+										if(filetask==1){obj.pdfurl="False"}
+										_this.ArrsList.mainFileArray.push(obj);
+									}
+								}
+								/*else if(item.type!="main_doc" && item.type.indexOf("main_")>-1){//正式文
+									obj.filetypeid = "mainFileArray";
+									var filetypename = "正式文";//_trace
+									if(item.type.indexOf("_tgw")>-1){
+										filetypename = "加密文件";
+									}else if(item.type.indexOf("_pdf")>-1){
+										filetypename = "版式文件";
+									}
+									obj.filetypename = filetypename;
+									obj.childFileId = ["false"];
+									if(filetask==1){obj.pdfurl="False"}
+									_this.ArrsList.mainFileArray.push(obj);
+								}*/else if(item.type=="attach"){//背景材料
+									obj.filetypeid = "attachArray";
+									obj.filetypename = "附件";
+									obj.childFileId = [];
+									obj.notationType="att_notation"
+									if(filetask==1){obj.pdfurl="False"}
+									_this.ArrsList.attachArray.push(obj);
+								}else  if(item.type=="notation" || item.type=="att_notation"){
+									var stepId = docInfor.permission.stateLabel;
+									if(item.fileName.indexOf(stepId)>-1){
+										obj.thisStep = true;
+									}
+									var pid = toArr(item.extension).associated;
+									obj.filetypeid = "notationArray";
+									obj.filetypename = "批注";
+									obj.notationType="notation"
+									if(item.type=="att_notation")obj.notationType="att_notation";
+									obj.partFileId = pid;
+									_this.ArrsList.notationArray.push(obj);
+								}
+							});
+							if(_this.ArrsList.notationArray.length>0){
+								var _index=-1;
+								$.each(_this.ArrsList.notationArray, function(x,item) {
+									if(item.notationType=="notation"){
+										$.each(_this.ArrsList.mainFileArray, function(y,obj) {
+											if(obj.fileId==item.partFileId){
+												obj.childFileId.push(x)
+												if(_index==-1)_index=x;
+											}
+										});										
+										
+									}else{
+										$.each(_this.ArrsList.attachArray, function(y,obj) {
+											if(obj.fileId==item.partFileId){
+												obj.childFileId.push(x);						
+											}
+										});										
+									}
+									if((x+1)==_this.ArrsList.notationArray.length){
+										_this.pdfInfo.type="notationArray";
+										_this.pdfInfo.index=(_index==-1?0:_index);	
+									}
+								});															
+							}else if(_this.ArrsList.mainFileArray.length>0){
+								this.pdfInfo.type="mainFileArray";
+							}else if(_this.ArrsList.attachArray.length>0){
+								this.pdfInfo.type="attachArray";
+							}
+							this.iniPdfShow();
+				    },
+					showPdf: function(type,num,autoload){
+						//console.log(123);
+						if(autoload){
+							
+						}else if(this.pdfInfo.type==type && this.pdfInfo.index==num){
+							return false;
+						}
+						wispApp.UI.showProgressDialog("正在下载文件...");
+						var userInfor = toArr(App.LS.get("userInfo"));
+						this.pdfInfo.type=type;
+						this.pdfInfo.index=num;
+						var fileinfo = this.ArrsList[type][num];
+						var pdfurl = fileinfo.pdfurl;
+						if(pdfurl==""){
+							//未转换过,需要转换
+							this.loadpdf(fileinfo.fileUrl,type,num,autoload);
+						}else if(pdfurl=="converFail" || pdfurl=="False"||pdfurl=="null"){
+							wispApp.UI.dismissProgressDialog();
+							$("#dome").html('<div class="fileError">《'+fileinfo.fileTitle+'》文件无法转换</div>');
+						}else if(pdfurl!=""){
+							this.showSignBtn(fileinfo,type);
+							$("#dome").empty();
+							console.log(pdfurl);
+							openPdf("dome",pdfurl,{
+								//waterMark:userInfor.userName,
+								waterMark: "省发改委  " + (userInfo.userName || userInfo.username) + " " + (userInfo.phone ?  userInfo.phone.substring(7) : ""),
+								ctrlSwiper:function(scale){
+									BackCtrlSwiper("swiper-container3",scale);
+								}
+							});
+							App.LS.set("openpdf",pdfurl);//记录当时打开的文件url用于转屏的时候重新渲染页面 
+							this.showMore=false;
+							wispApp.UI.dismissProgressDialog();
+						}
+					},
+				    getFileIcon: function(val){
+				    	switch(val) {
+						    case "wps":
+						        return "wps"
+						        break;
+						    case "doc":
+						    case "docx":
+						    	return "word"
+						        break;
+						    case "xls":
+						    case "xlsx":
+						    	return "excel"
+						        break;
+						    case "pdf":
+						    	return "pdf"
+						        break;
+						    case "ppt":
+						    	return "ppt"
+						        break;
+						    case "jpg":
+						    case "jpeg":
+						    case "png":
+						    	return "jpg"
+						        break;
+						    default:
+						       	return "qita"
+						}
+				    },
+				   iniPdfShow: function(){
+				    	var _this = this;
+				    	$.each(this.ArrsList,function(types,item){
+					    	if(item.length>0){
+					    		$.each(item, function(i,doc) {
+									var autoflag = false;
+									if(_this.pdfInfo.type == types && _this.pdfInfo.index == i ){//打开文件
+										//console.log(i);
+										autoflag = true;
+									}
+									if(doc.pdfurl==""){
+										_this.loadpdf(doc.fileUrl,types,i,autoflag);
+									}else if(autoflag){
+										_this.showPdf(types,i,autoflag);
+									}
+						    	});
+					    	}
+				    	});
+				    },
+				    loadpdf: function(_url,type,i,autoflag){
+				    	var _this=this;
+				    	/* $.ajax({
+							type: "GET",
+							url: _url,
+							dataType: "json",
+							success: function (result){
+								console.info(result)
+								if(result==="converFail" || result.Success==='False' || result.Content==='null'){
+									_this.ArrsList[type][i].pdfurl = "./img/error.pdf";
+								}else{
+									_this.ArrsList[type][i].pdfurl = fcsgetfile + result.Content;
+								}
+								if(autoflag){
+									_this.showPdf(type,i,autoflag);
+								}
+							},
+							error:function(error){
+								_this.ArrsList[type][i].pdfurl = "./img/error.pdf";
+								if(autoflag){
+									_this.showPdf(type,i,autoflag);
+								}
+							}
+						}); */
+				    	$.ajax({
+							type: "GET",
+							url: _url,
+							dataType: "jsonp",
+							jsonp: "jsoncallback",
+							success: function (result){
+								console.info(result)
+								if(result=="converFail"){
+									_this.ArrsList[type][i].pdfurl = "./img/error.pdf";
+						       	}else if(result.Success==='False' || result.Content==='null'){
+						            _this.ArrsList[type][i].pdfurl = "./img/error.pdf";
+						        }else{
+									_this.ArrsList[type][i].pdfurl = fcsgetfile + result.Content;
+						        }
+								//console.info(autoflag)
+								if(autoflag){
+									_this.showPdf(type,i,autoflag);
+								}
+							},
+							error:function(error){
+								_this.ArrsList[type][i].pdfurl = "./img/error.pdf";
+								if(autoflag){
+									_this.showPdf(type,i,autoflag);
+								}
+							}
+						})
+				    },
+				    openSingFile : function(){
+						if(/iPhone|iPad/i.test(navigator.userAgent)) {
+							toast("苹果设备暂不支持此功能！");
+							return false;
+						}
+						App.LS.remove("DeleteFileId");
+				    	var docInfor = toArr(App.LS.get("docInfor"));
+				    	var userInfor = toArr(App.LS.get("User"));
+				    	var docId = docInfor.form.id;
+				    	var stepId = docInfor.permission.stateLabel;
+				    	var fileinfo = this.ArrsList[this.pdfInfo.type][this.pdfInfo.index];
+				    	var times = (new Date()).Format("yyyyMMddhhmmss");
+
+				    	if(fileinfo.filetypeid=="notationArray"){//删除历史批注文件							
+							App.LS.set("DeleteFileId",fileinfo.fileId);
+				    	}
+				    	var pdfPath =fileinfo.pdfurl;
+				    	var userName = userinfo.userName;
+				    	var basePath = ZjgyHost + ZjgyUrl["File-upload"];
+				    	var type = false;
+				    	var filename = "";//下载后文件,暂不需要
+						var fileNewname = encodeURIComponent(userinfo.userName+"_"+fileinfo.fileTitle)+".pdf";	
+				    	var moduleId = App.LS.get("module");
+				    	var fileType =fileinfo.notationType;
+						//if(App.LS.get("mobile")=="U039275"){alert(fileType)};
+				    	//var extension = {associated:fileinfo.fileId};
+						var extension = {associated:fileinfo.partFileId?fileinfo.partFileId:fileinfo.fileId};
+				    	var token =getCookieValue("x-auth-token");	
+				    	PDFNotation(pdfPath, userName, type, filename, fileNewname, basePath, docId, stepId, moduleId, fileType, extension, token);
+				    },
+					showMorePage: function(){
+						this.showMore = true;
+					},
+					hideMorePage: function(){
+						this.showMore = false;
+					},
+					cutTime : function(times,type){
+						var len = times.indexOf(" ");
+						return times.substring(0,len);
+					},
+					initPdfPage : function(){//刷新操作，批注完调用
+						this.ArrsList = {mainFileArray:[],attachArray:[],notationArray:[]};
+						this.pdfInfo.index = 0;
+						var _url = ZjgyHost + ZjgyUrl[App.LS.get("module")+"-wj"];
+						var docInfor = toArr(App.LS.get("docInfor"));
+						var obj = {docId:docInfor.form.id};
+						ajaxRequst(_url,'GET','','json',obj).then((json) => {
+							App.LS.set("docInfor",JSON.stringify(json));
+							vFile.pdflist(json.atts);
+						});
+						
+					}
+				}
+			});
+		</script>
+	</body>
+</html>

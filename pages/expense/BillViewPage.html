@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<title>票据上传</title>
+		<script type="text/javascript" src="../../js/loadVersion.js" ></script>	
+		<script>
+			var loadList=[				
+				{name:"iconfontcss",type:"css",url:"../../css/iconfont.css"},
+				{name:"commoncss",type:"css",url:"../../css/common.css"},	
+				{name:"indexcss",type:"css",url:"../../css/index.css"},	
+				{name:"handleFilecss",type:"css",url:"../../css/handleFile.css"},				
+				{name:"vuejs",type:"js",url:"../../js/vue.min.js"},
+				{name:"jqueryjs",type:"js",url:"../../js/jquery-1.9.1.min.js"},
+				{name:"indexjs",type:"js",url:"../../js/index1.9.12.js"},	
+				{name:"vantjs",type:"js",url:"../../js/vant.min.js"},
+				{name:"imageConversionjs",type:"js",url:"./js/imageConversion.js"},
+				//{name:"commonjs",type:"js",url:"../../js/vconsole.min.js"},
+				{name:"ipConfigjs",type:"js",url:"../../js/ipConfig.js"},
+				{name:"commonjs",type:"js",url:"../../js/common.js"},
+				{name:"billUploadjs",type:"js",url:"./js/billViewPage.js"},
+			];
+			loadVersion.iniVersion(loadList);
+		</script>
+	</head>
+	<body >
+		<div id="billViewPage" class="flex">
+			<van-tabs  v-model="tabActive"  color="#5078FE" 
+            title-active-color="#5078FE"  line-width="20%" line-height="2px" :lazy-render="true" swipeable sticky>
+				<template v-for="(item,x) in tabData">
+					<van-tab :title="item.name">
+						<van-pull-refresh v-model="item.refreshing" @refresh="onRefresh">
+						<!-- <div class="flex" :id="item.pageId"> -->
+							<van-list v-model="item.loading" :finished="item.finished" finished-text="没有更多了" @load="getBillList" :id="item.pageId">
+							<ul v-if="item.billAttList.length != 0">
+								<li class="list-li" v-for="(billAtt,a) in item.billAttList">
+									<div class="image-li"><img :ref="billAtt.id" src="../../img/loading.png" width="100%" height="100%" style="object-fit: cover;"/></div>
+									<div class="title-li">
+										<p class="title">{{billAtt.fileName}}</p>
+										<p class="bottom"><span>上传时间：</span><span>{{billAtt.createTime}}</span></p>
+									</div>
+									<div class="operation-li">
+										<van-uploader class="upload-button" :before-read="asyncBeforeRead" :after-read="uploadFiles" :name="billAtt" :disabled="!isEdit">重新上传</van-uploader>
+										<!-- <p class="upload-button" @click="">重新上传</p> -->
+										<p class="del-button"  @click="isEdit ? 'deleteAttFile(billAtt,true)' : ''"  :disabled="!isEdit">删除</p>
+									</div>
+								</li>
+							</ul>
+							<ul v-else> 
+								<img class="emptyimg" src="../../img/empty_prompt.png" />
+							</ul>
+							</van-list>
+						<!-- </div> -->
+						</van-pull-refresh>
+					</van-tab>
+				</template>
+			</van-tabs>
+		</div>
+		<style>
+		   dl:first-child {padding-top: .6rem;}
+		   dl{padding: .3rem 0;font-size: .9rem;}
+		   dt{border-bottom: #f1f0f0  solid 1px;background: #fff;}
+		   dd{/*padding: .3rem 0;  border-bottom: #f1f0f0  solid 1px;*/background: #fff;height: auto;  position: relative;color: #313131;white-space: normal !important;line-height: 1rem;    display: flex;    justify-content: space-between;}
+		   dd.chekBox,#basicInfor dd.checked{text-align: left;    padding-left: 0.1rem;    width: 96%;    height: auto;}
+		   dd>span,dt{color: #6C6B6B; display: block;    text-align: left;}
+		   dd.add{padding: 1rem;   font-size: 0.8rem;}
+		   dd.add>span{ color: rgb(28, 149, 255); }
+		   dd>.textcontent { width: 55%;text-align: right;}
+		   dd>textarea.editable{color:#C4CBD3}
+		   dd>.dlspan span { border-bottom: solid 1px #828080;  width: 1rem;  display: inline-block;    line-height: .24rem;}
+
+		   .list-li{
+				display: -webkit-box;
+				display: -webkit-flex;
+				display: flex;
+				padding: 0.6rem 1rem;
+    			border-bottom: 1px solid #f1f1f1;
+				max-height: 6rem;
+				/* background-color: #ffffff; */
+				font-size: .8rem;
+				line-height: 1.4rem;
+		   }
+		   .image-li{
+				-webkit-flex: none;
+    			flex: none;
+				width: 4rem;
+				height: 4rem;
+				margin-right: 10px;
+		   }
+		   .title-li{
+				-webkit-flex: 1;
+    			flex: 1;
+			   	width: 10rem;
+			   	margin-right: 10px;
+		   }
+		   .title-li .title{
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+		   }
+		   .title-li .bottom{
+				display: -webkit-box;
+				display: -webkit-flex;
+				display: flex;
+			   	color: #B9B9B9;
+			   	font-size: .7rem;
+				line-height: 1rem;
+		   }
+		   .title-li .bottom span{
+				-webkit-flex: 1;
+    			flex: 1;
+		   }
+		   .operation-li{
+				width: 4rem;
+				text-align: right;
+    			font-size: .7rem;
+		   }
+		   .operation-li .upload-button{
+			   color: #5078fe;
+		   }
+		   .operation-li .del-button{
+			   color: #f51111;
+		   }
+		   .operation-li .del-button[disabled="disabled"]{
+				opacity: .5;
+		   }
+	   </style>			
+	</body>
+</html>

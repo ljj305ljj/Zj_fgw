@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<title>mgr版本号字符串</title>
+		<style>
+			*{width: 100%;height: 100%;padding: 0;margin: 0;}
+			#version{word-break: break-all;padding: 50px;box-sizing: border-box;}
+		</style>
+	</head>
+	<body>
+		<div id="version"></div>
+		<script>
+			var version = 
+			{
+				/*大版本*/
+				'version':'17',
+				/*页面版本*/				
+				'ListPage':'0.1',
+				'indexPhone':'0.1',
+				'filePreView':'0.1',
+				'DraftPage':'0.1',
+				'DetailPage':'0.1', //
+				'FlowBoxPage':'0.1', //
+				'BaseInfor':'0.2',
+				'FileRead':'0.1',
+				'FlowRead':'0.1', 
+				'FileResource':'0.1',
+				'opinion':'0.1',
+				'FileList':'0.1',
+				'moreModule':'0.1',
+				'ReadSendPage':'0.1',
+				'relative':'0.1',
+				'SearchPage':'0.1',
+				'Setting':'0.1',
+				'StarPage':'0.1',
+				/*页面版本独立*/
+				'commonjs':'0.3',
+				'detaiPagejs':'0.1', //
+				'flowpagejs':'0.1', //
+				'DetailPagejs':'0.1', //
+				'HandleViewjs':'0.1', //
+				'indexPhonejs':'0.4', //
+				'ipConfigjs':'0.2',
+				'listPagejs':'0.1', //
+				'pdfjs':'0.1', //
+				'pdfworkerjs':'0.1',
+				'pdfh5js':'0.1', //
+				'PDFNotationjs':'0.1', //
+				'jqueryjs':'0.1', //
+				'vuejs':'0.1', //
+				'vantjs':'0.1', //
+				'dingtalk_openjs':'0.1', //
+				/*公用css*/
+				'iconfontcss':'0.1',
+				'commoncss':'0.1', //
+				'swipercss':'0.1',
+				'handleFilecss':'0.1',
+				'pdfh5css':'0.1',
+				'indexcss':'0.1',
+			};
+			
+			window.onload = function(){
+				var log = document.getElementById("version");
+				var replaces = JSON.stringify(version).replace(/\"/g,"'");
+				log.innerText = replaces;
+				console.info(replaces);
+			}
+		</script>
+	</body>
+</html>

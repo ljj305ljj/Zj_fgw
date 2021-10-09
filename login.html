@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<title>登录页</title>
+		<style>
+			*{padding: 0;margin: 0;box-sizing: border-box;}
+			html,body{height: 100%;width: 100%;}
+			input,textarea,select,a:focus{outline: none;}
+		</style>
+		<link rel="stylesheet" href="css/iconfont.css" />
+		<script type="text/javascript" src="js/jquery-1.9.1.min.js" ></script>
+		<script type="text/javascript" src="js/vue.min.js" ></script>
+	</head>
+	<body>
+		<div class="login-bg">
+	      	<div id="UserFromBox" class="userfrom">
+	          <div class="login-name"><p>欢迎登录移动办公</p><p class="title-en">Welcome to login mobile office</p></div>
+	          	<div class="input-box">
+	            	<span class="leftIcon rjicon icon-user1"></span>
+					<input id="userNmae" v-model="userName" class="input-bg" />
+	          	</div>
+	          	<div class="input-box">
+	            	<span class="leftIcon rjicon icon-pad1"></span>
+					<input id="passWord" v-model="userPass" type="password" class="input-bg" />
+					<label id="look" class="rightIcon rjicon icon-noeye"></label>
+	          	</div>
+	          	<button>登录</button>
+	      	</div>
+	  	</div>
+	  	<style>
+			.title-en{font-size: 0.5rem;letter-spacing: 1px;}
+			.login-name{color: #FFFFFF;font-size: 1.5rem;text-align: center;margin-bottom: 30%;letter-spacing:5px;}
+			.login-bg{background: linear-gradient(135deg, #006CDB,#78c0ff);background: -webkit-linear-gradient(135deg, #006CDB,#78c0ff);width: 100%;height: 100%;}
+			.input-box{padding-left: 3.2rem;position: relative;height: 3rem;margin-bottom: 10px;}
+			.input-bg{border-radius: 1.5rem;}
+			.input-box .leftIcon{position: absolute;top: 0;left: 0;line-height: 3rem;height: 3rem;width: 3rem;background: #ffffff;border-radius: 1.5rem;text-align: center;font-size: 1.5rem;color: #40a1f6;}
+			.input-box .rightIcon{position: absolute;top: 0;right: 0;line-height: 3rem;height: 3rem;width: 3rem;border-radius: 1.5rem;text-align: center;font-size: 1.5rem;color: #c8c8c8;}
+			.rightIcon.icon-eye{color:#40a1f6;}
+			.bg-imgs{position: fixed;top: 0;left: 0;width: 100%;height: 100%;}
+			.bg-imgs img{width: 100%;}
+			.bg-imgs img:last-child{position: absolute;bottom:0;}
+			.userfrom{position: fixed;width: 100%;padding: 20% 5% 0 5%;height: 100%;}
+			.userfrom input,.userfrom a{background-color: #fff;line-height: 3rem;border:none;width: 100%;padding: 0 1.5rem;font-size: 1rem;}
+			.userfrom button{width: 100%;background: #20ca9b;border:none;margin-top: 2rem;width: 100%;height: 2.5rem;border-radius: 1.25rem;color: #fff;font-size: 1rem;}
+		</style>
+		<script>
+			new Vue({
+				el: '#UserFromBox',
+				data(){
+				    return{
+				      	userName:'',
+				        userPass:'',
+				        passType:false
+				    }
+				},
+				methods:{
+				    tologin:function() {
+				        if(this.userName==''||this.userPass==''){alert('用户名或密码为空');return false;}
+				        var _this=this;
+				        var postUrl = NginxHost + getPartUrl("login");
+				        var username = _this.userName;
+				        var userpass = _this.userPass;
+				        //let datas='userName='+username+'&passWord='+userpass+'&appCode='+'4GMwLWBnLGRkNGBuO9ZkNGVtL96mJTqp4GRmNXJoNWVtOGZqOGVpRpRmN92jNWJjNGNoQ93aNHem5dUgN9Ep'+'&userAgent='+JSON.stringify({version:"8.0.0",model:"LON  HUAWEI_LON-AL00",imei:"86558403622714"})
+//				        var datas='username='+username+'&password='+userpass;
+//				        setCookie("LtpaToken",result.token,1000 * 60 * 60 * 24 * 7);
+//			            setCookie("userName",username,1000 * 60 * 60 * 24 * 7);
+//			            setCookie("userPass",userpass,1000 * 60 * 60 * 24 * 7);
+//			            AppLS.set("User", JSON.stringify(result.userinfo));
+//						AppLS.set("UserGroups", JSON.stringify(result.groups));
+				    }
+				}
+			});
+			$("#look").on("click",function(){
+				if($("#passWord").attr("type")=="text"){
+					$("#passWord").attr("type","password");
+					$(this).attr("class","rightIcon rjicon icon-noeye");
+				}else{
+					$("#passWord").attr("type","text");
+					$(this).attr("class","rightIcon rjicon icon-eye");
+				}
+			})
+		</script>
+	</body>
+</html>

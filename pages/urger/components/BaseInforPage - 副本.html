@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<title>办理单</title>
+	</head>
+	<body>
+		<div id="BLD2" class="bldview">
+			<div id="text4" class="bldpage" :style="'height:'+getDetailHeight()">
+				<div class="bld-note" v-show="noteDate.length>0">
+					<div class="bld-note-title" @click="showNote=!showNote" :class="showNote?'':'noshow'"><span class="rjicon icon-feedback"></span></div>
+					<ul v-show="showNote" class="bld-note-div">
+						<template>
+							<li class="bld-note-li" v-for="(obj,i) in noteDate">
+								<div>{{obj.sendUserName}}</div>
+								<div>{{obj.sendTime}}</div>
+								<div>{{obj.content}}</div>
+							</li>
+						</template>
+					</ul>
+				</div>
+				<div id="tempDiv2" style="display: none;"></div><div id="Bldbox2"></div>
+			</div>
+			
+		</div>
+		<script>
+			var docInfor = toArr(App.LS.get("docInfor"));
+			let stateBusiness = toArr(App.LS.get("stateBusiness"));
+			var vFBD2=new Vue({
+				el: '#BLD2',
+				data(){
+				    return{
+				      	btnArrs:[],
+				      	moreBtn:false,
+				      	showNote:false,
+				      	noteDate:[],
+						isShowGengduoMenu:false
+				    }
+				},
+				mounted : function(){
+					//wispApp.UI.showProgressDialog("正在加载办理单...");
+					//App.LS.remove("flowOpinion");
+					baseCommon.getToHandleId("Bldbox2");
+				},
+				methods : {
+					getDetailHeight:function(){
+						return ($("body").height()-44-54 + "px");
+					},
+					
+				}
+			});
+			
+		</script>
+		<style>
+			/*查看办理单*/
+			[v-cloak] {display: none;}
+			.bldview{height: 100%;width: 100%;padding-bottom: 3rem;}
+			.bldpage{height: 100%;width: 100%;overflow-y: auto;}
+			.foot-btn{height: 3rem;position: fixed;bottom: 0;left: 0;width: 100%;border-top: 1px solid #ccc;background: #fff; color: #A1A1A3;}
+			.bottom-nav-box{height: 3rem;display: inline-block;width: 33.33%;text-align: center;line-height: 3rem;}
+			.bottom-nav-box>span.rjicon{font-size: 1.2rem;position: relative;display: block;line-height: 1.5rem;padding-top: .2rem;}
+			.bottom-nav-box>span:nth-child(2){position: relative;top: -1rem;line-height: 1.2rem;height: 1rem;font-size: .8rem;}
+			.bldbox{position: relative;top:0;left: 0;}
+			.bld-note{position: absolute;top:30px;right: 0;z-index: 2;max-width: 40%;text-align: right;font-size: 1rem;max-width: 100%;}
+			.bld-note-title{position: absolute;top:0;left: -3rem;background: var(--wisp-color);color: #fff;padding: 0 1rem;border-top-left-radius: 30px;border-bottom-left-radius: 30px;line-height: 30px;text-align: center;float: right;}
+			.bld-note-div{box-shadow: 0px 2px 5px rgba(0,0,0,.1);width: 15rem;font-size: .8rem;background: rgba(249,249,249,.9);text-align: left;border-top: 1px solid var(--wisp-color);}
+			.bld-note-li{padding: 10px 6px 10px 10px;}
+			.bld-note-li:nth-of-type(even){background: rgba(222, 222, 222, 0.5);}
+			.noshow{opacity: .5;}
+			.van-overlay{ top: -3rem;}
+			.van-popup--center {
+				/* top: 0; */
+				-webkit-transform: translate3d(0,0,0);
+				transform: translate3d(0,0,0); 
+			}
+			.van-cell{
+				font-size: .8rem;
+				color:#A1A1A3;
+				text-align: center;
+			}
+		</style>
+	</body>
+</html>

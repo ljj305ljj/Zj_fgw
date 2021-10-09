@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="referrer" content="no-referrer" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=4, minimum-scale=1,user-scalable=yes">
+    <meta content="email=no" name="format-detection" />
+    <title>基本信息</title>
+    <!-- <script>
+  document.documentElement.style.fontSize = document.documentElement.clientWidth / 7.5 + 'px';
+</script> -->
+</head>
+
+<body>
+    <div id="meeting" class="page-view">
+        <div style="height: 100%;width: 100%;">
+            <div id="text6" style="height: 100%;width: 100%;overflow: hidden;overflow-y: auto;">
+                <!-- tab内容 -->
+                <div id="type-two-border" class="notice-div">
+                    <div class="notice-title">{{unescape(docInfor.subject)}}</div>
+                    <div style="margin: 1rem .5rem;  font-size: .8rem;" v-html="replace(docInfor.content)"></div>
+                    <div class="notice-box">
+                        <div
+                            style="display: flex;  flex-direction: row;   justify-content: space-between;  padding: 0 .1rem;">
+                            <div class="notice-item">发 布 人：{{docInfor.draftUser}}</div>
+                            <div class="notice-item">发布单位：{{docInfor.draftDept}}</div>
+                        </div>
+                        <div
+                            style="display: flex;  flex-direction: row;   justify-content: space-between;  padding: 0 .1rem;">
+                            <div class="notice-item">发布类型：{{docInfor.pubCategoryName}}</div>
+                            <div class="notice-item">发布时间：{{docInfor.publishDate}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var vFlow = new Vue({
+            el: '#meeting',
+            data() {
+                return {
+                    docInfor: listInfo
+                }
+            },
+            mounted: function () {
+                console.log(this.docInfor)
+            },
+            created: function () {
+                this.loading = true;
+            },
+            methods: {
+                replace: function (content) {
+                    if (content) {
+                        content = content.replace('text-indent:272pt;', 'text-align: right;');
+                        content = content.replace('text-indent:264pt;', 'text-align: right;');
+                        return content;
+                    } else {
+                        content = "";
+                    }
+                    return content;
+                },
+                getFileIcon: function (fileSuffix) {
+                    switch (fileSuffix) {
+                        case "wps":
+                            return "wps"
+                            break;
+                        case "doc":
+                        case "docx":
+                            return "word"
+                            break;
+                        case "xls":
+                        case "xlsx":
+                            return "excel"
+                            break;
+                        case "pdf":
+                            return "pdf"
+                            break;
+                        case "ppt":
+                            return "ppt"
+                            break;
+                        case "jpg":
+                        case "jpeg":
+                        case "png":
+                            return "jpg"
+                            break;
+                        default:
+                            return "qita"
+                    }
+                },
+                getFileTask: function (fileSuffix) {
+                    var fileTask = "";
+                    if (fileSuffix.indexOf('doc') > -1) {
+                        fileTask = "word2PDF"
+                    } else if (fileSuffix.indexOf('wps') > -1) {
+                        fileTask = "wps2PDF";
+                    } else if (fileSuffix.indexOf('xls') > -1) {
+                        fileTask = "excel2PDF";
+                    } else if (fileSuffix.indexOf('ppt') > -1) {
+                        fileTask = "ppt2PDF";
+                    } else if (fileSuffix.indexOf('pdf') > -1) {
+                        fileTask = "none";
+                    } else if (fileSuffix.indexOf('jpg') > -1) {
+                        fileTask = "jpg2PDF";
+                    } else if (fileSuffix.indexOf('jpeg') > -1) {
+                        fileTask = "jpg2PDF";
+                    } else if (fileSuffix.indexOf('gif') > -1) {
+                        fileTask = "gif2PDF";
+                    } else if (fileSuffix.indexOf('png') > -1) {
+                        fileTask = "png2PDF";
+                    } else if (fileSuffix.indexOf('txt') > -1) {
+                        fileTask = "txt2PDF";
+                    } else {
+                        fileTask = 1;
+                    }
+                    return fileTask;
+                },
+                initFileList: function (type) {
+                    var _this = this;
+                    $.each(fileLists[type], function (i, item) {
+                        item.url = item.URL;
+                        item.fileSuffix = (item.title.substring(item.title.lastIndexOf('.') + 1)).toLowerCase();
+                        item.fileTask = _this.getFileTask(item.fileSuffix);
+                        if (item.fileTask == 1) {
+                            item.fcsUrl = fcsurl + 'fileurl=' + encodeURIComponent(item.url) + '&task=none&type=src&res=url&filetype=' + item.fileSuffix + '&jsoncallback=?';
+                        } else {
+                            item.fcsUrl = fcsurl + 'fileurl=' + encodeURIComponent(item.url) + '&task=' + item.fileTask + '&type=src&res=url&filetype=' + item.fileSuffix + '&jsoncallback=?';
+                        }
+                        item.fcsTransTime = 0;
+                        item.fileType = type;
+                        item.pdfurl = '';
+                        item.index = i;
+                        item.autoflag = false;
+                        console.log(item);
+                        _this.getPdfUrl(item);
+                    })
+                },
+                fcsError: function (fileObj) {
+                    if (fileObj.autoflag && fileObj.fcsTransTime == 3) {
+                        toast("转换失败，重新发起.");
+                        fileObj.pdfurl = "converFail";
+                    } else if (fileObj.autoflag) {
+                        this.getPdfUrl(fileObj);
+                    }
+                },
+                getPdfUrl: function (fileObj) {
+                    var _this = this;
+                    // console.info(_url)
+                    //ajaxRequst(_url,'post','application/x-www-form-urlencoded','text',obj).then(function(json){
+                    ajaxRequst({
+                        type: "GET",
+                        url: fileObj.fcsUrl,
+                        dataType: "jsonp",
+                        jsonp: "jsoncallback"
+                    }, function (result) {
+                        fileObj.fcsTransTime++;
+                        console.info(result)
+                        if (result == "converFail" || result.Success === 'False' || result.Content === 'null') {
+                            fcsError(fileObj);
+                        } else {
+                            //autoflag=true;
+                            fileObj.pdfurl = fcsFilePath + result.Content;
+                            if (fileObj.autoflag) {
+                                _this.openFile(fileObj);
+                            }
+                        }
+
+                    }, function (error) {
+                        console.log(JSON.parse(error.responseText));
+                        var _error = JSON.parse(error.responseText);
+                        // toast(_error.msg)
+                        //								try{wispApp.UI.dismissProgressDialog();}catch(e){}
+                        toast("数据加载出错，请刷新重试！");
+                        //								console.log(error);
+                    }
+                    )
+                },
+                openFile: function (fileObj) {
+                    console.dir(fileObj)
+                    var _self = this;
+                    if (fileObj.pdfurl != "" && fileObj.pdfurl != "converFail") {
+                        if (fileObj.fileTask == 1) {//不转换的情况
+                            try {
+                                var fileJson = { userName: App.LS.get("LastName"), isRead: true }
+                                wispApp.H5plus.downloaFile(fileObj.pdfurl, {}, fileJson, function (filePath, fileProperty) {
+                                    //alert("filePath:"+filePath);
+                                    try { wispApp.UI.dismissProgressDialog(); } catch (e) { }
+                                    if (/edc|bdc/i.test(fileObj.fileSuffix) && /Android/i.test(navigator.userAgent)) {
+                                        var actionName = "android.intent.action.kinsecSignFile";
+                                        var sd_path = plus.io.convertLocalFileSystemURL(filePath);
+                                        var optionsJson = [{ openFile: sd_path, saveFile: "", screen: "all" }];
+                                        wispApp.App.openapp("", "", actionName, optionsJson);
+                                    } else {
+                                        wispApp.App.openfile(filePath, {}, fileListPage.openErrorCallbak);
+                                    }
+                                    /*plus.runtime.openFile(filePath,{},function(error){
+                                        wispApp.UI.showToast(error.message);
+                                    });*/
+                                });
+                            } catch (e) { alert(e) }
+                        } else {
+                            //window.open('./pdfh5/pdfh5.html?fileUrl='+fileObj.pdfurl+'&fileTitle='+fileObj.title)  
+                            wispApp.H5plus.creatWebview('./pdfh5/pdfh5.html?fileUrl=' + fileObj.pdfurl + '&fileTitle=' + fileObj.title + '&ver=' + App.LS.get('appRes'), 'fileRead', '文件');
+                        }
+                    } else if (fileObj.pdfurl == "") {
+                        this.getPdfUrl(fileObj);
+                    }
+
+                },
+                openErrorCallbak: function (error) {
+                    wispApp.UI.showToast(error.message);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

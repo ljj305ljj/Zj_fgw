@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<title>搜索</title>
+		<script type="text/javascript" src="./js/loadVersion.js" ></script>	
+		<style>
+			/*搜索列表*/
+			.search-header{border-bottom: 1px solid #f1f1f1;overflow: hidden;display: flex;flex-direction:row;height: 2.5rem;line-height: 2.5rem;padding: .45rem .5rem;background: #ffffff;position: fixed;top:0;left: 0;width: 100%;}
+			.search-header .rjicon{position: absolute;top: .5rem;left: 1rem;font-size: 1rem;}
+			.search-header input{width: 100%;padding: 0 1.5rem;font-size: .8rem;}
+			.search-header>div{background: #ECECED;flex-grow: 1;}
+			.toSearchBtn{width: 3rem;font-size: .8rem;line-height: 1.6rem;text-align: center;}
+			.search-body,.search-module{padding-top: 2.5rem;height: 100%;width: 100%;overflow-x: hidden;overflow-y: auto;}
+			.s-module-ul{width: 100%;padding: 1rem;font-size: 0;border-bottom: 1px solid #f1f1f1;}
+			.s-module-tip{text-align: center;padding: .5rem;color: #C0C0C0;font-size: .8rem;}
+			.s-module-li{width: 50%;display: inline-block;text-align: center;font-size: .8rem;}
+			.filt-active{color:#23A0FD}
+			.search-btn{height: 1.6rem;background: #fff;border-radius: 1rem;line-height: 1.6rem;padding: 0 0.5rem;box-sizing: border-box;color:#C0C0C0;font-size: .8rem}
+			.notMoreList{text-align: center;color: #999999;font-size: .8rem;padding: .6rem;}
+		</style>
+		<script>
+			var loadList=[		
+				{name:"iconfontcss",type:"css",url:"css/iconfont.css"},
+				{name:"commoncss",type:"css",url:"css/common.css"},				
+				{name:"swipercss",type:"css",url:"css/swiper.min.css"},	
+				{name:"jqueryjs",type:"js",url:"js/jquery-1.9.1.min.js"},
+				{name:"vuejs",type:"js",url:"js/vue.min.js"},
+				{name: "indexjs", type: "js", url: "js/index1.9.12.js" },
+				{name:"swiperjs",type:"js",url:"js/swiper.min.js"},
+				{name:"ipConfigjs",type:"js",url:"js/ipConfig.js"},
+				{name:"commonjs",type:"js",url:"js/common.js",newcallback:"initPage()"}
+			];
+			loadVersion.iniVersion(loadList);
+		</script>	
+	</head>
+	<body>
+		
+	  	<div id="Search" class="page-view">
+			<template>
+			<header class="search-header">
+		        <div class="search-btn">
+		        	<span class="rjicon rjicon-sousuo"></span>
+		        	<input type="text" v-model="keyWord" placeholder="搜索 标题 + 正文" />
+		        </div>
+		        <span v-show="keyWord!=''" class="toSearchBtn"  @click="toSearch">搜索</span>
+	      	</header>
+	      <!-- 	<div v-if="keyWord==''" class="search-module">
+	      		<ul class="s-module-ul">
+	      			<li class="s-module-tip">搜索指定内容</li>
+	      			<li class="s-module-li" :class="filter=='收文'?'filt-active':''" @click="changeFilter('收文')">收文</li>
+	      			<li class="s-module-li" :class="filter=='发文'?'filt-active':''" @click="changeFilter('发文')">发文</li>
+	      		</ul>
+	      	</div> -->
+	      		<ul class="search-body" id="search-body">
+					<template v-if="sList && sList.length>0">
+						<li class="tabBody-li" v-for="(obj,y) in sList"  @click="openDoc(obj)">
+			          		<div class="word-title" v-html='obj.C_subject'></div>
+		          			<div class="word-bottom">
+								<!--<p v-for="(fieldItem,z) in item.field">{{fieldItem.showName?fieldItem.name+' : ':""}}{{obj[fieldItem.id]}}</p>-->
+								<p>模块：{{obj.S_moduleDes}}</p>
+								<p>{{obj.S_createTime}}</p>
+			          		</div>
+			          	</li>
+					</template>
+		          	<template v-else><li><img class="emptyimg" src="./img/empty_prompt.png" /></li></template>
+		          	<li v-show="sList && sList.length>0 && total<start" class="notMoreList">--- 到底啦 ---</li>
+		       </ul>
+			</template>
+		</div>
+		
+		<script>
+			var initPage = function(){
+				var loadflag = true;	
+					
+				var vSearch=new Vue({
+					el: '#Search',
+					data(){
+						return{
+							sList : [],//请求数据
+							historyKey : {keyWord:"",filter:""},
+							keyWord : "",
+							addKeyWord : false,//是否空格隔开
+							sourceType : "all",//title content all
+							timeRange : "all",//day week month year all
+							order : "timeDesc",//timeDesc timeAsc default
+							filter : "",//发文 收文
+							start : 0,
+							count : 15,
+							total : null
+						}
+					},
+					created(){
+						fontSizeSet.initFontSize();	
+						
+					},
+					methods:{
+						toSearch: function(){
+							if(this.keyWord==""){
+								wispApp.UI.showToast("请输入关键字");
+								return false;	
+							}
+							
+							this.getSearchList();
+						},
+						changeFilter:function(val){
+							this.filter = val;
+						},
+						getSearchList : function(){
+							var _self = this;
+							var item = _self;
+							if(item.historyKey.keyWord!=item.keyWord || item.historyKey.filter!=item.filter){
+								//重置搜索
+								item.start = 0;
+								item.total = null;
+								item.historyKey = {keyWord:item.keyWord,filter:item.filter};
+							}
+							if(item.total!=null && item.total<=item.start){
+								console.info("没有更多");
+								return false;
+							}
+							wispApp.UI.showProgressDialog("正在加载列表...");
+							var userinfo = toArr(App.LS.get("userInfo"));
+							var _url = ZjgyHost + ZjgyUrl["searchQuery"];
+							var obj = {
+								addKeyWord:false,
+								firstOpen:true,
+								matchType:"default",
+								limit:item.count,
+								offset:item.start,
+								filter:item.filter,
+								q:item.keyWord,
+								order:item.order,
+								sourceType:item.sourceType,
+								timeRange:item.timeRange,
+								userinfo:{"userNo":userinfo.username,"sysNo":userinfo.systemNo}
+							};
+							//{"q":"测试","sourceType":"title","order":"default","timeRange":"all","matchType":"default","firstOpen":true,"addKeyWord":false,"limit":15,"offset":0,"filter":"","userinfo":{"userNo":"U006073","sysNo":"CSXT"}}
+							ajaxRequst(_url,'post','application/json','json',JSON.stringify(obj)).then((result) => {
+								console.info(result)
+								loadflag=true;
+								if(item.start==0){
+									item.sList=result.list;
+								}else{
+									var temp = item.sList;
+									item.sList = temp.concat(result.list);
+								}
+								item.start=item.start+item.count;
+								item.total=result.total;
+								_self.$nextTick(function(){
+									$('#search-body').height($("body").height()-(3*(fontSize.val)));
+									
+									$("#search-body").scroll(function(){
+										var viewH = $(this).height(),//可见高度
+										contentH = $(this).get(0).scrollHeight,//内容高度
+										scrollTop = $(this).scrollTop();//滚动高度
+										if(contentH - (viewH + scrollTop + 10) <= 100) { //当滚动到底部时，
+											if(loadflag==true){
+												loadflag=false;
+												_self.getSearchList();
+											}else{
+												return false;
+											}
+										}
+									});
+								});
+								// _self.$nextTick(function(){
+								// 	$("#swiper-container3 .swiper-slide").scroll(function(){
+								// 		var viewH = $(this).height(),//可见高度
+								// 		contentH = $(this).get(0).scrollHeight,//内容高度
+								// 		scrollTop = $(this).scrollTop();//滚动高度
+								// 		if(contentH - (viewH + scrollTop + 10) <= 0.5) { //当滚动到底部时，
+								// 			if(loadflag==true){
+								// 				loadflag=false;
+								// 				_self.getSearchList();
+								// 			}else{
+								// 				return false;
+								// 			}
+								// 		}
+								// 	});
+								// });
+								wispApp.UI.dismissProgressDialog();
+							});
+						},
+						openDoc : function(obj){						
+							obj.businessDocId = obj.id;
+							obj.businessNo = obj.S_businessNo;
+							/* if(obj.S_moduleDes=="收文"){
+								obj.businessNo = "receival";
+							}else if(obj.S_moduleDes=="发文"){
+								obj.businessNo = "dispatch";
+							}else{
+								toast("暂未开发"+obj.S_moduleDes+"模块");
+							}*/
+							App.LS.set("viewType",'searchview');
+							App.LS.set("listInfo", JSON.stringify(obj));
+							let detailPage = "DetailPage.html";
+							if(obj.mailIp){ 
+								App.LS.set('mailType', 'inbox');
+								detailPage = "pages/mail/mailInforPage.html";
+							}
+							switch (obj.S_businessNo) {
+								case "RECEIVAL"://收文处理
+								case "DISPATCH"://发文处理
+								case "SPECIAL_WORK"://专班工作
+								case "LEAVE"://请假审批
+								case "OVERTIME"://加班审批
+								case "TRAVEL_APPROVAL"://出差审批
+									detailPage = "DetailPage.html";
+									break;
+								case "CAR_APPLY"://车辆管理
+									detailPage = "pages/clgl/DetailPage.html";
+									break;
+								case "MEETING_BOOK"://会议室预订
+								case "MEETING_ISSUE"://党组会议-会议议题
+								case "MEETING"://专题会议
+								case "MEETING_OFFICE"://党组会议、主任办公会议
+								case "MEETING_EXTERNAL"://会议安排
+								case "MEETING_ACTIVITY"://会议、活动交办事项处理
+									detailPage = "pages/meeting/DetailPage.html";
+									break;
+								case "URGERCLIENT"://委重点工作督查
+								case "MAJORURGER"://委领导批示督办
+								case "LISTURGER"://省领导批示督办
+									detailPage = "pages/urger/DetailPage.html";
+									break;
+								// case "SPECIAL_WORK"://专班工作
+								// 	detailPage = "pages/zbgz/DetailPage.html";
+								// 	break;
+								case "INFOREPORT": //信息上报
+									detailPage = "pages/xxgl/DetailPage.html";
+									break;
+								case "INFO"://信息编审
+									detailPage = "pages/zwxx/DetailPage.html";
+									break;
+								case "GOODS"://办公用品
+								case "SUPPLIES"://办公耗材
+									detailPage = "pages/goods/DetailPage.html";
+									break;
+								// case "SUPPLIES"://办公耗材
+								// 	detailPage = "pages/supplies/DetailPage.html";
+								// 	break;
+								// case "SCRAP"://资产报废
+								// 	detailPage = "pages/transfer/DetailPage.html";
+								// 	break;
+								case "INFORMAL"://征求意见
+									detailPage = "pages/informal/DetailPage.html";
+									break;
+								case "TRAVEL_EXPENSE"://经费报销-差旅报销
+								case "OTHER_EXPENSE"://经费报销-业务报销
+								case "LABOR_UNION_EXPENSE"://经费报销-工会报销
+								case "PARTY_UNION_EXPENSE"://经费报销-党费报销
+								case "CONTRACT_APPROVE"://合同管理
+								case "PURCHASE_NOTICE"://采购管理-采购公告审批
+								case "PURCHASE_RESULT"://采购管理-采购结果审批
+								case "MEETING_PAY_ISSUED"://支出预算审批-会议、培训、活动支出预算审批
+								case "OFFICIAL_RECEPTION"://支出预算审批-公务接待预算审批
+								case "UNION_ACTIVITIES"://支出预算审批-工会活动支出预算审批
+								case "PROJECT_PLANNING_SERVICE"://支出预算审批-服务采购支出预算审批
+								case "GOODS_PURCHASE"://支出预算审批-货物采购审批
+									detailPage = "pages/expense/DetailPage.html";
+									break;
+								case "YOUTH_WORK"://团青工作
+									detailPage = "pages/youthWork/DetailPage.html";
+									break;
+								default:
+									if(obj.urgerId){
+										detailPage = "pages/urger/DetailPage.html";
+									}else{
+										toast("暂未开发"+obj.S_moduleDes+"模块");
+										return;
+									}
+									break;
+							}
+							if (obj.businessDocId) {
+								App.LS.set('viewType', 'todo');
+								OpenWebView(detailPage, { title: "表单页" });
+							} else {
+								OpenWebView(detailPage, { title: "表单页" });
+							}
+						}
+					}
+				});
+				
+			}
+			
+		</script>
+	</body>
+</html>

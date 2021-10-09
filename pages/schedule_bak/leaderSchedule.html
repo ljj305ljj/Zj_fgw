@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<!--<html manifest="test.manifest"> 缓存-->
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<link rel="stylesheet" href="../../css/iconfont.css" />
+		<link rel="stylesheet" href="css/mui.min.css" />
+		<link rel="stylesheet" href="css/mui.picker.min.css" />
+		<link rel="stylesheet" href="../../css/common.css?v=2" />
+		<link rel="stylesheet" href="css/schedule.css" />
+		<script type="text/javascript" src="../../js/loadVersion.js" ></script>
+		<script>
+			document.documentElement.style.fontSize = document.documentElement.clientWidth / 7.5 + 'px';
+			var loadList=[					
+				//{name:"muicss",type:"css",url:"css/mui.min.css"},
+				//{name:"muipickercss",type:"css",url:"css/mui.picker.min.css"},
+				//{name:"commoncss",type:"css",url:"css/common.css"},
+				//{name:"iconfontcss",type:"css",url:"css/iconfont.css"},
+				{name:"jquery",type:"js",url:"../../js/jquery-1.9.1.min.js"},
+				{name:"dingtalk_openjs",type:"js",url:"../../js/dingtalk_open2.7.6.js"},
+				{name:"vuejs",type:"js",url:"../../js/vue.min.js"},
+				{name:"commonjs",type:"js",url:"../../js/common.js"},
+				{name:"ipConfig",type:"js",url:"../../js/ipConfig.js"},
+				{name:"muijs",type:"js",url:"js/mui.min.js"},
+				{name:"muipoppickerjs",type:"js",url:"js/mui.poppicker.js"},
+				{name:"muipickerminjs",type:"js",url:"js/mui.picker.min.js"},
+                {name:"leaderSchedulejs",type:"js",url:"js/leaderSchedule.js"}
+			];
+			loadVersion.iniVersion(loadList);
+		</script>
+	</head>
+	<body style="overflow: hidden;">
+		<div class="schedule-div  mui-scroll-wrapper">
+			<div class="schedule-btn left rjicon rjicon-fanhui1" onclick="selectWeek.openClick('left')"></div>
+			<div class="schedule-btn right rjicon rjicon-fanhui1" onclick="selectWeek.openClick('right')"></div>
+			<div class="schedule-top">
+				<div class="schedule-date">
+					<div class="schedule-date-left">
+						<!-- <span class="left rjicon rjicon-fanhui1" onclick="selectWeek.addweek('left')"></span>
+						<span class="right rjicon rjicon-fanhui1" onclick="selectWeek.addweek('right')"></span> -->
+						<p onclick="selectWeek.selectWeek()"><span class="year" style="display:none;"></span><span class="date"></span>  <!--<i class=" rjicon rjicon-rili" style="color: #999;font-size: .28rem;margin-left: .2rem;position: relative;top: .01rem;"></i>-->
+						</p>
+						<p style="text-align:center;">（第<span class="week"></span>周）</p>
+					</div>
+					<div class="schedule-date-right" onclick="selectWeek.userFun(this)">
+						<p><span class="title">人员：</span><span class="user">全部</span></p>
+					</div>
+				</div>
+				<ul class="schedule-tab">
+					<li class="active">一<div class="date"></div></li>
+					<li>二<div class="date"></div></li>
+					<li>三<div class="date"></div></li>
+					<li>四<div class="date"></div></li>
+					<li>五<div class="date"></div></li>
+					<li>六<div class="date"></div></li>
+					<li>日<div class="date"></div></li>
+				</ul>
+			</div>
+			<div class="">
+				<ul class="schedule-ul day1 mui-scroll" style="display:none">
+					<!--<li>
+						<p><span class="name">会议室一</span>地铁4号线建设指挥部会议</p>
+						<div class="bottom">
+							<span>2018-08-20 09:00-18:00</span>
+						</div>
+					</li>-->
+				</ul>
+				<ul class="schedule-ul day2 mui-scroll" style="display:none">
+					
+				</ul>
+				<ul class="schedule-ul day3 mui-scroll" style="display:none">
+					
+				</ul>
+				<ul class="schedule-ul day4 mui-scroll" style="display:none">
+					
+				</ul>
+				<ul class="schedule-ul day5 mui-scroll" style="display:none">
+					
+				</ul>
+				<ul class="schedule-ul day6 mui-scroll" style="display:none">
+					
+				</ul>
+				<ul class="schedule-ul day7 mui-scroll" style="display:none">
+					
+				</ul>
+			</div>
+		</div>
+		<div class="cover-div" onclick="selectWeek.over()"></div>
+	<div class="selectDate-div">
+				<div class="header">
+					<p><span class="year">2018</span>年</p>
+					<span class="left rjicon rjicon-fanhui1" onclick="selectWeek.selectWeekClick('left')"></span>
+					<span class="right rjicon rjicon-fanhui1" onclick="selectWeek.selectWeekClick('right')"></span>
+				</div>
+				<ul>
+				</ul>
+		</div>
+</body>	
+</html>

@@ -1,0 +1,83 @@
+*{padding: 0;margin: 0;box-sizing: border-box;}
+html,body{height: 100%;width: 100%;}
+html{font-size: 16px;}
+input,textarea,select,a:focus{outline: none;}
+ul,li{list-style: none;}
+.rj-col{display: flex;}
+.rj-col-12{width: 50%;display: inline-block;}
+.sendDiv{overflow: hidden;position: absolute; top: 0;left: 0; bottom: 0; width: 100%; height: 100%;z-index: 996;}
+.maildiv{background: #fff;}
+.flow-header{text-align: center;height: 3rem;width: 100%;box-shadow: 0 1px 6px #ccc;position: absolute;top: 0px;z-index: 10;line-height: 3rem;}
+.send-body{width:100%;height: 100%;overflow: auto;padding-bottom: 3rem;}
+.leftDiv-ul{background: #ffffff;border-bottom:1px solid #ececec;}
+.leftDiv-li{padding: 1rem;}
+.send-tit{font-size: 1rem;margin: 5px 0;display: block;}
+.bak-Sel{padding: .5rem 0;white-space: normal;}
+.bak-Sel label{font-size: .8rem;padding: .3rem .5rem;display: inline-block;line-height: 1.2rem;border: 1px solid #e1e1e1;border-radius: .4rem;margin: .2rem;}
+.sel-people-div{position: relative;border-top: 1px solid #e1e1e1;margin-top: 15px;padding-top: 15px;}
+.sel-people-tip{position: absolute;top: -11px;width: 30%;font-size: 18px;color: red;text-align: center;background: #ffffff;left: 35%;}
+
+#resultUser label,#resultUser-reback label{    color: red;}
+.right-icon{float: right;font-size: 14px;color: #907f7f;}
+.lab-sel{padding: .5rem;background: #ffffff;border-bottom: 1px #e1e1e1 solid;}
+.lab-sel:last-of-type{border-bottom-width: 0;}
+.span-chack{padding-right: .8rem;}
+.pp-sel{padding: .5rem;white-space: initial;border-bottom: 1px solid #f5f5f5;}
+.pp-sel:last-of-type{border-bottom-width: 0;}
+.pp-act{color:#23a0fd;}
+.box-dept{overflow-x: hidden;overflow-y: auto;box-shadow: 0px 0px 5px #e6e2e2;min-height: 20vh;max-height: 38vh;}
+.send-Btns{position: absolute;bottom: 0;left: 0;width: 100%;padding: .5rem;background-color: #ffffff;}
+.close-Btns{width: 100%;padding: .5rem;background-color: #ffffff;}
+.send-Btns span,.close-Btns span{width: 48%;display: inline-table;text-align: center;padding: .5rem;margin: 0 1%;background: #23a0fd;color: #ffffff;border-radius: .5rem;height: 2rem;font-size: .8rem;}
+.send-Btns span:first-child,.close-Btns span:first-child{border-right: 1px solid #c8c7cc;}			
+.opin-body{padding: 3rem 1rem;}
+.opin-div{padding:.5rem 0px;}
+.opintext-area{width: 100%;height: 5rem;padding: .8rem;border-radius: .5rem;font-size: 0.8rem;line-height: 1rem;border: 1px solid #c8c8c8;resize: none;}
+.opin-tab{box-shadow: 0px 0px 5px #e6e2e2;border-radius: 5px;overflow: auto;max-height: calc(100vh - 285px);max-height: -moz-calc(100vh - 285px);max-height: -webkit-calc(100vh - 285px);}
+.opin-type-btn label{padding: .5rem .8rem;width: 33.3%;display: inline-block;text-align: center;}
+.zhyj-type-btn label{padding: .5rem .8rem;width: 33.3%;display: inline-block;text-align: center;}
+.opin-top-btn span{background: #23a0fd;border-radius: .5rem;color: #fff;line-height: 1.5rem;font-size: .8rem;height: 1.5rem;padding: 0 .5rem;display: inline-block;}
+.opin-top-btn label{padding: .4rem 0px .5rem 0px;width: 50%;display: inline-table;}
+.opin-top-btn label:nth-child(2){text-align: right;}
+.opinList{border-radius: 5px;overflow-y: auto;overflow-x: hidden;}
+.opinList li,.make-opli li{padding: .7rem 1.8rem .7rem .8rem;white-space: initial;border-bottom: 1px solid #e1e1e1;position: relative;}
+.opinList li .rjicon{position: absolute;font-size: 1rem;right: .8rem;top: 50%;margin-top: -.5rem;}
+.opinList li:nth-child(odd),.make-opli li:nth-child(odd){background: #fcfcfc;}
+.sel-act,.sel-act span,.type-atc{color: #23a0fd;}
+
+#people-css{padding: .8rem 1rem;display: none;}
+#people-css label{padding: .8rem;display: inline-block;line-height: 20px;font-size: 16px;background-color: #f8f8f8;border-radius: 5px;margin: 3px;}
+#people-css label span{display: inline-block;width: 20px;height: 20px;background-color: red;text-align: center;color: #fff;border-radius: 10px;line-height: 20px;margin-left: 5px;}			
+#flow_box .sel-height{position: relative;height: 300px;background: #f7f7f7;margin:0 7px;width:auto;}
+.bak-Sel label span{display: inline-block;width: 20px;height: 20px;color: #2095fc;text-align: center;border-radius: 10px;line-height: 20px;margin-left: 5px;}
+#resultUser-reback label span{display: inline-block;width: 20px;height: 20px;color: #2095fc;text-align: center;border-radius: 10px;line-height: 20px;margin-left: 5px;}
+.bak-Sel .action-sel{background-color: #e5f3fe;border-color: #4cadfe;color: #2095fc;}
+
+.bak-sel-page{display: none;position: absolute;z-index: 999;background: rgba(0,0,0,0.3);top: 0;left: 0;width: 100%;height: 100%;padding-top:2rem;}
+
+.lab-sel{padding: .8rem;background: #ffffff;border-bottom: 1px #e1e1e1 solid;}
+.lab-sel:last-of-type{border-bottom-width: 0;}
+.span-chack{padding-right: .8rem;}
+
+.lab-sel:nth-child(odd){background: #fcfcfc;}
+.lab-sel label{display: block;}
+.sel-act+.dept-p{display:block}
+
+.box-dept{overflow-x: hidden;overflow-y: auto;box-shadow: 0px 0px 5px #e6e2e2;min-height: 20vh;max-height: 38vh;}
+.dept-p{    display: none;padding: .5rem 0px 0px 2rem;}
+.tree-act+.tree-dept{display:block}
+.tree-dept{display: none;padding: 0px 0px 0px 30px;}
+.people-tree{height: 100%;overflow-y: auto;overflow-x: hidden;background: #ffffff;padding: 10px;}
+.people-tree label{padding: 10px 0;display: block;text-overflow: ellipsis;overflow: hidden;}
+
+.tree-people{white-space: initial;border-bottom: 1px solid #f5f5f5;}
+.people-lab.tree-act{color:#23a0fd;}
+.dept-lab.tree-act{padding-bottom:.1rem;color:#23a0fd;}
+.people-lab.tree-act+span{display: block;}
+.tree-dept label span{min-width: 20px;padding: 0px 2px;margin-left: 5px;color: #ffffff;width: 20px;background: #23a0fd;display: inline-block;text-align: center;border-radius: 10px;}
+.flow-header .right{position: absolute;right: 0;top: 0;height: 100%;padding: 0 .3rem;color: #ffffff;}
+.box-dept li{padding: 0.3rem;background: #ffffff;border-bottom: 1px solid #f5f5f5;}
+.box-dept li:last-of-type{border-bottom-width: 0;}
+.box-dept li label{display:block;}
+.msmtype{margin: 0.3rem 0;display: block;}
+.msmtype.iconfont.icon-fuxuankuang-gou{color:#23a0fd;}

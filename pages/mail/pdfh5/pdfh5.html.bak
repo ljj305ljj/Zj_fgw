@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <title>PDFH5</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/pdfh5.css" />
+    <link href="ico/wisp_320.png" type="image/x-icon" rel="shortcut icon" />
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+        #demo {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="text-wrapper">
+            <div class="text part1">
+                <div>
+                    <span class="letter">
+                        <div class="character">L</div> <span></span>
+                    </span>
+                    <span class="letter">
+                        <div class="character">o</div> <span></span>
+                    </span>
+                    <span class="letter">
+                        <div class="character">a</div> <span></span>
+                    </span>
+                    <span class="letter">
+                        <div class="character">d</div> <span></span>
+                    </span>
+                    <span class="letter">
+                        <div class="character">i</div> <span></span>
+                    </span>
+                    <span class="letter">
+                        <div class="character">n</div> <span></span>
+                    </span>
+                    <span class="letter">
+                        <div class="character">g</div> <span></span>
+                    </span>
+                </div>
+            </div>
+            <div class="how-to"><span>正在加载中，请您耐心等待...</span></div>
+        </div>
+
+    </div>
+	<div id="demo1" style="height:00px">ee
+	f
+	f
+	f
+	f
+	f
+	f
+	f
+	f
+	f
+	f
+	f
+	f
+	</div>
+    <div id="demo"></div>
+    <script src="js/pdf.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/pdf.worker.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/jquery-1.11.3.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/pdfh5.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">	
+	var timestamp = new Date().getTime();
+	//var url="./pdf/2.pdf;./pdf/1.pdf;./pdf/179.pdf";
+	var url="./pdf/0110.pdf";
+	//"./pdf/20191223145110898810.pdf?td="+timestamp
+     openPdf("demo",url,{waterMark:"榕基",renderType:"svg",lazy:true});	
+/*
+       $("#app").remove()
+            $("#demo").show()
+            //当前默认优先获取浏览器地址栏？file=后面的地址，如果地址栏没有，再拿配置项的pdfurl或者data来渲染pdf
+            //优先顺序：  ？file= > pdfurl > data
+            var pdfh5 = new Pdfh5('#demo', {
+                pdfurl: "./pdf/20191223145110898810.pdf",
+                // pdfurl: "testPDF/1.pdf",
+                 renderType:"canvas",
+                lazy: true
+            });
+*/
+	
+   </script>
+</body>
+
+</html>

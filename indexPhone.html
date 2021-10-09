@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+	<meta content="email=no" name="format-detection" />
+	<!-- <meta name="wpk-bid" content="dta_1_840942484"> <script>    !(function(c,i,e,b){var h=i.createElement("script");var f=i.getElementsByTagName("script")[0];h.type="text/javascript";h.crossorigin=true;h.onload=function(){c[b]||(c[b]=new c.wpkReporter({bid:"dta_1_840942484"}));c[b].installAll()};f.parentNode.insertBefore(h,f);h.src=e})(window,document,"https://g.alicdn.com/woodpeckerx/jssdk??wpkReporter.js","__wpk");</script> -->
+	<title>首页</title>
+	<!-- <script type="text/javascript" src="./js/vconsole.min.js"></script>
+	<script>
+		// 初始化vConsole
+if (/Android|webOS|iPhone|iPad|BlackBerry/i.test(navigator.userAgent)) {
+	window.vConsole = new window.VConsole({
+		defaultPlugins: ['system', 'network', 'element', 'storage'], // 可以在此设定要默认加载的面板
+		maxLogNumber: 1000,
+		// disableLogScrolling: true,
+		onReady: function () {
+			console.log('vConsole is ready.');
+		},
+		onClearLog: function () {
+			console.log('on clearLog');
+		}
+	});
+}
+	</script> -->
+	<!-- <script type="text/javascript" src="./js/index.js"></script> -->
+	<script type="text/javascript" src="./js/loadVersion.js"></script>
+	
+	<!-- <script type="text/javascript" src='./js/wpkReporter.js' crossorigin='true'></script> -->
+	<!-- <script src='./js/dingReporter.js'></script> -->
+	<script>
+		var loadList = [
+			{name:"iconfontcss",type:"css",url:"css/iconfont.css"},
+			{ name: "commoncss", type: "css", url: "css/common.css" },
+			{ name: "indexcss", type: "css", url: "css/index.css" },
+			{ name: "vuejs", type: "js", url: "js/vue.min.js" },
+			{ name: "jqueryjs", type: "js", url: "js/jquery-1.9.1.min.js" },
+			{ name: "indexjs", type: "js", url: "js/index.js" },
+			{ name: "vantjs", type: "js", url: "js/vant2.12.min.js" },
+			//{ name: "echarts", type: "js", url: "js/echarts.min.js" },
+			{ name: "ipConfigjs", type: "js", url: "js/ipConfig.js" },
+			//{ name: "commonjs", type: "js", url: "js/vconsole.min.js" },
+			{ name: "commonjs", type: "js", url: "js/common.js" },
+			{ name: "indexPhonejs", type: "js", url: "js/indexPhone.js" }
+		];
+		loadVersion.iniVersion(loadList, true);
+	</script>
+</head>
+
+<body>
+	<div id="Index" class="page-view">
+		<div id="errorPage" v-show="showError"
+			style="width: 100%;height: 100%;position: relative;background: #f7f7f7;z-index: 22;position: absolute;right:0;display: none;">
+			<div style="width: 50%;margin: 0 auto;margin-top: 25%;">
+				<img src="img/errorPic.png" width="" style="width: 100%;">
+				<span style="display: block;width:100%;text-align: center;margin-top: 20px;color: #A9A9A9;"
+					id="errorInfor">页面出错了</span>
+				<div style="width: 100%; margin: 0 auto; text-align: center;">
+					<button
+						style="width: 8em;background-color: #2D8CEA;height: 2rem;color: #fff;border: none;border-radius: 4px;margin-top: 20px;"
+						id="errorButton" onclick="closePage();">关闭</button>
+				</div>
+			</div>
+		</div>
+		<div v-show="bottomBtnActive!=2 && bottomBtnActive!=4" class="tabBody">
+			<van-grid :border="false" :column-num="4">
+				<template v-for="(indexItem,i) in indexTabDatas">
+					<template v-for="(item,j) in indexItem.modal">
+						<div class="tab-handle-item" :class="showModalId==item.id?'tab-handle-active':''"
+							@click="goList(item,i,j)" v-if="indexItem.name=='所有应用' && j < 7">
+							<div class="item-icon"
+								:style="{background:j>iconBackgrounds.length-1?iconBackgrounds[j-iconBackgrounds.length]:iconBackgrounds[j]}"
+								:class="(item.url=='' && !item.childre)?'disabled':''">
+								<van-icon class-prefix="rjicon" :name="item.icon" :info="(item.num!=0)?item.num:''" />
+							</div>
+							<p>{{item.title}}</p>
+						</div>
+						<div class="tab-handle-item" v-if="(indexItem.name=='所有应用') && (j === (indexItem.modal.length -1)) &&  (indexItem.modal.length != toArr(App.LS.get('indexTabData'))[1].modal.length) "
+							@click="goList({title:'更多',url:'moreModule.html'})">
+							<div class="item-icon"
+								:style="{background:j>iconBackgrounds.length-1?iconBackgrounds[j-iconBackgrounds.length]:iconBackgrounds[j]}"
+								:class="(item.url=='' && !item.childre)?'disabled':''">
+								<van-icon class-prefix="rjicon" name="gengduocaozuo" />
+							</div>
+							<p>更多</p>
+						</div>
+						<template v-if="j!=0  && j%4==3 || (j==indexItem.modal.length-1 && j%4<3)">
+							<div v-if="modalNum.id==(i+'-'+parseInt(j/4))" class="tab-more">
+								<div v-for="(view,k) in modalNum.datas" class="tab-handle-more" @click="goList(view)">
+									<div class="item-icon" :class="view.url==''?'disabled':''" :style="{background:k>iconBackgrounds.length-1?iconBackgrounds[k-iconBackgrounds.length]:iconBackgrounds[k]}">
+										<van-icon class-prefix="rjicon" :name="view.icon"
+											:info="(view.num!=0)?view.num:''" />
+									</div>
+									<p>{{view.title}}</p>
+								</div>
+							</div>
+						</template>
+					</template>
+				</template>
+			</van-grid>
+			<van-tabs v-model="tabActive" swipeable color="#5078FE" animated title-active-color="#5078FE"
+				:line-width="(1/tabData.view.length)*100+'%'" line-height="2px" sticky @change="onChange">
+				<template v-for="(item,x) in tabData.view">
+					<van-tab :title="item.name" :badge="item.count>0?item.count:''">
+						<van-pull-refresh v-model="item.refreshing" @refresh="onRefresh">
+							<van-list v-model="item.loading" :finished="item.finished" finished-text="没有更多了"
+								@load="onLoad" :id="item.id">
+								<ul>
+									<template v-if="item.data.list && item.data.list.length>0 ">
+										<template v-for="(obj,y) in item.data.list">
+											<li class="tabBody-li indexli"
+												:class="item.preIcon?'rjicon '+item.preIcon:''" @click="openDoc(obj)">
+												<div class="word-title"
+													:style="!isReaded(obj) ? 'font-weight: bold;' : ''"><span
+														:class="getTitleIcon(obj.businessExtension) != '' ? 'traffic-lights ' + getTitleIcon(obj.businessExtension):''"></span>{{getFileSubject(obj,item)}}
+												</div>
+												<div class="word-bottom">
+													<template v-for="(fieldItem,z) in item.field">
+														<template v-if="fieldItem.count">
+															<p v-if="fieldItem.id.indexOf('|') == -1 && obj[fieldItem.id]">{{fieldItem.showName?fieldItem.name+' : ':""}}{{obj[fieldItem.id].substring(0,fieldItem.count)}}</p>
+															<template v-else>
+																<p v-if="obj[fieldItem.id.split('|')[0]] && obj[fieldItem.id.split('|')[0]].indexOf('handleStatus') > -1">{{toArr(obj[(fieldItem.id.split("|")[0])]).handleStatus.substring(0,fieldItem.count)}}</p>
+																<p v-else-if>{{obj[fieldItem.id.split('|')[1]].substring(0,fieldItem.count)}}</p>
+															</template>
+
+														</template>
+														<template v-else>
+															
+															<template v-if="fieldItem.id.indexOf('|') == -1">
+																<p v-if="obj[fieldItem.id]">
+																	{{fieldItem.showName?fieldItem.name+' : ':""}}{{obj[fieldItem.id]}}
+																</p>
+															</template>
+															<template v-else>
+																<p v-if="obj[fieldItem.id.split('|')[0]] && obj[fieldItem.id.split('|')[0]].indexOf('handleStatus') > -1">{{fieldItem.showName?fieldItem.name+' : ':""}}{{toArr(obj[(fieldItem.id.split("|")[0])]).handleStatus}}</p>
+																<p v-else-if="obj[fieldItem.id.split('|')[1]]">{{fieldItem.showName?fieldItem.name+' : ':""}}{{obj[fieldItem.id.split('|')[1]]}}</p>
+															</template>
+
+														</template>
+													</template>
+												</div>
+
+											</li>
+										</template>
+									</template>
+									<template v-else>
+										<li><img class="emptyimg" src="./img/empty_prompt.png" /></li>
+									</template>
+								</ul>
+							</van-list>
+						</van-pull-refresh>
+					</van-tab>
+				</template>
+			</van-tabs>
+		</div>
+		<div v-show="bottomBtnActive==2">
+			<template v-for="(indexItem,i) in indexTabDatas">
+				<div class="tab-handle-title">{{indexItem.name}}</div>
+				<van-grid :border="false">
+					<template v-for="(item,j) in indexItem.modal">
+						<div class="tab-handle-item" :class="showModalId==item.id?'tab-handle-active':''"
+							@click="goList(item,i,j)">
+							<div class="item-icon" :class="(item.url=='' && !item.childre)?'disabled':''"
+								:style="{background:j>iconBackgrounds.length-1?iconBackgrounds[j-iconBackgrounds.length]:iconBackgrounds[j]}">
+								<van-icon class-prefix="rjicon" :name="item.icon" :info="(item.num!=0)?item.num:''" />
+							</div>
+							<p>{{item.title}}</p>
+						</div>
+						<template v-if="j!=0  && j%4==3 || (j==indexItem.modal.length-1 && j%4<3)">
+							<div v-if="modalNum.id==(i+'-'+parseInt(j/4))" class="tab-more">
+								<div v-for="(view,k) in modalNum.datas" class="tab-handle-more" @click="goList(view)">
+									<div class="item-icon" :class="view.url==''?'disabled':''" :style="{background:k>iconBackgrounds.length-1?iconBackgrounds[k-iconBackgrounds.length]:iconBackgrounds[k]}">
+										<van-icon class-prefix="rjicon" :name="view.icon"
+											:info="(view.num!=0)?view.num:''" />
+									</div>
+									<p>{{view.title}}</p>
+								</div>
+							</div>
+						</template>
+					</template>
+				</van-grid>
+			</template>
+		</div>
+		<div class="tabBody" v-show="bottomBtnActive==4">
+			<div class="pic-div">
+				<div id="picCanvas"></div>
+			</div>
+		</div>
+		<div style="height: 1rem;width: 100%;"></div>
+		<!-- <vindexbtns :Datas="bottomBtnActive"></vindexbtns> -->
+	</div>
+</body>
+
+</html>

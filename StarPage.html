@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<title>关注文件</title>
+		<!--<link rel="stylesheet" href="../css/common.css" />
+		<link rel="stylesheet" href="../css/iconfont.css" />
+		<link rel="stylesheet" href="../css/swiper.min.css" />
+		<script type="text/javascript" src="../js/jquery-1.9.1.min.js" ></script>
+		<script type="text/javascript" src="../js/vue.min.js" ></script>
+		<script type="text/javascript" src="../js/swiper.min.js"></script>
+		<script type="text/javascript" src="../js/common.js" ></script>
+		<script type="text/javascript" src="../ipConfig.js" ></script>
+		<script type="text/javascript" src="../js/h5Config.js" ></script>-->
+		
+		<script type="text/javascript" src="js/loadVersion.js" ></script>
+		<script>
+			var loadList=[
+				{name:"iconfontcss",type:"css",url:"css/iconfont.css"},
+				{name:"commoncss",type:"css",url:"css/common.css"},
+				{name:"swipercss",type:"css",url:"css/swiper.min.css"},
+				{name:"ipConfig",type:"js",url:"js/ipConfig.js"},
+				{name:"jquery",type:"js",url:"js/jquery-1.9.1.min.js"},
+				{name: "indexjs", type: "js", url: "js/index1.9.12.js" },
+				{name:"vue",type:"js",url:"js/vue.min.js"},
+				{name:"swiper",type:"js",url:"js/swiper.min.js"},
+				{name:"commonjs",type:"js",url:"js/common.js"},
+				{name:"StarPagejs",type:"js",url:"js/Starpage.js"}
+			];
+			loadVersion.iniVersion(loadList);
+		</script>
+		<style>
+			.star_list{width: 100%;height: 100%;padding-top: 3.4rem;}
+			.star_left{float: left;width: 25%;height: 100vh;border-right: 1px solid #f1f1f1;background: #fafafa;font-size: .9rem;}
+			.star_right{float: left;width: 75%;height: 100%;position: relative;top: 0;left: 0;}
+			.star_title{width: 100%;padding: 1rem;border-bottom: 1px solid #f1f1f1;line-height: 1.2rem;font-size: 1rem;position: absolute;top: 0;left: 0;z-index: 2;background: #ffffff;}
+			.star_title span{display: inline-block;font-size: 1rem;line-height: 1rem;padding: .2rem 0;}
+			span.star_more{float: right;padding: .2rem 1rem;background: var(--wisp-color);border-radius: 2px;color: #ffffff;}
+			.star_li{padding: .4rem;}
+			.star_active{color:var(--wisp-color);border-left:5px solid;border-color:var(--wisp-color);}
+			.star_nottype{text-align: center;color: #999999;font-size: .8rem;padding: .6rem;}
+			.list_div{width: 100%;height: 100%;overflow-x: hidden;overflow-y: auto;position: relative;} 
+			.tabBody-li.star_div{position: relative;top: 0;left: 0;/*padding-left: 3rem;*/}
+			.chack_box{position: absolute;top: 50%;margin-top: -1.5rem;left: 0;line-height: 3rem;width: 3rem;text-align: center;}
+			.chack_box.icon-selected{color:var(--wisp-color);}
+			.notMoreList{text-align: center;color: #999999;font-size: .8rem;padding: .6rem;}
+		</style>
+	</head>
+	<body>
+	  	<div id="Star" class="page-view">
+	  		<div class="star_title"><span>收藏分类</span><span v-show="selectList.length>0" @click="moveTypeFlag()" class="star_more">移动</span></div>
+			<div class="star_list">
+				<template>
+					<div class="star_left">
+						<div class="star_li" v-for="(obj,i) in tabData" :class="tabActive==i?'star_active':''" @click="changeStar(i)"><p>{{obj.folderName}}</p></div>
+						<div v-show="tabData.length==0" class="star_nottype">暂无分类</div>
+						<!-- <div class="star_li" @click="addStarType()"><span class="rjicon icon-addup"></span> 新增</div> -->
+					</div>
+					<div class="star_right">
+						<div v-for="(obj,i) in tabData" :id="'list'+i" class="list_div" v-show="tabActive==i">
+							<div class="tabBody-li star_div" v-for="(doc,j) in obj.list.data" @click="openDoc(doc)">
+								<!-- <div class="chack_box_word"> -->
+									<!-- <div class="chack_box rjicon" :class="chackBoxflag(doc)?'icon-selected':'icon-chekbox'" @click.stop="onChekbox($event,doc)"></div> -->
+									<div class="word-title">{{doc.title}}</div>
+				          			<div class="word-bottom">
+										<p>{{doc.moduleName}}</p>
+										<p>{{doc.collectTime}}</p>
+					          		</div>
+								<!-- </div> -->
+							</div>
+			          		<div v-show="obj.list.data && obj.list.data.length>0 && obj.list.total<=obj.list.start" class="notMoreList">--- 到底啦 ---</div>
+						</div>
+					</div>
+				</template>
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,111 @@
+#setting header {
+  display: flex;
+  height: 2.444rem;
+  border-top: 1px solid #F5F5F5;
+  border-bottom: 1px solid #F5F5F5;
+  font-family: PingFangSC-Medium;
+  font-size: 0.8rem;
+  color: #666666;
+  align-items: center;
+  padding-left: 0.833rem;
+}
+#setting header span {
+  font-size: 0.7rem;
+  color: #DE5C51;
+  margin-left: 0.444rem;
+}
+.setting-All {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0.667rem 1.389rem 0 1.778rem;
+  border-bottom:0.556rem solid #F5F5F5;
+}
+.setting-All_item {
+  display: flex;
+  align-items: center;
+  flex:50%;
+  margin-bottom: 1.389rem;
+}
+  /*.setting-All_item:last-child {*/
+/*  margin-bottom: 0;*/
+/*}*/
+.setting-All_item--word {
+  margin: 0 0.667rem;
+  color: #666666;
+  font-size: 0.8rem;
+  width: 1.667rem;
+}
+.setting-All_item--icon {
+  width: 2.167rem;
+  height: 2.167rem;
+  background: #86CD46;
+  border-radius: 10px;
+  line-height: 2.167rem;
+  text-align: center;
+  color: #fff;
+  font-size: 1.167rem;
+}
+.setting-List {
+  padding:1.222rem 1.111rem 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom:0.556rem solid #F5F5F5;
+
+}
+.setting-List_item {
+  /* flex:33.33%; */
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.167rem;
+  margin-right: .4rem;
+}
+.setting-List_item span{
+  width: auto;
+  margin-left: 0;
+  margin-right: 0.4rem;
+}
+.setting-wordSize {
+  padding: 1.611rem 0 2.222rem;
+  border-bottom:0.556rem solid #F5F5F5;
+}
+.setting-wordSize__word {
+  width: 100%;
+  color: #666666;
+  font-size: 0.8rem;
+  font-family: PingFangSC-Medium;
+  display: flex;
+  justify-content: space-between;
+}
+
+.van-slider {
+  height: 0.2rem;
+}
+.van-switch {
+  font-size: 1.222rem!important;
+}
+.van-slider__button {
+  height: 1.389rem!important;
+  width: 1.389rem!important;
+  background-color:#3298FA;
+  box-shadow: 0 0 0 0;
+}
+
+
+
+.diy-ul{font-size: 0;display: flex;padding: 14px 45px;}
+.fsli-txt{padding: 0 20px;flex-direction:row;display: flex;justify-content: space-between;}
+.fsli-txt span{position: relative;width: 50px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;}
+
+
+.fsli-txt span:after{
+  content: "";
+  width: 1px;
+  height: 10px;
+  position: absolute;
+  left: 25px;
+  top: 40px;
+  background: #c3c3c3;
+}

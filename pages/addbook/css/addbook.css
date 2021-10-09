@@ -1,0 +1,31 @@
+.addbook-list{
+    position: relative;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px 16px;
+    overflow: hidden;
+    color: #323233;
+    font-size: .8rem;
+    line-height: 1.4rem;
+    background-color: #fff;
+}
+.addbook-list .mobile,.addbook-list .email{
+    margin-top: 3px;
+    color: #969799;
+    font-size: .7rem;
+    line-height: 1rem;
+}
+.flex-list{
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    flex: 1;
+}
+.van-info {
+    color: #fff!important; 
+    background: #ee0a24!important; 
+    -webkit-transform: translate(70%,-50%)!important; 
+    transform: translate(70%,-50%)!important;
+}

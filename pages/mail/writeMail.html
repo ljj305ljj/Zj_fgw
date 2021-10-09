@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+  <meta content="email=no" name="format-detection" />
+  <title>写邮件</title>
+  <script type="text/javascript" src="../../js/loadVersion.js"></script>
+  <script>
+    var loadList = [
+      { name: "iconfontcss", type: "css", url: "../../css/iconfont.css" },
+      // { name: "iconfontcss", type: "css", url: "./css/jquery.typeahead.css" },
+      { name: "commoncss", type: "css", url: "css/email.css" },
+      { name: "indexcss", type: "css", url: "../../css/index.css" },
+      // { name: "rjIconcss", type: "css", url: "css/rjIcon.css" },
+      // { name: "handleFilecss", type: "css", url: "css/handleFile.css" },
+      { name: "vuejs", type: "js", url: "../../js/vue.min.js" },
+      { name: "jqueryjs", type: "js", url: "../../js/jquery-1.9.1.min.js" },
+      // { name: "jqueryjs", type: "js", url: "./js/jquery.typeahead.js" },
+      { name: "indexjs", type: "js", url: "../../js/index1.9.12.js" },
+      { name: "vantjs", type: "js", url: "../../js/vant2.7.1.js" },
+      { name: "ipConfigjs", type: "js", url: "../../js/ipConfig.js" },
+      { name: "vconsolejs", type: "js", url: "../../js/vconsole.min.js" },
+      { name: "commonjs", type: "js", url: "../../js/common.js" },
+      // { name: "commonjs", type: "js", url: "js/common1.js" },
+      { name: "mailInforPagejs", type: "js", url: "./js/writeMailPage.js" }
+    ];
+    loadVersion.iniVersion(loadList);
+  </script>
+</head>
+
+<body>
+  <div id="mail" class="page-view" style="height:100%;">
+    <template>
+      <div style="height: 100vh;width: 100%;    overflow-y: auto;
+    padding-bottom: 60px;">
+        <!-- 写邮件 -->
+        <div id="writeMail" class="maildiv" style="font-size: 0.9444rem;line-height: 1.1667rem;">
+          <header class="flow-header" style="display: none;">
+            <div onclick="mailWritBack();" class="send-cancel rjicon icon-fanhui1"
+              style=" float: left; padding-left: 0.1rem;"></div>
+            <div id="mailtitle">写邮件</div>
+            <div id="seave-draft" class="right">存草稿</div>
+          </header>
+          <div class="email-main">
+            <div id="mail-tit" class="write-title noTopBorder"><label><b>*</b>主题：</label>
+              <div class="tit-inp-box"><input placeholder="请输入主题" class="mail-input" id="mail-subject" /></div>
+            </div>
+            <div class="write-title"><b>*</b>收件人：
+              <!-- <div class="typeahead__container">
+              <div class="typeahead__field">
+                  <div class="typeahead__query">
+                    <input style="font-size: .8rem;line-height: 1.4rem; color:#888888;" data-type="0" data-inp="true" class="openSel-input open-search-btn" name="country_v1[query]" placeholder="请输入关键字" autocomplete="off">
+                  </div>
+                  <div class="typeahead__button">
+                      <button type="submit">
+                          <i class="typeahead__search-icon"></i>
+                      </button>
+                  </div>
+              </div>
+            </div> -->
+              <input data-type="0" data-inp="true" class="openSel-input open-search-btn" type="search"
+                placeholder="请输入关键字" v-model="toAddress" @blur="hideAutoComoleteList" />
+              <span data-type="0" class="openSel-btn right-add rjicon iconadd"> 添加</span>
+            </div>
+            <div style="position: relative;" v-show="isShowAutoCompleteList">
+              <ul class="autoCompleteList">
+                <li v-for="(obj, a) in autoCompleteList" @click="selectAddress(obj,0)">{{obj.treeName}}<{{obj.email}}>
+                </li>
+              </ul>
+            </div>
+            <div class="bak-Sel" id="mailUser-0" style="overflow: auto; max-height: 10rem;"></div>
+            <div class="write-title">抄送：
+              <input data-type="1" data-inp="true" class="openSel-input open-search-btn" type="search"
+                placeholder="请输入关键字" v-model="ccMailAddress" @blur="hideAutoComoleteList" />
+              <!-- <span data-type="1" data-inp="true"
+              class="openSel-input open-search-btn">请输入关键字</span> -->
+              <span data-type="1" class="openSel-btn right-add rjicon iconadd"> 添加</span>
+            </div>
+            <div style="position: relative;" v-show="isShowAutoCompleteList2">
+              <ul class="autoCompleteList">
+                <li v-for="(obj, a) in autoCompleteList" @click="selectAddress(obj,1)">{{obj.treeName}}<{{obj.email}}>
+                </li>
+              </ul>
+            </div>
+            <div class="bak-Sel" id="mailUser-1" style="overflow: auto; max-height: 10rem;"></div>
+            <div class="write-title">密送：
+              <input data-type="2" data-inp="true" class="openSel-input open-search-btn" type="search"
+              placeholder="请输入关键字" v-model="bccMailAddress" @blur="hideAutoComoleteList" />
+              <!-- <span data-type="2" data-inp="true" class="openSel-input open-search-btn">请输入关键字</span> -->
+                <span data-type="2" class="openSel-btn right-add rjicon iconadd"> 添加</span>
+            </div>
+            <div style="position: relative;" v-show="isShowAutoCompleteList3">
+              <ul class="autoCompleteList">
+                <li v-for="(obj, a) in autoCompleteList" @click="selectAddress(obj,2)">{{obj.treeName}}<{{obj.email}}>
+                </li>
+              </ul>
+            </div>
+            <div class="bak-Sel" id="mailUser-2" style="overflow: auto; max-height: 10rem;"></div>
+            <div class="write-title"><label>发件人：</label>
+              <div class="tit-inp-box">
+                <div id="toSendUser" class="no-tap"></div>
+              </div>
+            </div>
+            <!-- <div class="write-title" style="display: flex;">
+            <div class="chackbox-btn" id="needBack">
+              <van-checkbox v-model="backchecked"><span style="color: #888888;">需要回执</span></van-checkbox>
+            </div>
+            <div class="chackbox-btn" id="needNews">
+              <van-checkbox v-model="ssmchecked"><span style="color: #888888;">钉消息</span></van-checkbox>
+            </div>
+          </div> -->
+            <div style="border-top: 1px solid #ededed;">
+              <textarea class="mail-textarea aaa" style="border-top:none;" id="mail-text" placeholder="正文内容"
+                v-model="docInfor.content" v-if="mailType == 'fromDraft'"></textarea>
+              <textarea v-else class="mail-textarea" style="border-top:none;" id="mail-text"
+                placeholder="正文内容"></textarea>
+              <div id="temp-area"></div>
+            </div>
+            <div class="write-title">附件：<span class="right-add rjicon iconadd upload" id="addFile-btn"> <input
+                  type="file" name="myfile" id="file" @change="uploadFile1(mailType,event)">添加</span></div>
+            <div class="main-filelist bak-Sel">
+              <ul class="main-filelist">
+                <li v-for="(obj,i) in attachList">
+                  {{i+1 + '.'+obj.fileName+'.'+obj.fileSuffix}}
+                  <span style="margin-left: 1rem;font-size: 1rem;" @click="deleteAttach(obj.id)"
+                    class="rjicon rjicon-del"></span>
+                </li>
+              </ul>
+            </div>
+            <!--<div class="write-title"><div class="chackbox-btn" id="">添加抄送</div><div class="chackbox-btn" id="">添加密送</div></div>-->
+            <!-- 添加联系人 -->
+            <div class="bak-sel-page" style="display: none;">
+              <div class="mail-search-box">
+                <header class="flow-header">
+                  <div onclick="$('.bak-sel-page').hide();" class="send-cancel rjicon icon-fanhui1"
+                    style=" float: left; padding-left: 0.1rem;">取消</div>
+                  <div class="right" id="mail-PSumit">确认添加</div>
+                </header>
+                <div class="mail-search-div"
+                  style="bottom:0;display: flex;justify-content: center;align-items: center;">
+                  <van-radio-group v-model="treeType" direction="horizontal">
+                    <van-radio name="1"><span style="color: #888888;">人员</span></van-radio>
+                    <van-radio name="2"><span style="color: #888888;">部门</span></van-radio>
+                  </van-radio-group>
+                </div>
+              </div>
+              <ul id="address-Tree" class="people-tree" v-show="treeType == 1"></ul>
+              <ul id="address-List" class="people-tree" v-show="treeType == 2"></ul>
+
+            </div>
+            <van-row type="flex" justify="space-around" class="mail-Btns">
+              <van-col class="btn" :span="(mailType == 'draft' || mailType == 'fromDraft') ? 7 : 11"
+                @click="mailWritBack();">取 消</van-col>
+              <van-col class="btn" :span="(mailType == 'draft' || mailType == 'fromDraft') ? 7 : 11"
+                @click="mailSave('send')" id="mail-send-btn">发送</van-col>
+              <van-col class="btn" span="7" v-if="mailType == 'draft'" @click="mailSave('draft')">存草稿</van-col>
+              <van-col class="btn" span="7" v-if="mailType == 'fromDraft'" @click="mailSave('save')">保存</van-col>
+            </van-row>
+            <!-- <div class="mail-Btns">
+            <span @click="mailWritBack();">取 消</span>
+            <span @click="mailSave('send')" id="mail-send-btn">发送</span>
+            <span v-if="mailType == 'draft'" @click="mailSave('draft')">存草稿</span>
+            <span v-if="mailType == 'fromDraft'" @click="mailSave('save')">保存</span>
+          </div> -->
+          </div>
+        </div>
+    </template>
+  </div>
+</body>
+
+</html>

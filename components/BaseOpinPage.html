@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<title>办理单</title>
+	</head>
+	<body>
+		<div id="OPBLD" class="bldview">
+			<div id="text4" class="bldpage" :style="'height:'+getDetailHeight()">
+				<div class="bld-note" v-show="noteDate.length>0">
+					<div class="bld-note-title" @click="showNote=!showNote" :class="showNote?'':'noshow'"><span class="rjicon icon-feedback"></span></div>
+					<ul v-show="showNote" class="bld-note-div">
+						<template>
+							<li class="bld-note-li" v-for="(obj,i) in noteDate">
+								<div>{{obj.sendUserName}}</div>
+								<div>{{obj.sendTime}}</div>
+								<div>{{obj.content}}</div>
+							</li>
+						</template>
+					</ul>
+				</div>
+				<div id="OPtempDiv" style="display: none;"></div><div id="OPBldbox"></div>
+			</div>
+			<div id="FileBtn" v-if="btnArrs.length>0" class="foot-btn" :style="moreBtn?'height:auto':''">
+				<div class="bottom-nav-box" v-for="item in btnArrs"  @click="toEvents(item.toEvent,$event)"><span class="rjicon" :class="item.iconCss"></span><span v-cloak>{{item.btnName}}</span></div>
+			</div>
+		</div>
+		<script>
+			var docInfor = toArr(App.LS.get("docInfor"));
+			let stateBusiness = toArr(App.LS.get("stateBusiness"));
+			var vOPFBD=new Vue({
+				el: '#OPBLD',
+				data(){
+				    return{
+				      	btnArrs:[],
+				      	moreBtn:false,
+				      	showNote:false,
+				      	noteDate:[]
+				    }
+				},
+				mounted : function(){
+					//wispApp.UI.showProgressDialog("正在加载办理单...");
+					//App.LS.remove("flowOpinion");
+					//baseCommon.getOpinionList();
+					//this.initBtnData();
+					//this.getNoteList();
+				},
+				methods : {
+					getDetailHeight:function(){
+						return ($("body").height()-44-54 + "px");
+					},
+					toEvents: function(name,thisObj){
+						console.log(name);
+						//closePage();
+						if(name=="jsEnd" || name=="jsOver" || name=="jsFreeReturn" || name=="jsCancle" || name=="startProcess" || name=="saveForm"){
+							eval("("+name+"())");
+						}else{
+							App.LS.set("flowType",name);
+							OpenWebView("/FlowBoxPage.html");
+						}
+					},
+					initBtnData : function(){
+						console.log("initBtnData");
+						//this.btnArrs = detailCommon.InitFlowBtn(docInfor);
+						var item = docInfor;						
+						let stateBusiness = detailPage.proPermission.stateBusiness;
+						console.log(stateBusiness);
+						let businessHandle = [];//环节可操作按钮
+						$.each( stateBusiness.businessHandle,function(h,handle){
+							businessHandle.push(handle.handleNo);
+						})
+
+						let baseAction = [];
+						$.each(toArr(App.LS.get("baseAction")),function(i,action){
+							baseAction.push(action.split("|")[1]);
+						})
+						
+						console.log(baseAction);
+						var btns=[];
+						var formisEdit=false;
+						/*if(curPage!="newDraft"){
+							formisEdit=this.formIsEdit();
+						}	
+						if(formisEdit)btns.push({btnName:"保存",iconCss:"icon-save",toEvent:"saveForm"});
+						if(docInfor.form && docInfor.form.flowStatus=="0")btns.push({btnName:"启用流程",iconCss:"icon-save",toEvent:"startProcess"});
+						if(detailPage.docstatus()=="done")btns.push({btnName:"取消办结",iconCss:"icon-tuihui",toEvent:"cancleFinished"});*/
+						//console.log(btns);
+						//if(!item.permission){this.btnArrs = btns;return false;}
+						//try{var isPizhu=item.permission.business.buttons;}catch(e){var isPizhu='';}
+						//try{var UnitButton=item.permission.actions.split(',');}catch(e){var UnitButton=[];}businessHandle
+						//if(item.permission.astatus=="1"||item.permission.astatus=="0"){							
+							if($.inArray("pdfNotation",businessHandle)>-1){
+								//_MenuList.push('<a class="bottom-3nav-box" onclick=pdfFileList()><span class="iconfont icon-piyue"></span><p>正文批注</p></a>');
+								//hasNotationBtn=true;
+								haveSignbtn = true;
+								//btns.push({btnName:"手写签批",iconCss:"icon-piyue",toEvent:"pdfNotation"});
+							}
+							if($.inArray("send",baseAction)>-1){
+								//发送
+								btns.push({btnName:"发送",iconCss:"icon-fasong",toEvent:"jsSend"});
+							}
+							if($.inArray("freedomSend",baseAction)>-1){
+								//自由流发送
+								btns.push({btnName:"发送",iconCss:"icon-fasong",toEvent:"jsSendfreedom"});
+							}
+							if($.inArray("transfer",baseAction)>-1){
+								//转办
+								btns.push({btnName:"转办",iconCss:"icon-zhuanfa",toEvent:"jsPass"});
+							}			
+							if($.inArray("return",baseAction)>-1 || $.inArray("returnPre",baseAction)>-1){
+								//退回
+								btns.push({btnName:"退回",iconCss:"icon-tuihui",toEvent:"jsReturn"});
+							}
+							if($.inArray("returnPre",businessHandle)>-1 || $.inArray("returnPre",baseAction)>-1){
+								//退还
+								btns.push({btnName:"退还",iconCss:"icon-tuihui",toEvent:"jsFreeReturn"});
+							}
+							if($.inArray("forcefinish",baseAction)>-1 ){
+								//办结
+								btns.push({btnName:"办结",iconCss:"icon-chuliwancheng",toEvent:"jsOver"});
+							}
+							if( $.inArray("finish",baseAction)>-1){
+								//办理完毕
+								btns.push({btnName:"办理完毕",iconCss:"icon-chuliwancheng",toEvent:"jsEnd"});
+							}
+						//}
+						
+						if( $.inArray("cancel",baseAction)>-1){
+							//撤办
+							btns.push({btnName:"撤办",iconCss:"icon-chuliwancheng",toEvent:"jsCancle"});
+						}
+						this.btnArrs = btns;
+						//detailCommon.getCollecFlag(this.btnArrs);
+					},
+					getFlowOpinion:function(){
+				    	baseCommon.getFlowOpinion();
+				    },
+				    getNoteList:function(){
+				    	baseCommon.getNoteList(this.noteDate);
+				    }
+				}
+			});
+			
+		</script>
+	
+	</body>
+</html>

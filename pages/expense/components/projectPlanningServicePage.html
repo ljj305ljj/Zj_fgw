@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<title>基本信息</title>
+	</head>
+	<body>
+		<div id="jbxx" class="bldview">			
+            <div :style="'height:'+getDetailHeight()" style="overflow-y: auto; overflow-x: hidden;padding-bottom:3rem; background: #F1F1F3;">           
+                <template >   
+                    <div  class="title">服务采购支出预算审批</div>         
+                    <!-- <div  class="date">报销时间: {{formData.draftDate}}</div> -->
+                    <van-form validate-first >	
+                        <dl > 
+                        <!-- <dt><van-field label="处室名称" value="" disabled size="large" /></dt> -->
+                        <dd><van-field
+                            v-model="formData.draftOrgName"					
+                            input-align="right"
+                            label="主办处室"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.draftUserName"					
+                            input-align="right"
+                            label="经办人"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.docSequence"					
+                            input-align="right"
+                            label="业务编号"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.draftDate"					
+                            input-align="right"
+                            label="登记时间"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.projectName"					
+                            input-align="right"
+                            label="项目名称"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.projectType"					
+                            input-align="right"
+                            label="项目类型"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.content"					
+                            input-align="right"
+                            label="服务采购内容及要求"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <van-field label="关联文件" value="" disabled size="large" />
+                                <van-button :disabled="detailPage.proPermission.flowStatus=='running' ? false : true" slot="button" size="small" color="#5462E7" @click="OpenWebView('relative.html');">关联文件</van-button>
+                            </dt>  
+                            <template  v-for="(reldoc, reldocIndex) in relDocList">    
+                            <dd><van-field
+                                v-model="reldoc.subject"					
+                                input-align="right"
+                                label="标题"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                            </template>
+                        </dl>
+                        <dl>
+                        <dd><van-field
+                            v-model="formData.budegtAmount"					
+                            input-align="right"
+                            label="预算金额"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field>
+                        <i slot="suffix" style="font-style:normal;margin-right: 16px;line-height: 2.4rem;">元</i></dd>  
+                        <dd><van-field
+                            v-model="formData.budegtSpecific"					
+                            input-align="right"
+                            label="测算依据"
+                            rows="2"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.purchaseType"					
+                            input-align="right"
+                            label="采购类型"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.isSecret == '0' ? '否' : '是'"					
+                            input-align="right"
+                            label="是否涉密"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.purchaseMethod"					
+                            input-align="right"
+                            label="采购方式"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.application"					
+                            input-align="right"
+                            label="适用情形"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd><van-field
+                            v-model="formData.isForSmallMediumEnterprise == '0' ? '否' : '是'"					
+                            input-align="right"
+                            label=" 是否面向中小企业"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd v-if="formData.isForSmallMediumEnterprise=='0'"><van-field
+                            v-model="formData.forSmallMediumEnterprise"					
+                            input-align="right"
+                            label="适用情形"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        </dl>  
+                        <dl>
+                         <dd><van-field
+                            v-model="formData.isReleaseAnnouncement == '0' ? '否' : '是'"					
+                            input-align="right"
+                            label="是否需发布采购公告"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dd v-if="formData.isReleaseAnnouncement =='1'"><van-field
+                            v-model="purchaseNoticeInfo.isHaveExpert == '0' ? '否' : '是'"					
+                            input-align="right"
+                            label="是否派专家"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dl  v-if="formData.isReleaseAnnouncement =='1' && purchaseNoticeInfo.isHaveExpert == 1">
+                            <template v-for="(info,index) in purchaseNoticeInfo.expertLists">
+                            <template v-if="info.userName">
+                            <dd><van-field
+                                v-model="info.userName"					
+                                input-align="right"
+                                label="姓名"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>   
+                            <dd><van-field
+                                v-model="info.IDCard"					
+                                input-align="right"
+                                label="身份证号"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>   
+                            <dd><van-field
+                                v-model="info.workUnit"					
+                                input-align="right"
+                                label="工作单位"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>   
+                            <dd><van-field
+                                v-model="info.position"					
+                                input-align="right"
+                                label="职称"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>  
+                            <dd><van-field
+                                v-model="info.telephone"					
+                                input-align="right"
+                                label="联系电话"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>  
+                            </template>
+                            </template>
+                        </dl>  
+                        <dd  v-if="formData.isReleaseAnnouncement =='1'"><van-field
+                            v-model="formData.purchaseRepresent == '0' ? '否' : '是'"					
+                            input-align="right"
+                            label="是否派采购代表"
+                            rows="1"
+                            autosize
+                            size="large"
+                            type="textarea"
+                            readonly
+                            >
+                        </van-field></dd>
+                        <dl  v-if="formData.isReleaseAnnouncement =='1' && purchaseNoticeInfo.purchaseRepresent == 1">
+                            <template v-for="(info,index) in purchaseNoticeInfo.representativeLists">
+                            <template v-if="info.userName">
+                            <dd><van-field
+                                v-model="info.userName"					
+                                input-align="right"
+                                label="姓名"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>   
+                            <dd><van-field
+                                v-model="info.IDCard"					
+                                input-align="right"
+                                label="身份证号"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>   
+                            <dd><van-field
+                                v-model="info.workUnit"					
+                                input-align="right"
+                                label="工作单位"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>   
+                            <dd><van-field
+                                v-model="info.position"					
+                                input-align="right"
+                                label="职称"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>  
+                            <dd><van-field
+                                v-model="info.telephone"					
+                                input-align="right"
+                                label="联系电话"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>  
+                            </template>
+                            </template>
+                        </dl> 
+                        </dl>	
+                    </van-form>	 
+                 </template>  
+            </div>				
+		</div>
+		<script>
+			var docInfor = toArr(App.LS.get("docInfor"));
+			let stateBusiness = toArr(App.LS.get("stateBusiness"));
+           console.log("基本信息");
+			var jbxx=new Vue({
+			            el: '#jbxx',
+			            data(){
+			                return{
+			                    formData:docInfor,
+                                relDocList:toArr(docInfor.relDocList),
+                                expertInfo:toArr(docInfor.expertInfo),//专家
+                                representInfo:toArr(docInfor.representInfo),//采购代表
+                                meetingTotalNumJson:toArr(docInfor.meetingTotalNumJson),//人数
+                                meetingDaysJson:toArr(docInfor.meetingDaysJson),//天数
+                                meetingCostsJson:toArr(docInfor.meetingCostsJson),//费用合计
+                                purchaseNoticeInfo:toArr(docInfor.purchaseNoticeInfo),
+                                businessNo: toArr(App.LS.get("listInfo")).businessNo,
+			                }
+			            },
+			            mounted:function(){
+			                
+						   
+			            },
+			            methods:{
+                            getDetailHeight:function(){
+                            	return ($("body").height()-44-54 + "px");
+                            },
+                            },
+                            })
+			
+		</script>
+		<style>
+             .title{
+              font-size: 1rem;
+              text-align: center;
+              color: #606061;
+              padding: .8rem 0 .5rem 0;
+              background: #fff;
+            }
+            /* .date{
+                font-size: .8rem;
+                text-align: right;
+                padding-right: .5rem;
+                padding-bottom: .8rem;
+                background: #fff;
+            } */
+            dl:first-child {padding-top: .6rem;}
+            dl{padding: .3rem 0;font-size: .9rem;}
+            dt{border-bottom: #f1f0f0  solid 1px;background: #fff;}
+            dd{/*padding: .3rem 0;  border-bottom: #f1f0f0  solid 1px;*/background: #fff;height: auto;  position: relative;color: #313131;white-space: normal !important;line-height: 1rem;    display: flex;    justify-content: space-between;}
+            dd.chekBox,#basicInfor dd.checked{text-align: left;    padding-left: 0.1rem;    width: 96%;    height: auto;}
+            dd>span,dt{color: #6C6B6B; display: block;    text-align: left;}
+            dd.add{padding: 1rem;   font-size: 0.8rem;}
+            dd.add>span{ color: rgb(28, 149, 255); }
+            dd>.textcontent { width: 55%;text-align: right;}
+            dd>textarea.editable{color:#C4CBD3}
+            dd>.dlspan span { border-bottom: solid 1px #828080;  width: 1rem;  display: inline-block;    line-height: .24rem;}
+		</style>
+	</body>
+</html>

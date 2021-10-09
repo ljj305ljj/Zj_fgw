@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<title>反馈记录</title>
+	</head>
+	<body>		
+		<style type="text/css">
+			/**反馈记录**/
+			.opinion-box{height: 100%; overflow-y: auto;overflow-x: hidden;}	
+			.opinion-box li{ padding-left: 7rem;position: relative; z-index: 1;white-space: normal !important;}
+			.opinion-box li:before{content: "\e6a7";color: #5462E7;  position: absolute;left: 6.2rem;top: 1.5rem;font-size:1.6rem }
+			.opinion-right-box{ width: 100%;padding: 1rem .5rem 0 1.5rem;}
+			.opinion-right{ padding: .5rem 0;color: #101010;}
+			.opinion-right div.opinionBox{ font-size: .5rem; line-height: .6rem;  position: relative; }
+			.opinion-right div.typeBox{ font-size: .35rem;  padding-top: 0.5rem; padding-bottom: .1rem;letter-spacing: .1rem;}
+			.opinion-right div.typeBox span:first-child{ margin-right: 0.36rem;}
+			.opinion-left-box{width: 7rem; height: 100%; position: absolute; left: 0rem; top: 0rem;}
+			.opinion-left-box p.time{ line-height: .4rem;width: 100%;  padding-right: 1.5rem; color: #272727;font-size: .3rem; position: absolute; top: 2.5rem; text-align: right;}
+			.opinion-left-box p.date{ line-height: .5rem;width: 100%; padding-right: 1.5rem;  color: #272727;font-size: .35rem;  text-align: right; position: absolute; top: 1.5rem; }
+		</style>
+		<div id="Feed" class="page-view position-relative">
+			<div style="height: 100vh;width: 100%;">
+				<div id="text6" style="height: 100%;width: 100%;" >
+					<template v-if="flowdatas.length>0">
+						<ul class="opinion-box">
+							<li class="rjicon" v-for="(doc,i) in flowdatas" >
+								<div class="opinion-left-box"><p class="date">{{cutTime(doc.feedbackTime,'year')}}</p><p class="time">{{cutTime(doc.feedbackTime,'day')}}</p></div>
+								<div class="opinion-right-box">
+									<div class="opinion-right">
+										<div class="opinionBox">{{chackVal(doc.feedbackUserOrgName)}}：{{chackVal(doc.feedbackUserName)}}</div>
+										<div class="typeBox">
+											<div >反馈内容：{{doc.feedbackContent}}</div>
+										</div>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</template>
+		          	<template v-else><div><img class="emptyimg" src="./img/empty_prompt.png" /></div></template>
+				</div>
+			</div>
+		</div>
+		<script>
+			var vFeed=new Vue({
+				el: '#Feed',
+				data(){
+				    return{
+				      	flowdatas:[]
+				    }
+				},
+				mounted:function(){
+					//h5Wisp.UI.showwaiting("正在打开流程记录...");
+					console.info("vFeed");
+					this.initflowPage();
+				},
+				methods:{
+				    initflowPage: function(){
+				    	var _this = this;
+						var _url= ZjgyHost + ZjgyUrl["bbs-bbsFeedback"];
+						var obj = {bbsId:listInfo.id,feedbackUserOrgNo:'',feedbackUserUnitNo:'',offset:0,limit:100,'sort':''}
+						if(_url){
+							ajaxRequst(_url,'GET','application/json;charset=UTF-8','json',obj).then(function(json){	
+								console.log(json);
+								_this.flowdatas = json.list;
+								//_this.countIndex(temp);
+							});
+						}
+						//h5Wisp.UI.closewaiting();
+				    },
+				    cutTime : function(times,type){
+				    	var len = times.indexOf(" ");
+				    	if(type=="year"){
+				    		return times.substring(0,len);
+				    	}else{
+				    		return times.substring(len+1);
+				    	}
+				    },
+				    chackVal : function(val){
+				    	return val?val:"无"
+					},
+					/**
+					 * 计算返回数据如果环节一致时，排列序号一致
+					 * @param list
+					 */
+					countIndex(list) {
+						let _this = this;
+						let index = 1;
+						for (let i = 0; i < list.length; i++) {
+							let item = list[i];
+							// 计算序号
+							if (i >= 1) {
+								let preItem = list[i - 1];
+								if (preItem.stateName !== item.stateName) {
+									item.index = index;
+									index++;
+								}
+							} else {
+								item.index = index;
+								index++
+							}
+							//dealTraceInfo: "{"assignArray":[{"assignObject":["根管理员"],"assignType":"user","stateName":"普通环节20"}],"dealType":"send","handler":{"userName":"根管理员","userNo":"U000000"}}"
+							// 封装展示数据
+
+							if (item.dealTraceInfo) {
+								let operations = [];
+								let dealTraceInfo = JSON.parse(item.dealTraceInfo);
+								dealTraceInfo.forEach((item)=>{
+									let handlerUser = item.handler.userName;
+									let handleStateName = item.handleStateName;
+									let operator = item.dealType;
+									let targetList = item.assignArray;
+									let targetStr = "";
+									targetList.forEach((assign,index)=>{
+										targetStr += assign.stateName +'('+assign.assignObject.join('、')+')';
+										if(index<targetList.length-1){
+											targetStr += " ,"
+										}
+									});
+									switch (operator) {
+										case 'send':
+											operator = handlerUser + ' 送 ' + targetStr;
+											break;
+										case 'autosend':
+											operator = handlerUser + ' 送 ' + targetStr;
+											break;
+										case 'done4finish':
+											operator = '被' + handlerUser + ' 办结 ';
+											break;
+										case 'done4send':
+											operator = handlerUser + ' 发送后办毕 ';
+											break;
+										case 'done':
+											operator = handlerUser +  ' 办毕 ' + targetStr;
+											break;
+										case 'converge':
+											operator = handlerUser +  ' 办毕送汇合 '
+											break;
+										case 'done4force':
+											operator = handlerUser + ' 强制办毕 ' + targetStr;
+											break;
+										case 'done4cancel':
+											operator ='被' + handlerUser + ' 撤回 ' + targetStr;
+											break;
+										case 'done4tackback':
+											operator = '被' + handlerUser + ' 收回 ';
+											break;
+										case 'done4alltackback':
+											operator = '被' + handlerUser + ' 全部收回 ' +targetStr;
+											break;
+										case 'done4forcefinish':
+											operator = '被' + handlerUser + ' 强制办结';
+											break;
+										case 'transfer':
+											operator = handlerUser + ' 转 ' + targetStr;
+											break;
+										case 'return':
+											operator = handlerUser + ' 退回 ' +targetStr;
+											break;
+										case 'done4return':
+											operator = '被' + handlerUser + ' 退回 ' +targetStr;
+											break;
+										case 'finish':
+											operator = handlerUser + ' 结束流程 ' + targetStr;
+											break;
+										case 'serial':
+											operator = handlerUser + ' 顺序送 ' + targetStr;
+											break;
+										case 'canclefinish':
+											operator = handlerUser + ' 取消办结送 ' + targetStr;
+											break;
+										default:
+											break;
+									}
+									operations.push( operator)
+								});
+								item.operations = operations;
+								// console.log(operations);
+								_this.flowdatas[i].operations = operations;
+							}
+						}
+					}
+				}
+			});
+		</script>
+	</body>
+</html>
