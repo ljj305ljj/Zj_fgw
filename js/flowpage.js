@@ -1180,13 +1180,14 @@ Vue.component('tree',{
 								_self.opinion.opinionBody = '无。';
 								opinionBody=_self.opinion.opinionBody;
 							}
+							// alert(userinfo.userId);
 							var paradata = {
 								id: "",
 								createTime: null,
 								opinionContent: opinionBody,
 								opinionCode: data.opinionNo,
 								opinionCodeName: data.opinionName,
-								opinionUserNo: userinfo.username,
+								opinionUserNo: userinfo.userId || userinfo.username,
 								flowSlab: stateBase.stateLabel,
 								docId: App.LS.get("docId")
 							}
@@ -1226,7 +1227,7 @@ Vue.component('tree',{
 						let paradata = {
 							opinionCategory: "PERSON",
 							opinionContent: _this.opinion.opinionBody,
-							userNo: userinfo.username
+							userNo: userinfo.userId || userinfo.username
 						}
 						ajaxRequst(_url,'post','application/json;charset=UTF-8','json',JSON.stringify(paradata)).then(function (responseData) {
 							//console.log(responseData);
@@ -1255,7 +1256,7 @@ Vue.component('tree',{
 						var docinfor = toArr(App.LS.get('docInfor'));
 						var personOpinion=[
 							//{"class":"0","name":"公用意见","id":"COMMON",datalist:[],tourl:ZjgyHost + ZjgyUrl["getcommonOpinion"]+"?opinionCategory=COMMON"},
-							{"class":"1","name":"常用意见","id":"PERSON",datalist:[],tourl:ZjgyHost + ZjgyUrl["getpersonOpinion"]+"?opinionCategory=PERSON&userNo=" + userinfo.username},
+							{"class":"1","name":"常用意见","id":"PERSON",datalist:[],tourl:ZjgyHost + ZjgyUrl["getpersonOpinion"]+"?opinionCategory=PERSON&userNo=" + (userinfo.userId || userinfo.username)},
 						];
 						var requestTimes = 0;//请求公共意见、个人意见的次数
 						$.each(personOpinion, function(i,item) {

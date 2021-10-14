@@ -500,11 +500,11 @@
 }
 .icon-chekbox:before {
     content: "\e6c8";
-	color:green;
+	color:#5078fe;
 }
 .icon-selected:before {
     content: "\e6ca"!important;
-	  color:green;
+	  color:#5078fe;
 }
 .icon-guide:before{
   content: "\e655";

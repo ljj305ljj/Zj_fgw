@@ -184,7 +184,12 @@
 							<!-- </template> -->
 					</div>
 				</van-tab>
-				<div class="add-btn" @click="ShowTreeSelect" ><van-icon style="line-height: 44px;" name="add-o" color="#5078fe" size="1.2rem" /></div>
+				<div class="add-btn">
+					<span v-if="isEdit" class="rjicon iconzengjia" style="line-height: 44px;color:#5078fe; padding: 0 .4rem;"  @click="ShowTreeSelect" ></span>
+					<span v-if="isEdit" class="rjicon  rjicon-del" style="line-height: 44px;color:#e80808;padding: 0 .4rem;"  @click="deleteInforMation"></span>
+					<!-- <van-icon style="line-height: 44px;" name="add-o" color="#5078fe" size="1.2rem" /> -->
+					<!-- <van-icon style="line-height: 44px;" name="delete-o" color="#5078fe" size="1.2rem" /> -->
+				</div>
 			</van-tabs>
 			<!-- <Vtreeselect :Trees="userTrees" :isFormVield="false" v-show="isShowTreeSelect"></Vtreeselect> -->
 			<div v-show="isShowTreeSelect" id="box-deptList" class="box-dept tree-list" @click.stop>
@@ -221,13 +226,13 @@
 				background: #ffffff;
 			}
 			.van-tabs__nav{
-				width: 90%;
+				width: 80%;
 			}
 			.add-btn{
 				position: fixed;
 				top: 0;
 				right: 0;
-				width: 10%;
+				width: 20%;
 				height: 44px;
 				background: #fff;
 				text-align: center;

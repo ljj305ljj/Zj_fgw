@@ -36,7 +36,7 @@
 			<div class="domeBox">
 				<span v-show="pdfInfo.canSign" class="singBtn" @click="openSingFile">签批</span>
 				<span v-show="sendBtn" class="singBtn" style="bottom:6.5rem" @click="sendAction">发送</span>
-				<div :style="'height:'+getDetailHeight()" id="dome"></div>
+				<div :style="'height:'+getDetailHeight()" ><iframe id="dome" src="" width="100%" height="100%" frameborder="0"></iframe></div>
 				<div class="fileListBtn" @click="showMorePage">文件清单</div>
 				<div v-show="showMore" class="file-view" @click="hideMorePage">
 					<ul class="file-ul">
@@ -79,6 +79,7 @@
 			</div>
 		</div>
 		<script>
+			var fcsurl = ZjgyHost + 'wps/files/';
 			var vFile=new Vue({
 				el: '#File',
 				data(){
@@ -198,11 +199,13 @@
 							var fileSuffix = item.fileSuffix ? item.fileSuffix.toLowerCase() : "";
 							var expires = new Date();
 							var filetask = getFileTask(fileSuffix);
+							let watermark = "省发改委  " + (userInfo.userName || userInfo.username) + " " + (userInfo.phone ?  userInfo.phone.substring(7) : "");
 							//tempurl=fcsurl+'fileurl='+encodeURIComponent(tempurl)+"&task=none&type=src&res=url&filetype="+fileSuffix
 							//autoflag=true;
 							//var tempurl= outerBasehost + '/wisp_fcs/conversion/conved' + result.Content;
-							var _url = fcsurl + 'fileurl=' + encodeURIComponent(tempurl)+'&task='+filetask+'&type=src&res=url&filetype='+fileSuffix+'&reqType=app';
-
+							// var _url = fcsurl + 'fileurl=' + encodeURIComponent(tempurl)+'&task='+filetask+'&type=src&res=url&filetype='+fileSuffix+'&reqType=app';
+							var _url = fcsurl + item.id + "/get-online-preview-url?urlToken=" + getCookieValue("x-auth-token") + "&fileType=" + fileSuffix + "&watermark=" + watermark + "&time=" + expires.getTime();
+							//http://223.4.76.182:5050/wps/files/13e31252d4cbe000/get-online-preview-url?urlToken=500a8541-220d-4d7d-acdf-468e75ec42fd&fileType=wps&watermark=%E9%99%88%E8%A1%A1%E6%B2%BB&time=1633662856839&_t=1633662856862
 								if(item.resourceSubject){
 									var obj = {
 										"fileTitle":item.resourceSubject,
@@ -379,13 +382,22 @@
 							this.showSignBtn(fileinfo,type);
 							$("#dome").empty();
 							console.log(pdfurl);
-							openPdf("dome",pdfurl,{
-								//waterMark:userInfor.userName,
-								waterMark: "省发改委  " + (userInfo.userName || userInfo.username) + " " + (userInfo.phone ?  userInfo.phone.substring(7) : ""),
-								ctrlSwiper:function(scale){
-									BackCtrlSwiper("swiper-container3",scale);
-								}
-							});
+							if(location.protocol == 'https:'){
+								pdfurl = pdfurl.replace('http://10.168.100.101', outerBasehost+"/httpsViewer");
+								pdfurl = pdfurl.replace('http://10.249.137.58', outerBasehost+"/httpsViewer");
+							}else{
+								pdfurl = pdfurl.replace('http://10.168.100.101',  outerBasehost+"/httpViewer");
+								pdfurl = pdfurl.replace('http://10.249.137.58', outerBasehost+"/httpViewer");
+							}
+							// pdfurl = pdfurl.replace('http://10.249.137.58/', outerBasehost+"/viewer/");
+							document.getElementById("dome").src = pdfurl;
+							// openPdf("dome",pdfurl,{
+							// 	//waterMark:userInfor.userName,
+							// 	waterMark: "省发改委  " + (userInfo.userName || userInfo.username) + " " + (userInfo.phone ?  userInfo.phone.substring(7) : ""),
+							// 	ctrlSwiper:function(scale){
+							// 		BackCtrlSwiper("swiper-container3",scale);
+							// 	}
+							// });
 							App.LS.set("openpdf",pdfurl);//记录当时打开的文件url用于转屏的时候重新渲染页面 
 							this.showMore=false;
 							wispApp.UI.dismissProgressDialog();
@@ -465,43 +477,17 @@
 				    },
 				    loadpdf: function(_url,type,i,moduleId,autoflag){
 				    	var _this=this;
-				    	/* $.ajax({
+				    	$.ajax({
 							type: "GET",
 							url: _url,
 							dataType: "json",
 							success: function (result){
 								console.info(result)
-								if(result==="converFail" || result.Success==='False' || result.Content==='null'){
-									_this.ArrsList[type][i].pdfurl = "./img/error.pdf";
+								if(result.response && result.response.result == 0){
+									_this.ArrsList[type][i].pdfurl = result.response.url;
 								}else{
-									_this.ArrsList[type][i].pdfurl = fcsgetfile + result.Content;
-								}
-								if(autoflag){
-									_this.showPdf(type,i,autoflag);
-								}
-							},
-							error:function(error){
-								_this.ArrsList[type][i].pdfurl = "./img/error.pdf";
-								if(autoflag){
-									_this.showPdf(type,i,autoflag);
-								}
-							}
-						}); */
-				    	$.ajax({
-							type: "GET",
-							url: _url,
-							dataType: "jsonp",
-							jsonp: "jsoncallback",
-							success: function (result){
-								console.info(result)
-								if(result=="converFail"){
 									_this.ArrsList[type][i].pdfurl = "./img/error.pdf";
-						       	}else if(result.Success==='False' || result.Content==='null'){
-						            _this.ArrsList[type][i].pdfurl = "./img/error.pdf";
-						        }else{
-									_this.ArrsList[type][i].pdfurl = fcsgetfile + result.Content;
-						        }
-								//console.info(autoflag)
+								}
 								if(autoflag){
 									_this.showPdf(type,i,i,moduleId,autoflag);
 								}
@@ -512,7 +498,33 @@
 									_this.showPdf(type,i,i,moduleId,autoflag);
 								}
 							}
-						})
+						});
+				    	// $.ajax({
+						// 	type: "GET",
+						// 	url: _url,
+						// 	dataType: "jsonp",
+						// 	jsonp: "jsoncallback",
+						// 	success: function (result){
+						// 		console.info(result)
+						// 		if(result=="converFail"){
+						// 			_this.ArrsList[type][i].pdfurl = "./img/error.pdf";
+						//        	}else if(result.Success==='False' || result.Content==='null'){
+						//             _this.ArrsList[type][i].pdfurl = "./img/error.pdf";
+						//         }else{
+						// 			_this.ArrsList[type][i].pdfurl = fcsgetfile + result.Content;
+						//         }
+						// 		//console.info(autoflag)
+						// 		if(autoflag){
+						// 			_this.showPdf(type,i,i,moduleId,autoflag);
+						// 		}
+						// 	},
+						// 	error:function(error){
+						// 		_this.ArrsList[type][i].pdfurl = "./img/error.pdf";
+						// 		if(autoflag){
+						// 			_this.showPdf(type,i,i,moduleId,autoflag);
+						// 		}
+						// 	}
+						// })
 				    },
 				    openSingFile : function(){
 						if(/iPhone|iPad/i.test(navigator.userAgent)) {

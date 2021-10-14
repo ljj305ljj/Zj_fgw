@@ -20,6 +20,8 @@ window.InforRegistPage=new Vue({
 			tabActive:0,
 			tabnum:4,
 			signJson: toArr(App.LS.get("signJson")) || toArr(docInfor.signJson) || {signJsonList:[]},//信息登记
+			payMethodDetail:toArr(App.LS.get("payMethodDetail")) || toArr(docInfor.payMethodDetail) || [],//支付明细\
+			formData:toArr(App.LS.get("formData")),
 			totalExpenses: {//报销费用总计
 				bussinessPeoples:[],//出差人
 				businessLocation:[],//出差地
@@ -105,54 +107,58 @@ window.InforRegistPage=new Vue({
 			this.signJson.signJsonList[this.tabActive].days = d + 1;
 		},
 		detailAutoCalculation(){//伙食补助、公杂补助的自动计算
-			let days = this.signJson.signJsonList[this.tabActive].days;//出差天数
-			let heaven = this.signJson.signJsonList[this.tabActive].heaven;//会议天数
-			let qinghaiTibetBorderDay = this.signJson.signJsonList[this.tabActive].qinghaiTibetBorderDay;//青藏疆天数
-			let vehiclesDay = this.signJson.signJsonList[this.tabActive].vehiclesDay;//公务派车天数
-			let expenseAmountArray = this.signJson.signJsonList[this.tabActive].chargeDetails.detail;
-			let hotelAmount = expenseAmountArray.filter(det => det.name == "住宿费")[0].amount;//住宿费
-			let foodAmount = 0, publicAmount = 0, total = 0;//伙食补助报销金额，公杂补助报销金额，小计
+			if(this.signJson && this.signJson.signJsonList && this.signJson.signJsonList[this.tabActive]){
+				let days = this.signJson.signJsonList[this.tabActive].days;//出差天数
+				let heaven = this.signJson.signJsonList[this.tabActive].heaven;//会议天数
+				let qinghaiTibetBorderDay = this.signJson.signJsonList[this.tabActive].qinghaiTibetBorderDay;//青藏疆天数
+				let vehiclesDay = this.signJson.signJsonList[this.tabActive].vehiclesDay;//公务派车天数
+				let expenseAmountArray = this.signJson.signJsonList[this.tabActive].chargeDetails.detail;
+				let hotelAmount = expenseAmountArray.filter(det => det.name == "住宿费")[0].amount;//住宿费
+				let foodAmount = 0, publicAmount = 0, total = 0;//伙食补助报销金额，公杂补助报销金额，小计
+	
+				if(heaven > days){
+					toast("会议天数应小于等于出差天数！");
+					this.signJson.signJsonList[this.tabActive].heaven = 0;
+					return false;
+				}else if(vehiclesDay > days){
+					toast("派车天数应小于等于出差天数！");
+					this.signJson.signJsonList[this.tabActive].vehiclesDay = 0;
+					return false;
+				}
+				if(days == 1){
+					foodAmount = 100;
+					publicAmount = 80;
+				}else if(days >= 2){
+					if(heaven == 0 && hotelAmount > 0){
+						//伙食补助报销金额=青藏疆天数*120+（出差天数-青藏疆天数）*100；
+						foodAmount = qinghaiTibetBorderDay * 120 + (days - qinghaiTibetBorderDay)*100;
+						//公杂补助报销金额=出差天数*80-派车天数*40；
+						publicAmount = days * 80 - vehiclesDay * 40;
+					}else if(heaven == 0 && hotelAmount == 0){
+						foodAmount = 0;
+						publicAmount = 0;
+					}else if(heaven > 0){
+						//伙食补助报销金额=（出差天数-会议天数+2）*100；
+						foodAmount = (days - heaven + 2) * 100;
+						//公杂补助报销金额=（出差天数-会议天数+2）*80-派车天数*40；
+						publicAmount = (days - heaven + 2) * 80 - vehiclesDay * 40;
+					}
+				}
 
-			if(heaven > days){
-				toast("会议天数应小于等于出差天数！");
-				this.signJson.signJsonList[this.tabActive].heaven = 0;
-				return false;
-			}else if(vehiclesDay > days){
-				toast("派车天数应小于等于出差天数！");
-				this.signJson.signJsonList[this.tabActive].vehiclesDay = 0;
-				return false;
+				expenseAmountArray.forEach((det,d) => {
+					if(det.name == "伙食补助"){
+						det.amount = foodAmount;
+					}else if(det.name == "公杂补助"){
+						det.amount = publicAmount;
+					}
+					if(d == expenseAmountArray.length - 1){
+						det.amount = total;//最后一个是小计
+					}else{
+						total += det.amount;
+					}
+				})
 			}
-			if(days == 1){
-				foodAmount = 100;
-				publicAmount = 80;
-			}else if(days >= 2){
-				if(heaven == 0 && hotelAmount > 0){
-					//伙食补助报销金额=青藏疆天数*120+（出差天数-青藏疆天数）*100；
-					foodAmount = qinghaiTibetBorderDay * 120 + (days - qinghaiTibetBorderDay)*100;
-					//公杂补助报销金额=出差天数*80-派车天数*40；
-					publicAmount = days * 80 - vehiclesDay * 40;
-				}else if(heaven == 0 && hotelAmount == 0){
-					foodAmount = 0;
-					publicAmount = 0;
-				}else if(heaven > 0){
-					//伙食补助报销金额=（出差天数-会议天数+2）*100；
-					foodAmount = (days - heaven + 2) * 100;
-					//公杂补助报销金额=（出差天数-会议天数+2）*80-派车天数*40；
-					publicAmount = (days - heaven + 2) * 80 - vehiclesDay * 40;
-				}
-			}
-			expenseAmountArray.forEach((det,d) => {
-				if(det.name == "伙食补助"){
-					det.amount = foodAmount;
-				}else if(det.name == "公杂补助"){
-					det.amount = publicAmount;
-				}
-				if(d == expenseAmountArray.length - 1){
-					det.amount = total;//最后一个是小计
-				}else{
-					total += det.amount;
-				}
-			})
+			
 		},
 		calculateTotalExpenses(){//计算总报销费用（合计）
 			let signJsonList = this.signJson && this.signJson.signJsonList && JSON.parse(JSON.stringify(this.signJson.signJsonList));
@@ -179,6 +185,9 @@ window.InforRegistPage=new Vue({
 						})
 					}
 				})
+				this.formData.bussinessPeople = bussinessPeoples;//出差人自动填充到表单字段
+				this.formData.endAddress =  businessLocation.join("，");//出差地自动填充到表单字段
+				this.formData.amount = this.totalExpenses.detail[this.totalExpenses.detail.length-1].amount;//总报销金额自动填充到表单字段
 				this.totalExpenses.bussinessPeoples = bussinessPeoples.join("，");
 				this.totalExpenses.businessLocation = businessLocation.join("，");
 			}
@@ -187,8 +196,7 @@ window.InforRegistPage=new Vue({
 			this.isShowTreeSelect = true;
 			
 		},
-		setInforMation(name){
-			console.log(44444444444444)
+		setInforMation(name){//新增人员信息登记页签
 			this.isShowTreeSelect = false;
 			if(this.signJson){
 				if(!this.signJson.signJsonList){ this.signJson.signJsonList= []; }
@@ -213,7 +221,7 @@ window.InforRegistPage=new Vue({
 					vehiclesDay: 0,
 				})
 				// this.calculateTotalExpenses();
-				
+				this.autoToPayMethodDetail(name);//自动同步到支付明细
 				 setTimeout(() =>{
 					 if(this.tabActive == this.signJson.signJsonList.length - 1 ){
 						this.tabActive = this.signJson.signJsonList.length;
@@ -228,6 +236,35 @@ window.InforRegistPage=new Vue({
 				 
 			}
 		},
+		deleteInforMation(){//删除当前人员信息登记页签
+			let _this = this;
+			if(_this.tabActive == _this.signJson.signJsonList.length){ //当前显示合计页签
+				toast("当前页签无法删除！");
+				return;
+			}
+			App.UI('dialog', {
+				type : 'confirm',
+				title: 'queren',
+				OkTxt: '确定',
+				CancelTxt: '取消',
+				msg	 : '是否确定删除当前人员信息？'
+			},function(_action){
+				if(_action==='OK'){
+					_this.signJson.signJsonList.splice(_this.tabActive,1); 
+					if(_this.tabActive != 0){
+						_this.tabActive = _this.tabActive - 1;
+					}
+				}
+			})	
+		},
+		autoToPayMethodDetail(name){
+			//自动同步到支付明细
+			let _this = this;
+			let payDetail = _this.payMethodDetail.filter(det => det.name == name);
+			if(payDetail.length == 0){
+                _this.payMethodDetail.push({id: generateUUID(), index: _this.payMethodDetail.length, name: name});
+			}
+		},
 		backListening(){ //返回监听
 			let _this = this;
 			document.addEventListener('back', function(e) {
@@ -237,7 +274,9 @@ window.InforRegistPage=new Vue({
 					return;
 				}
 				App.LS.set("signJson",JSON.stringify(_this.signJson));
-				closePage();
+				App.LS.set("payMethodDetail",JSON.stringify(_this.payMethodDetail));
+				App.LS.set("formData",JSON.stringify(_this.formData));
+				closePage("jbxx.updateForm();");
 				// App.UI('dialog', {
 				// 	type : 'confirm',
 				// 	title: 'queren',

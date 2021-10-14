@@ -235,6 +235,7 @@ var indexPhone = new Vue({
 		getListData: function (para, viewIndex) {
 			var _self = this;
 			var _url = "";
+			let  userInfo = eval("("+App.LS.get('userInfo')+")");
 			//var item = _self.tabData.view[typeof (viewIndex) != 'undefined' ? viewIndex : _self.tabActive];
 			//console.log(item);
 			$.each(_self.tabData.view,function(i,item){
@@ -254,7 +255,7 @@ var indexPhone = new Vue({
 				$.each(item.paras.split("|"), function (p, paras) {
 					_url = ZjgyHost + ZjgyUrl[item.url.split("|")[p]] + (paras != "" ? paras + "&" : "?") + "offset=0&limit=1000";
 					if(paras.indexOf("businessExtension") > -1 || item.url.split("|")[p] == "listurger-hometodo" || item.url.split("|")[p] == "majorurger-hometodo" ){
-						_url += "&handleUserNo=" + eval("("+App.LS.get('userInfo')+")").username;
+						_url += "&handleUserNo=" + (userInfo.userId || userInfo.username);
 					}
 					var _type = "get";
 					//console.log(_url);
@@ -302,7 +303,7 @@ var indexPhone = new Vue({
 			} else {
 				_url = ZjgyHost + ZjgyUrl[item.url] + (item.paras != "" ? item.paras + "&" : "?") + "offset=" + item.offset + "&limit=" + item.limit;
 				if(item.url == "toread" || item.type == "xzfwtodo" || item.type == "mail" || item.type == "xntodo"){ 
-					_url += "&handleUserNo=" + eval("("+App.LS.get('userInfo')+")").username; }
+					_url += "&handleUserNo=" + (userInfo.userId || userInfo.username); }
 				var _type = "get";
 				//console.log(_url);
 				//console.info("list:"+(new Date()).Format("yyyy-MM-dd hh:mm:ss.S"))			
@@ -392,6 +393,7 @@ var indexPhone = new Vue({
 					_tempData.user.userId = _temp.userId;
 					_tempData.user.phone = _temp.phone;
 					_tempData.user.accountId = _temp.accountId;
+					// _tempData.token = "d1781ccf-9066-48f7-a33d-54c0e91bff47";
 					htmllist.push('<li class=Public-ptn onclick=indexPhone.repeatLogin("' + _tempData.token + '","' + encodeURIComponent(JSON.stringify(_tempData.user)) + '")>' + item.orgName.substring(item.orgName.lastIndexOf("/") + 1) + "/" + item.userName + '</li>');
 				})
 				pdfwin = App.UI('dialog', {

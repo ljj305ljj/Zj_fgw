@@ -18,7 +18,7 @@
 				{name:"indexjs",type:"js",url:"../../js/index1.9.12.js"},	
 				{name:"vantjs",type:"js",url:"../../js/vant.min.js"},
 				{name:"imageConversionjs",type:"js",url:"./js/imageConversion.js"},
-				// {name:"commonjs",type:"js",url:"../../js/vconsole.min.js"},
+				{name:"commonjs",type:"js",url:"../../js/vconsole.min.js"},
 				{name:"ipConfigjs",type:"js",url:"../../js/ipConfig.js"},
 				{name:"formComponentjs",type:"js",url:"./js/FormComponent.js"},
 				{name:"commonjs",type:"js",url:"../../js/common.js"},
@@ -124,6 +124,13 @@
 											/>
 										</dd>
 										<dd>
+											<!-- <Vtreeselect :Trees="userTrees" :id="invoice.id" v-show="isShowTreeSelect"></Vtreeselect> -->
+											<div v-show="isShowTreeSelect" :id="invoice.id" class="box-dept tree-list" @click.stop>
+												<template  v-show="!$.isEmptyObject(userTrees)">								
+													<tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setPassengerTreeValue">
+													</tree>									
+												</template>
+											</div>
 											<van-field
 												v-model="invoice.passenger"					
 												input-align="right"
@@ -138,13 +145,6 @@
 												readonly
 												>
 											</van-field>
-											<!-- <Vtreeselect :Trees="userTrees" :id="invoice.id" v-show="isShowTreeSelect"></Vtreeselect> -->
-											<div v-show="isShowTreeSelect" :id="invoice.id" class="box-dept tree-list" @click.stop>
-												<template  v-show="!$.isEmptyObject(userTrees)">								
-													<tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setPassengerTreeValue">
-													</tree>									
-												</template>
-											</div>
 										</dd>
 										<dd><van-field
 											v-model="invoice.banquet"					
@@ -262,6 +262,12 @@
 											/>
 										</dd>
 										<dd>
+											<div v-show="isShowTreeSelect" :id="invoice.id" class="box-dept tree-list" @click.stop>
+												<template  v-show="!$.isEmptyObject(userTrees)">								
+													<tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setPassengerTreeValue">
+													</tree>									
+												</template>
+											</div>
 											<van-field
 												v-model="invoice.passenger"					
 												input-align="right"
@@ -276,12 +282,6 @@
 												readonly
 												>
 											</van-field>
-											<div v-show="isShowTreeSelect" :id="invoice.id" class="box-dept tree-list" @click.stop>
-												<template  v-show="!$.isEmptyObject(userTrees)">								
-													<tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setPassengerTreeValue">
-													</tree>									
-												</template>
-											</div>
 										</dd>
 										<dd><van-field
 											v-model="invoice.banquet"					
@@ -360,7 +360,6 @@
 											</template>
 											</van-field>
 										</dt>
-										
 										<dd><van-field
 											v-model="invoice.stayWhere"					
 											input-align="right"
@@ -397,9 +396,29 @@
 											placeholder="报销金额"
 											>
 										</van-field></dd>
+										<div style="line-height: 2rem;text-align: right;padding-right: 1rem;">
+											<span v-if="isEdit" class="rjicon iconzengjia" style="color:#5078fe; padding: 0 .8rem;"  @click="addDestinationDetail(item.pageId,index)"></span>
+											<span v-if="isEdit" class="rjicon  rjicon-del" style="color:#e80808"  @click="delDestinationDetail(item.pageId,index)"></span>
+										</div>
+										<van-checkbox-group v-model="checkBoxs[item.pageId].peocheckedIndexs">
 										<template v-for="(peo,pIndex) in invoice.destination.detail">
-											<dt>
 											<dd>
+												<div v-show="isShowTreeSelect" :id="peo.id" class="box-dept tree-list" @click.stop>
+													<template  v-show="!$.isEmptyObject(userTrees)">								
+														<tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setPeoTreeValue">
+														</tree>									
+													</template>
+												</div>
+												<van-checkbox 
+													:name="pIndex"  
+													checked-color="#5078fe" 
+													style="padding: 14px 5px 14px 16px;" 
+													shape="square"
+													:ref="'peo'+checkBoxs[item.pageId].checkBoxsName" 
+													@click="togglePeoCheckBox(item.pageId,pIndex)" 
+													:disabled="!isEdit"
+													label-disabled>
+												</van-checkbox>
 												<van-field
 												v-model="peo.people"					
 												input-align="right"
@@ -414,12 +433,6 @@
 												@click="isEdit?showTreeComponet(index,pIndex):''"
 												>
 												</van-field>
-												<div v-show="isShowTreeSelect" :id="peo.id" class="box-dept tree-list" @click.stop>
-													<template  v-show="!$.isEmptyObject(userTrees)">								
-														<tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setPeoTreeValue">
-														</tree>									
-													</template>
-												</div>
 											<!-- <Vtreeselect :Trees="userTrees" :id="peo.id" v-show="isShowTreeSelect"></Vtreeselect> -->
 											</dd>
 											<dd><van-field
@@ -434,7 +447,7 @@
 												placeholder="住几晚"
 												>
 											</van-field></dd>
-											<dd><van-field
+											<dt><van-field
 												v-model="peo.amount"					
 												input-align="right"
 												label="报销金额"
@@ -445,9 +458,10 @@
 												:readonly="!isEdit"
 												placeholder="报销金额"
 												>
-											</van-field></dd>
-										</dt>
+											</van-field></dt>
+										
 										</template>
+										</van-checkbox-group>
 										<dt><van-field
 											v-model="invoice.invoiceNumber"					
 											input-align="right"
@@ -526,9 +540,30 @@
 											placeholder="报销金额"
 											>
 										</van-field></dd>
+										<div style="line-height: 2rem;text-align: right;padding-right: 1rem;">
+											<span v-if="isEdit" class="rjicon iconzengjia" style="color:#5078fe; padding: 0 .8rem;"  @click="addDestinationDetail(item.pageId,index)"></span>
+											<span v-if="isEdit" class="rjicon  rjicon-del" style="color:#e80808"  @click="delDestinationDetail(item.pageId,index)"></span>
+										</div>
+										<van-checkbox-group v-model="checkBoxs[item.pageId].peocheckedIndexs">
 										<template v-for="(peo,pIndex) in invoice.destination.detail">
-											<dt>
 											<dd>
+												<div v-show="isShowTreeSelect" :id="peo.id" class="box-dept tree-list" @click.stop>
+													<template  v-show="!$.isEmptyObject(userTrees)">								
+														<tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setPeoTreeValue">
+														</tree>									
+													</template>
+												</div>
+											<!-- <Vtreeselect :Trees="userTrees" :id="peo.id" v-show="isShowTreeSelect"></Vtreeselect> -->
+												<van-checkbox 
+													:name="pIndex"  
+													checked-color="#5078fe" 
+													style="padding: 14px 5px 14px 16px;" 
+													shape="square"
+													:ref="'peo'+checkBoxs[item.pageId].checkBoxsName" 
+													@click="togglePeoCheckBox(item.pageId,pIndex)" 
+													:disabled="!isEdit"
+													label-disabled>
+												</van-checkbox>
 												<van-field
 												v-model="peo.people"					
 												input-align="right"
@@ -543,15 +578,9 @@
 												@click="isEdit?showTreeComponet(index,pIndex):''"
 												>
 												</van-field>
-												<div v-show="isShowTreeSelect" :id="peo.id" class="box-dept tree-list" @click.stop>
-													<template  v-show="!$.isEmptyObject(userTrees)">								
-														<tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setPeoTreeValue">
-														</tree>									
-													</template>
-												</div>
-											<!-- <Vtreeselect :Trees="userTrees" :id="peo.id" v-show="isShowTreeSelect"></Vtreeselect> -->
+												
 											</dd>
-											<dd><van-field
+											<dt><van-field
 												v-model="peo.amount"					
 												input-align="right"
 												label="报销金额"
@@ -562,9 +591,9 @@
 												:readonly="!isEdit"
 												placeholder="报销金额"
 												>
-											</van-field></dd>
-										</dt>
+											</van-field></dt>
 										</template>
+										</van-checkbox-group>
 										<dt><van-field
 											v-model="invoice.invoiceNumber"					
 											input-align="right"

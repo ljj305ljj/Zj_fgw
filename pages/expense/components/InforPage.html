@@ -70,6 +70,8 @@
                                 type="textarea"
                                 :readonly="!isEdit"
                                 placeholder="出差事由"
+                                :rules="rules.subjectMatter"
+                                required
                                 >
                             </van-field></dd>
                         </dl>
@@ -121,7 +123,7 @@
                                 disabled 
                                 size="large"
                                 is-link 
-                                @click="OpenWebView('pages/expense/InforRegistPage.html');" >
+                                @click="openInforRegistPage" >
                                 </van-field>
                             </dd> 
                         </dl>
@@ -145,6 +147,14 @@
                             <van-checkbox-group v-model="checkedPayDetailIndex">
                             <template v-for="(expenseData, expenseIndex) in payMethodDetail">
                                   <dd>
+                                    <div v-show="isShowTreeSelect" :id="expenseData.id" class="box-dept tree-list" @click.stop>
+                                        <template  v-show="!$.isEmptyObject(userTrees)">
+                                            <tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setTreeValue">
+                                            </tree>									
+                                            <!-- <multi-tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' :val="expenseData.name" @tree-value="setTreeValue">
+                                            </multi-tree>									 -->
+                                        </template>
+                                    </div>
                                     <van-checkbox 
                                         :name="expenseIndex"  
                                         checked-color="#5078fe" 
@@ -156,7 +166,7 @@
                                         label-disabled>
                                     </van-checkbox>
                                     <!-- <span class="rjicon icon-fuxuankuang" style="color:#c5c3c3; padding: 14px 0 14px 16px;" @click=""></span> -->
-                                      <van-field
+                                    <van-field
                                       v-model="expenseData.name"					
                                       input-align="right"
                                       label="收款人"
@@ -170,13 +180,6 @@
                                       @click="isEdit?showTreeComponet(expenseIndex):''"
                                       >
                                   </van-field>
-                                  <div v-show="isShowTreeSelect" :id="expenseData.id" class="box-dept tree-list" @click.stop>
-                                    <template  v-show="!$.isEmptyObject(userTrees)">								
-                                        <tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setTreeValue">
-                                        </tree>									
-                                    </template>
-                                </div>
-                                  <!-- <Vtreeselect :Trees="userTrees" :id="expenseData.id" v-show="isShowTreeSelect" :setValue="setInforMation"></Vtreeselect> -->
                                 </dd>                         
                                     <dd><van-field
                                         v-model="expenseData.amount"					
@@ -466,6 +469,10 @@
                         userTrees:[],//人员组织结构
                         isShowTreeSelect:false,
                         payIndex:0,//支付明细
+                        //规则校验
+                        rules: {
+                            subjectMatter: [{ type: 'string',required: true, message: '请填写出差事由' }],
+                        },
                     }
                 },
                 created:function(){
@@ -678,6 +685,7 @@
                         this.expenseContentJson = toArr(App.LS.get("expenseContentJson"));
                         this.signJson = toArr(App.LS.get("signJson"));
                         this.payMethodDetail = toArr(App.LS.get("payMethodDetail"));
+                        this.formData = toArr(App.LS.get("formData"));
                     },
                     updateRelDocList(){
                         this.relDocList = toArr(App.LS.get("relDocList"));
@@ -688,6 +696,10 @@
                         App.LS.set("payMethodDetail",JSON.stringify(this.payMethodDetail));
                         App.LS.set("relDocList",JSON.stringify(this.relDocList));
                         OpenWebView('pages/expense/relative.html');
+                    },
+                    openInforRegistPage(){
+                        App.LS.set("formData",JSON.stringify(this.formData));
+                        OpenWebView('pages/expense/InforRegistPage.html');
                     },
                     backListening(){ //返回监听
                         let _this = this;

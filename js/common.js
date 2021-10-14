@@ -163,7 +163,9 @@ function goBack(callback){
 }
 
 function closePage(callback,isClose){
+	// alert(callback);
 	if(callback){addCookie("callback", callback, 7, "/");}
+	// alert(getCookieValue("callback"));
 	if(isClose == undefined || isClose){
 		dd.closePage();
 	}
@@ -1284,7 +1286,7 @@ function addvisibListener(){
             // if(App.LS.get("UserName")=="U00008/ZJJK"  || App.LS.get("UserName")=="U00010/ZJJK"){
             //     alert(App.Cookie.getCookieValue("callback"));  
             // }  
-			//alert(_val);      
+			// alert(_val);      
             App.CK.delCookie("callback");
             if (_val && _val != ""){
 				//alert("_val:"+_val)

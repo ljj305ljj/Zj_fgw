@@ -212,10 +212,10 @@ window.billViewPage=new Vue({
 		},
 		//上传前对图片进行压缩
 		asyncBeforeRead(file) {
-			if(this.tabActive == 0){ 
-				toast("暂不支持，请稍候再试...");
-				return false;
-			}
+			// if(this.tabActive == 0){ 
+			// 	toast("暂不支持，请稍候再试...");
+			// 	return false;
+			// }
 			this.fileName = file.name;
 			const isIMG = file.type === "image/jpg" || file.type === "image/jpeg" || file.type === "image/png";
 			return new Promise((resolve, reject) => {
@@ -283,6 +283,22 @@ window.billViewPage=new Vue({
 						 }
 						switch(_this.tabActive){
 							case 0://机票
+								_this.expenseContentJson.invoiceList.forEach((item,i) => {
+									if(item.id == obj.docId){
+										_this.expenseContentJson.trainTicket[i] = {
+											amount: res.money,
+											banquet: res.seat,
+											date: res.time!="" ? _this.formatChineseDate(res.time) : "",
+											departure: res.startStation,
+											destination: res.endStation,
+											expenseAmount: res.money,
+											id: item.id,
+											index: _this.expenseContentJson.invoiceList.length,
+											invoiceNumber: res.num,
+											passenger: res.name,
+										}
+									}
+								})
 								break;
 							case 1://火车票
 								// {

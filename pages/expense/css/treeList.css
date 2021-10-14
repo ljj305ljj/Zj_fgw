@@ -28,10 +28,19 @@
 /*树形列表样式*/
 .tabBody-ul{display: none;    overflow: hidden;}
 .tabbody-active{display: block;}
-.word-title{font-size: .28rem;/*line-height: 2rem;*/color: #37383C;}
+.word-title {
+    font-size: .8rem;
+    line-height: 1.2rem;
+    color: #1B1B1B;
+}
 .word-bottom{position: relative; color: #999999; font-size: .8rem;    display: flex; justify-content: space-between;    line-height: 1rem;}
 .word-bottom>p{word-wrap: normal;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;}
 .word-bottom>p+p{text-align:right;}
 .ontheader{top: 0;}
 .tabBody-li{padding: .2rem .2rem;border-bottom: 1px solid #f1f1f1;}
 .tabTitle{text-align: center;line-height: 2.5rem;box-sizing: border-box;border-bottom: 1px solid #f1f1f1;}
+.word-title .checkbox{
+    font-size: 1rem;
+    line-height: 1.2rem;
+    padding-right: .2rem;
+}

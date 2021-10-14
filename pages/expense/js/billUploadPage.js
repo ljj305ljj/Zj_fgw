@@ -1,16 +1,16 @@
 // 初始化vConsole
-// window.vConsole = new window.VConsole({
-// 	defaultPlugins: ['system', 'network', 'element', 'storage'], // 可以在此设定要默认加载的面板
-// 	maxLogNumber: 1000,
-// 	// disableLogScrolling: true,
-// 	onReady: function() {
-// 		console.info(dd)
-// 	  console.log('vConsole is ready.');
-// 	},
-// 	onClearLog: function() {
-// 	  console.log('on clearLog');
-// 	}
-// });
+window.vConsole = new window.VConsole({
+	defaultPlugins: ['system', 'network', 'element', 'storage'], // 可以在此设定要默认加载的面板
+	maxLogNumber: 1000,
+	// disableLogScrolling: true,
+	onReady: function() {
+		console.info(dd)
+	  console.log('vConsole is ready.');
+	},
+	onClearLog: function() {
+	  console.log('on clearLog');
+	}
+});
 var userInfo = toArr(App.LS.get('userInfo'));
 var docInfor = toArr(App.LS.get("docInfor"));
 var billAttList = [];//票据附件
@@ -34,18 +34,22 @@ window.billPage=new Vue({
 				invoiceList:{ 
 					checkBoxsName:"invoiceListCheckBoxs",//复选框名称
 					checkedIndexs:[],//选中的票据信息索引
+					peocheckedIndexs:[],//选中的人员索引
 				},
 				trainTicket:{ 
 					checkBoxsName:"trainTicketCheckBoxs",
 					checkedIndexs:[],
+					peocheckedIndexs:[],
 				},
 				stayList:{ 
 					checkBoxsName:"stayListCheckBoxs",
 					checkedIndexs:[],
+					peocheckedIndexs:[],
 				},
 				otherList:{ 
 					checkBoxsName:"otherListCheckBoxs",
 					checkedIndexs:[],
+					peocheckedIndexs:[],
 				}
 			},
 			showCalendar:false,
@@ -102,10 +106,10 @@ window.billPage=new Vue({
 			let day = newData[1].split("月")[1].split("日")[0];
 			return (year + "-" + month + "-" + day);
 		},
-		showTreeComponet(index,pindex){
+		showTreeComponet(index,pindex=0){
 			this.isShowTreeSelect = true;
 			this.exIndex = index;//对应票据信息中的乘客
-			if(pindex){ this.peoIndex = pindex; }//对应票据的选人
+			this.peoIndex = pindex; //对应票据的选人
 		},
 		setPassengerTreeValue(name){//填充机票、火车票的乘客
 			this.expenseContentJson[this.tabData[this.tabActive].pageId][this.exIndex].passenger = name;
@@ -161,7 +165,7 @@ window.billPage=new Vue({
 		},
 		autoExpenseAmount(){//同步票据各费用到指定出差人
 			let _this = this;
-			let isHasBussinessPeople = false,detail = {};
+			let detail = {};
 			if(_this.signJson && _this.signJson.signJsonList){
 				_this.signJson.signJsonList.forEach((sign,s) => {
 					sign.chargeDetails.detail.forEach((det,d) => { det.amount = 0;})//清空一下该出差人的报销明细
@@ -214,10 +218,10 @@ window.billPage=new Vue({
 		},
 		//上传前对图片进行压缩
 		asyncBeforeRead(file) {
-			if(this.tabActive == 0 ){ 
-				toast("暂不支持，请稍候再试...");
-				return false;
-			}
+			// if(this.tabActive == 0 ){ 
+			// 	toast("暂不支持，请稍候再试...");
+			// 	return false;
+			// }
 			this.fileName = file.name;
 			const isIMG = file.type === "image/jpg" || file.type === "image/jpeg" || file.type === "image/png";
 			return new Promise((resolve, reject) => {
@@ -286,6 +290,28 @@ window.billPage=new Vue({
 						 }
 						switch(_this.tabActive){
 							case 0://机票
+								// {
+								// 	endStation: "贵阳龙润堡"
+								// 	imageData: "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHB
+								// 	money: ""
+								// 	name: "吴胜"
+								// 	num: "7846580975240"
+								// 	plainNum: "CZ8602"
+								// 	startStation: "杭州肃"
+								// 	time: "20216711"
+								// }
+								_this.expenseContentJson.invoiceList.push({
+									amount: res.money,
+									banquet: res.seat,
+									date: res.time!="" ? _this.formatChineseDate(res.time) : "",
+									departure: res.startStation,
+									destination: res.endStation,
+									expenseAmount: res.money,
+									id: data.docId,
+									index: _this.expenseContentJson.invoiceList.length,
+									invoiceNumber: res.num,
+									passenger: res.name,
+								})
 								detail = {amount: res.money,name: "交通费"};
 								_this.autoToSignJsonList(detail,res);
 								break;
@@ -542,6 +568,32 @@ window.billPage=new Vue({
 			this.expenseContentJson = toArr(App.LS.get("expenseContentJson"));
 			// this.signJson = toArr(App.LS.get("signJson"));
 			// this.payMethodDetail = toArr(App.LS.get("payMethodDetail"));
+		},
+		togglePeoCheckBox(pageId,index){
+			if(this.isEdit){
+				this.$refs["peo" + this.checkBoxs[pageId].checkBoxsName][index].toggle();
+			}
+		},
+		addDestinationDetail(pageId,index){//添加新人员   index为 第几个票据
+			this.expenseContentJson[pageId][index].destination.detail.push({});
+		},
+		delDestinationDetail(pageId,index){//删除人员
+			let _this = this;
+			let peocheckedIndexs = _this.checkBoxs[pageId].peocheckedIndexs;//选中的人员索引
+			if(!peocheckedIndexs || peocheckedIndexs.length === 0){
+				toast("未选中删除项！");
+				return false;
+			}
+			let newIndexs = peocheckedIndexs.map(function(val, idx) {
+				return val - idx;
+			});
+			peocheckedIndexs.forEach((val, idx) => {
+				_this.$refs["peo" + _this.checkBoxs[pageId].checkBoxsName][val].toggle();
+			});
+			newIndexs.forEach((checked,cIndex) => {
+				_this.expenseContentJson[pageId][index].destination.detail.splice(checked,1);
+			});
+			
 		}
 	}
 });	
