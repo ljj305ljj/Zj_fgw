@@ -2,7 +2,7 @@
 var htmlRoot = ""
 var temphost = location.protocol + "//" + location.host;
 var outerBasehost = window.location.protocol + "//" + window.location.host + htmlRoot;
-var ZjgyHost = outerBasehost + "/fgwOA/";// /oa正式环境 /fgwOA /fgwOAtest本地测试环境
+var ZjgyHost = outerBasehost + "/fgwOA/";// /oa正式环境 /fgwOA 本地测试环境
 var basehost = ZjgyHost;
 var NginxHost = ZjgyHost;
 var filePath = outerBasehost + "/rjmoafgw/";
@@ -597,7 +597,7 @@ var indexTabData = [
                     	id: 'work',
                     	icon: 'gongwuhuodong',
                     	title: '出差审批',
-                    	url:'ListPage.html?moduleId=moa-ccsp',
+                    	url:'pages/ccsp/ListPage.html?moduleId=moa-ccsp',
                     },
                     {
                         id: 'person',
@@ -6708,6 +6708,12 @@ var ZjgyUrl = {
     "Tbj-travel_approval": "/travelApproval/workflow/flowFinish", /* 出差办结（结束）提交---*/
     "travel_approval-res": "/attachment/listDocResource",/*参考材料*/
     "ZDfs-travel_approval": "/travelApproval/workflow/flowAutoSend", /* 出差自动发送提交*/
+
+    "TRAVEL_APPROVAL-createId":"/travelApproval/createId", //新建出差审批id
+    "initProcess-travel_approval":"travelApproval/workflow/initProcess",//启动流程
+    "revoke-travel_approval":"travelApproval/workflow/flowRevoke",//删除流程
+    "TRAVEL_APPROVAL-save":"/travelApproval/updateTravelApproval",//更新
+    "TRAVEL_APPROVAL-insert":"/travelApproval/insertTravelApproval",//新增
 
     /*因公出差审批*/
     "travel_approval-wj": "/travelApproval/getTravelApprovalById",/*因公出差基本信息*/

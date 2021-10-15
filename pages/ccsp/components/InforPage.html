@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<title>基本信息</title>
+	</head>
+	<body>
+		<div id="jbxx" class="bldview">			
+            <div style="overflow-y: auto; overflow-x: hidden;padding-bottom:3rem; background: #F1F1F3;">
+                <template v-if="businessNo==='TRAVEL_APPROVAL'">
+                    <van-form validate-first >	
+                        <dl>
+                            <dd><van-field
+                                v-model="formData.draftDept"					
+                                input-align="right"
+                                label="主办处室"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                            <dd><van-field
+                                v-model="formData.draftUserName"					
+                                input-align="right"
+                                label="经办人"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                readonly
+                                >
+                            </van-field></dd>
+                            <dd><van-field
+                                v-model="formData.docSequence"					
+                                input-align="right"
+                                label="业务编号"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                placeholder="流程启动操作之后自动生成"
+                                readonly
+                                >
+                            </van-field></dd>
+                              <dd><van-field
+                                  v-model="formData.draftDate"					
+                                  input-align="right"
+                                  label="申请时间"
+                                  rows="1"
+                                  autosize
+                                  size="large"
+                                  type="textarea"
+                                  readonly
+                                  >
+                              </van-field></dd>
+                            <dd><van-field
+                                v-model="formData.travelReason"					
+                                input-align="right"
+                                label="出差事由"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea"
+                                :readonly="!isEdit"
+                                placeholder="出差事由"
+                                >
+                            </van-field></dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <van-field label="关联文件" value="" disabled size="large" />
+                                <van-button :disabled="!isEdit" slot="button" size="small" color="#5462E7" @click="openRelativeFiles">关联文件</van-button>
+                            </dt>
+                            <template  v-for="(reldoc, reldocIndex) in relDocList">    
+                                <dd>
+                                    <van-field
+                                        v-model="reldoc.subject"					
+                                        input-align="right"
+                                        label="标题"
+                                        rows="1"
+                                        autosize
+                                        size="large"
+                                        type="textarea"
+                                        readonly
+                                        @click="openFile(reldoc)"
+                                    >
+                                    </van-field> 
+                                    <van-button style="margin: 12px 16px 12px 0;width: 20%;" plain :disabled="!isEdit" size="mini" color="#e80808" @click="cancelRe(reldoc)">取消关联</van-button>
+                                </dd>    
+                            </template>
+                        </dl>
+                        <dl>
+                            <van-field  label="其他附件">
+                                <template #input>
+                                    <span class="right-add rjicon iconadd upload" id="addFile-btn">
+                                        <input type="file" name="myfile" id="file" @change="uploadFile1(event)">
+                                        上传材料
+                                    </span>
+                                </template>
+                            </van-field>
+                            <div class="main-filelist bak-Sel">
+                                <ul class="main-filelist">
+                                  <li v-for="(obj,i) in attachList">
+                                    {{i+1 + '.'+obj.fileName+'.'+obj.fileSuffix}}
+                                    <span style="margin-left: 1rem;font-size: 1rem;" @click="deleteAttach(obj.id)"
+                                      class="rjicon rjicon-del"></span>
+                                  </li>
+                                </ul>
+                            </div>
+                        </dl>
+                        <dl>
+                            <dd>
+                                <van-field
+                                    v-model="formData.travelTogetherPeople"					
+                                    input-align="right"
+                                    label="出差人"
+                                    rows="1"
+                                    autosize
+                                    size="large"
+                                    type="textarea"
+                                    placeholder="出差人"
+                                    @click="isEdit?showTreeComponet(index):''"
+                                    readonly
+                                    >
+                                </van-field>
+                                <!-- <Vtreeselect :Trees="userTrees" :id="invoice.id" v-show="isShowTreeSelect"></Vtreeselect> -->
+                                <div v-show="isShowTreeSelect" :id="formData.id" class="box-dept tree-list" @click.stop>
+                                    <template  v-show="!$.isEmptyObject(userTrees)">								
+                                        <multi-tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setPassengerTreeValue">
+                                        </multi-tree>									
+                                    </template>
+                                </div>
+                            </dd>
+                            <dd>
+                                <van-field-checkbox
+                                    label="乘坐的交通工具"
+                                    placeholder="请选择"
+                                    v-model="formData.transportation"
+                                    dict="dict_travel_jtgj"
+                                    label-width="200"
+                                    :option="{label:'itemName',value:'itemValue'}"
+                                />
+                            </dd>
+                            <dd>
+                                <van-field  label="是否包含委领导" label-width="10rem" size="large">
+                                    <template #input>
+                                        <van-radio-group class="right-add" direction="horizontal" v-model="formData.isLeaderTeam">
+                                            <van-radio name="1">是</van-radio>
+                                            <van-radio name="0">否</van-radio>
+                                        </van-radio-group>
+                                    </template>
+                                </van-field>
+                            </dd>
+                            <dd v-if="formData.isLeaderTeam == '1'">
+                                <van-field
+                                    v-model="formData.weiLeader"					
+                                    input-align="right"
+                                    label="委领导"
+                                    rows="1"
+                                    autosize
+                                    size="large"
+                                    type="textarea"
+                                    placeholder="请选择委领导"
+                                    @click="isEdit?showTreeComponetwld(index):''"
+                                    readonly
+                                    >
+                                </van-field>
+                                <!-- <Vtreeselect :Trees="userTrees" :id="invoice.id" v-show="isShowTreeSelect"></Vtreeselect> -->
+                                <div v-show="isShowTreeSelectwld" :id="formData.id" class="box-dept tree-list" @click.stop>
+                                    <template  v-show="!$.isEmptyObject(userTrees)">								
+                                        <multi-tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setwldTreeValue">
+                                        </multi-tree>									
+                                    </template>
+                                </div>
+                            </dd>
+                            <dd>
+                                <van-field  label="是否包含处长" label-width="10rem" size="large">
+                                    <template #input>
+                                        <van-radio-group class="right-add" direction="horizontal" v-model="formData.isChuLeader">
+                                            <van-radio name="1">是</van-radio>
+                                            <van-radio name="0">否</van-radio>
+                                        </van-radio-group>
+                                    </template>
+                                </van-field>
+                            </dd>
+                            <dd v-if="formData.isChuLeader == '1'">
+                                <van-field
+                                    v-model="formData.chuLeader"					
+                                    input-align="right"
+                                    label="处长"
+                                    rows="1"
+                                    autosize
+                                    size="large"
+                                    type="textarea"
+                                    placeholder="请选择处长"
+                                    @click="isEdit?showTreeComponetcz(index):''"
+                                    readonly
+                                    >
+                                </van-field>
+                                <!-- <Vtreeselect :Trees="userTrees" :id="invoice.id" v-show="isShowTreeSelect"></Vtreeselect> -->
+                                <div v-show="isShowTreeSelectcz" :id="formData.id" class="box-dept tree-list" @click.stop>
+                                    <template  v-show="!$.isEmptyObject(userTrees)">								
+                                        <multi-tree v-for="(item,index) in userTrees" :item='{data:item,key:index}' @tree-value="setczTreeValue">
+                                        </multi-tree>									
+                                    </template>
+                                </div>
+                            </dd>
+                            <dd v-if="isShowLiHang">
+                                <van-field  :label="showLiHang"  size="large">
+                                    <template #input>
+                                        <van-radio-group class="right-add" direction="horizontal" v-model="formData.isLiHang">
+                                            <van-radio name="1">是</van-radio>
+                                            <van-radio name="0">否</van-radio>
+                                        </van-radio-group>
+                                    </template>
+                                </van-field>
+                            </dd>
+                            <dd v-if="isShowLiZhe">
+                                <van-field  :label="ShowLiZhe"  size="large">
+                                    <template #input>
+                                        <van-radio-group class="right-add" direction="horizontal" v-model="formData.showLiZhe">
+                                            <van-radio name="1">是</van-radio>
+                                            <van-radio name="0">否</van-radio>
+                                        </van-radio-group>
+                                    </template>
+                                </van-field>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <van-field					
+                                input-align="right"
+                                label="出行记录"
+                                rows="1"
+                                autosize
+                                size="large"
+                                type="textarea" 
+                                readonly
+                                >
+                                <template #input>
+                                    <span v-if="isEdit" class="rjicon iconzengjia" style="color:#5078fe; padding: 0 .8rem;" @click="addtravelDetail()"></span>
+                                    <span v-if="isEdit" class="rjicon  rjicon-del" style="color:#e80808" @click="onDeleteRecordChange()"></span>
+                                </template>
+                                </van-field>
+                            </dt>
+                            <van-checkbox-group>
+                                <template v-for="(travelData, travelIndex) in formData.travelAddress">
+                                    <dl>
+                                        <dd>
+                                            <van-field
+                                                    v-model="travelData.startDate"					
+                                                    input-align="right"
+                                                    label="开始日期"
+                                                    autosize
+                                                    size="large"
+                                                    @click="showCalendarStart(travelIndex)"
+                                                    is-link
+                                                    :rules="[{ required: true, message: '请填写开始日期' }]"
+                                                    readonly
+                                                    >
+                                                </van-field>
+                                                <van-calendar 
+                                                    v-model="showCalendar" 
+                                                    :show-confirm="false"
+                                                    color="#5078fe"
+                                                    :style="{ height: '500px' }"
+                                                    @confirm="onConfirmStart" 
+                                                />
+                                        </dd>
+                                        <dd>
+                                            <van-field
+                                                    v-model="travelData.endDate"					
+                                                    input-align="right"
+                                                    label="结束日期"
+                                                    autosize
+                                                    size="large"
+                                                    @click="showCalendarEnd(travelIndex)"
+                                                    :rules="[{ required: true, message: '请填写结束日期' }]"
+                                                    is-link
+                                                    readonly
+                                                    >
+                                                </van-field>
+                                                <van-calendar 
+                                                    v-model="showCalendar2" 
+                                                    :show-confirm="false" 
+                                                    color="#5078fe"
+                                                    :style="{ height: '500px' }"
+                                                    @confirm="onConfirmEnd" 
+                                                />
+                                        </dd>
+                                        <dd>
+                                            <van-field
+                                                v-model="travelData.fromAddress"					
+                                                input-align="right"
+                                                label="出发地"
+                                                rows="1"
+                                                autosize
+                                                size="large"
+                                                type="textarea"
+                                                :readonly="!isEdit"
+                                                placeholder="请输入出发地"
+                                                >
+                                            </van-field>
+                                        </dd>
+                                        <dd>
+                                            <van-field
+                                                v-model="travelData.toAddress"					
+                                                input-align="right"
+                                                label="目的地"
+                                                rows="1"
+                                                autosize
+                                                size="large"
+                                                type="textarea"
+                                                :readonly="!isEdit"
+                                                placeholder="请输入目的地"
+                                                >
+                                            </van-field>
+                                        </dd>
+                                        <dd>
+                                            <van-field
+                                                v-model="travelData.remark"					
+                                                input-align="right"
+                                                label="备注"
+                                                rows="1"
+                                                autosize
+                                                size="large"
+                                                type="textarea"
+                                                :readonly="!isEdit"
+                                                placeholder="请输入备注"
+                                                >
+                                            </van-field>
+                                        </dd>
+                                    </dl>
+                                </template>
+                            </van-checkbox-group>
+                        </dl>
+                    </van-form>	 
+                 </template>
+                 <div id="FileBtn2" v-if="btnArrs2.length>0" class="foot-btn" >
+                    <template v-for="(item,i) in btnArrs2">
+                        <div class="bottom-nav-box"  @click="toEvents(item.toEvent,$event)"  v-show="btnArrs2.length <= 3 || (btnArrs2.length >3 && i < 2)"><span class="rjicon" :class="'rjicon-' + item.iconCss"></span><span v-cloak>{{item.btnName}}</span></div>
+                    </template>
+                </div>
+            </div>		
+		</div>
+		<script>
+			var docInfor = toArr(App.LS.get("docInfor"));
+			let stateBusiness = toArr(App.LS.get("stateBusiness"));
+            let thisModule = App.LS.get("module");
+			var jbxx=new Vue({
+                el: '#jbxx',
+                data(){
+                    return{
+                        startIndex:0,//第几个开始日期
+                        endIndex:0,//第几个结束日期
+                        showCalendar:false,
+                        showCalendar2:false,
+                        btnArrs2:[],
+                        attachList :[],
+                        formData:docInfor,
+                        relDocList:toArr(docInfor.relDocList) || [],
+                        isShowLiHang: false,
+                        isShowLiZhe: false,
+                        showLiHang: '',
+                        showLiZhe: '',
+                        // expenseContentJson:toArr(App.LS.get("expenseContentJson")) || toArr(docInfor.expenseContentJson) || {},
+                        signJson:toArr(App.LS.get("signJson")) || toArr(docInfor.signJson) || {signJsonList:[]},
+                        businessNo: toArr(App.LS.get("listInfo")).businessNo,
+                        isEdit:false,//是否可编辑
+                        userTrees:[],//人员组织结构
+                        isShowTreeSelect:false,
+                        isShowTreeSelectwld:false,
+                        isShowTreeSelectcz:false,
+                    }
+                },
+                created:function(){
+                    if(!this.formData.id){
+                        this.formData.transportation = [];
+                        this.formData.isChangeAddress = '0';
+                        this.formData.isLeaderTeam = '0';
+                        this.formData.isChuLeader = '0';
+                        let _url = ZjgyHost + ZjgyUrl["TRAVEL_APPROVAL-createId"];
+                        ajaxRequst(_url,'get','application/json;charset=UTF-8','json').then(json=>{
+                            this.formData.id = json
+                        })
+                        ajaxRequst(ZjgyHost+'/travelApproval/travelApprovalConfig/listTravelApprovalConfig','post','application/json;charset=UTF-8','json',JSON.stringify({systemNo: "ZJSFGW"})).then(json=>{
+                            json.forEach(element => {
+                                if (element.isShow == '1') {
+                                    if (element.content == '离杭') {
+                                        this.showLiHang = element.subject
+                                        this.isShowLiHang = true;
+                                    } else if (element.content == '离浙') {
+                                        this.showLiZhe = element.subject
+                                        this.isShowLiZhe = true;
+                                    }
+                                }
+
+                            });
+                        })
+                    }
+                    try {wispApp.UI.dismissProgressDialog();} catch(e) {}
+                    this.backListening();
+                    this.initBtn();
+                },
+                mounted(){
+
+                },
+                methods:{
+                    showCalendarStart(index){//显示日历控件
+                        this.showCalendar = true;
+                        this.startIndex = index;
+                        
+                    },
+                    onConfirmStart(date){
+                        this.showCalendar = false;
+                        this.formData.travelAddress[this.startIndex].startDate = this.formatDate(date);
+                        if(!this.formData.travelAddress[this.startIndex].frontRangeDate){
+                            this.formData.travelAddress[this.startIndex].frontRangeDate = []
+                        }
+                        this.formData.travelAddress[this.startIndex].frontRangeDate.push(this.formatDate(date))
+                        console.log(this.formData);
+                        
+                    },
+                    showCalendarEnd(index){
+                        this.showCalendar2 = true;
+                        this.endIndex = index;
+                    },
+                    onConfirmEnd(date){
+                        this.showCalendar2 = false;
+                        this.formData.travelAddress[this.endIndex].endDate = this.formatDate(date);
+                        this.formData.travelAddress[this.endIndex].frontRangeDate.push(this.formatDate(date))
+                    },
+                    formatDate(date) {
+                        return date.Format("yyyy-MM-dd");
+                    },
+                    setPassengerTreeValue(name,id){
+                        this.formData.travelTogetherPeople = name
+                        this.formData.travelTogetherPeopleNo = id
+                        this.isShowTreeSelect = false;
+                    },
+                    setwldTreeValue(name,id){
+                        this.formData.weiLeader=name
+                        this.formData.weiLeaderNo=id
+                        this.isShowTreeSelectwld = false;
+                    },
+                    setczTreeValue(name,id){
+                        this.formData.chuLeader=name
+                        this.formData.chuLeaderNo=id
+                        this.isShowTreeSelectcz = false;
+                    },
+                    initBtn(){
+                        let docStatus = getFlowStatus(docInfor,detailPage.proPermission);//文档状态
+                        let isEdit = FormIsEdit(docStatus,detailPage.proPermission);//表单是否可编辑
+                        this.isEdit = isEdit;
+                        App.LS.set("isEdit",this.isEdit);
+                        let baseAction = [];
+                        if( detailPage.proPermission && detailPage.proPermission.baseAction && detailPage.proPermission.flowStatus != "read"){	
+                            $.each(detailPage.proPermission.baseAction,function(i,action){
+                                baseAction.push(action.split("|")[1]);
+                            })
+                        }
+                        if(isEdit){
+                            getUserTrees(this);
+                            //保存
+                            this.btnArrs2.push({btnName:"保存",iconCss:"save",toEvent:"saveForm"});
+                            if($.inArray("send",baseAction)>-1 ){
+                                //删除
+                                this.btnArrs2.push({btnName:"删除",iconCss:"del",toEvent:"jsRevoke"});
+                            }
+                        }
+                    },
+                    cancelRe:function(file){//取消关联
+                        let _self=this;
+                        App.UI('dialog', {
+                            type : 'confirm',
+                            title: 'queren',
+                            OkTxt: '确定',
+                            CancelTxt: '取消',
+                            msg	 : '是否取消关联？'
+                        },function(_action){
+                            if(_action==='OK'){
+                                let _url = ZjgyHost + ZjgyUrl["save-"+App.LS.get("module")];
+                                let viewType = App.LS.get('viewType');
+                                _self.relDocList.forEach((item,i) => {
+                                    if(item.docId == file.docId){
+                                        _self.relDocList.splice(i,1);
+                                        console.log(_self.relDocList);
+                                    }
+                                })
+                                docInfor.relDocList = JSON.stringify(_self.relDocList);
+                                if(viewType != "newDraft"){//新起草的话不用保存
+                                    ajaxRequst(_url,'post','application/json;charset=UTF-8','json',JSON.stringify(docInfor)).then(function(json){
+                                        // console.log(json);
+                                        toast("保存成功！");
+                                        App.LS.set("docInfor",JSON.stringify(json));
+                                    })
+                                }else{
+                                    App.LS.set("relDocList",JSON.stringify(_self.relDocList));
+                                }
+                            }
+                        })
+                    },
+                    openFile:function(fileobj){
+					    try {wispApp.UI.showProgressDialog("加载中...");	} catch(e) {}
+						//openFile(fileUrl);
+						//var pdfUrl=outerBasehost + '/wisp_fcs/conversion/conved/' +getpdfFile(fileUrl);
+						var obj = {
+							id:App.LS.get("workTodoId"),
+							businessDocId:fileobj.docId,
+							businessNo:fileobj.moduleId,
+						};
+						App.LS.set("preListInfo",App.LS.get("listInfo"));//前一份文的
+						addCookie("callback", 'ListInfoCallback()', 7, "/");
+						App.LS.set("listInfo",JSON.stringify(obj));
+						let detailPage = "DetailPage.html";
+                        switch (obj.businessNo) {
+                            case "RECEIVAL"://收文处理
+                            case "DISPATCH"://发文处理
+                            case "SPECIAL_WORK"://专班工作
+                            case "LEAVE"://请假审批
+                            case "OVERTIME"://加班审批
+                            case "TRAVEL_APPROVAL"://出差审批
+                                detailPage = "DetailPage.html";
+                                break;
+                            case "CAR_APPLY"://车辆管理
+                                detailPage = "pages/clgl/DetailPage.html";
+                                break;
+                            case "MEETING_BOOK"://会议室预订
+                            case "MEETING_ISSUE"://党组会议-会议议题
+                            case "MEETING"://专题会议
+                            case "MEETING_OFFICE"://党组会议、主任办公会议
+                            case "MEETING_EXTERNAL"://会议安排
+                            case "MEETING_ACTIVITY"://会议、活动交办事项处理
+                                detailPage = "pages/meeting/DetailPage.html";
+                                break;
+                            case "URGERCLIENT"://委重点工作督查
+                            case "MAJORURGER"://委领导批示督办
+                            case "LISTURGER"://省领导批示督办
+                                detailPage = "pages/urger/DetailPage.html";
+                                break;
+                            // case "SPECIAL_WORK"://专班工作
+                            // 	detailPage = "pages/zbgz/DetailPage.html";
+                            // 	break;
+                            case "INFOREPORT": //信息上报
+                                detailPage = "pages/xxgl/DetailPage.html";
+                                break;
+                            case "INFO"://信息编审
+                                detailPage = "pages/zwxx/DetailPage.html";
+                                break;
+                            case "GOODS"://办公用品
+                            case "SUPPLIES"://办公耗材
+                                detailPage = "pages/goods/DetailPage.html";
+                                break;
+                            // case "SUPPLIES"://办公耗材
+                            // 	detailPage = "pages/supplies/DetailPage.html";
+                            // 	break;
+                            // case "SCRAP"://资产报废
+                            // 	detailPage = "pages/transfer/DetailPage.html";
+                            // 	break;
+                            case "INFORMAL"://征求意见
+                                detailPage = "pages/informal/DetailPage.html";
+                                break;
+                            case "TRAVEL_EXPENSE"://经费报销-差旅报销
+                            case "OTHER_EXPENSE"://经费报销-业务报销
+                            case "LABOR_UNION_EXPENSE"://经费报销-工会报销
+                            case "PARTY_UNION_EXPENSE"://经费报销-党费报销
+                            case "CONTRACT_APPROVE"://合同管理
+                            case "PURCHASE_NOTICE"://采购管理-采购公告审批
+                            case "PURCHASE_RESULT"://采购管理-采购结果审批
+                            case "MEETING_PAY_ISSUED"://支出预算审批-会议、培训、活动支出预算审批
+                            case "OFFICIAL_RECEPTION"://支出预算审批-公务接待预算审批
+                            case "UNION_ACTIVITIES"://支出预算审批-工会活动支出预算审批
+                            case "PROJECT_PLANNING_SERVICE"://支出预算审批-服务采购支出预算审批
+                            case "GOODS_PURCHASE"://支出预算审批-货物采购审批
+                                detailPage = "pages/expense/DetailPage.html";
+                                break;
+                            case "YOUTH_WORK"://团青工作
+                                detailPage = "pages/youthWork/DetailPage.html";
+                                break;
+                            default:
+                                if(obj.urgerId){
+                                    detailPage = "pages/urger/DetailPage.html";
+                                }else{
+                                    toast("暂未开发！");
+                                    try {wispApp.UI.dismissProgressDialog();} catch(e) {}
+                                    return;
+                                }
+                                break;
+						}
+                        if (obj.businessDocId) {
+                            App.LS.set('viewType', 'todo');
+                            OpenWebView(detailPage, { title: "表单页" });
+                        } else {
+                            OpenWebView(detailPage, { title: "表单页" });
+                        }
+						
+					},
+                    addtravelDetail(){//增加支付明细
+                        const oldRecordength = this.formData.travelAddress.length;
+                        if (oldRecordength > 0) {
+                            this.record = {
+                                fromAddress: '',
+                                toAddress: '',
+                                frontRangeDate: [],
+                                startDate: '',
+                                endDate: '',
+                                remark: ''
+                            };
+                            const newrecord = this.record;
+                            this.$set(this.formData.travelAddress, oldRecordength, newrecord);
+                        }
+
+                    },
+                    onDeleteRecordChange () {
+                        //删除行
+                        const length = this.formData.travelAddress.length;
+                        if (length == 1) {
+                            toast("默认行不可删除");
+                            return;
+                        }
+                        //过滤掉不要的，留下需要的
+                        this.formData.travelAddress = this.formData.travelAddress.filter(
+                            (item, index) => index != length - 1
+                        );
+                    },
+                    toggleCheckBox(index){
+                        if(this.isEdit){
+                            this.$refs.checkboxes[index].toggle();
+                        }
+                    },
+                    toEvents: function(name,thisObj){
+						//closePage();
+						if(name== "saveForm" || name == "jsRevoke"){
+							eval("("+name+"())");
+						}
+					},
+                    showTreeComponet(index){
+                        this.isShowTreeSelect = true;
+                    },
+                    showTreeComponetwld(index){
+                        this.isShowTreeSelectwld = true;
+                    },
+                    showTreeComponetcz(index){
+                        this.isShowTreeSelectcz = true;
+                    },
+                    updateForm(){
+                        this.signJson = toArr(App.LS.get("signJson"));
+                        this.payMethodDetail = toArr(App.LS.get("payMethodDetail"));
+                    },
+                    updateRelDocList(){
+                        this.relDocList = toArr(App.LS.get("relDocList"));
+                    },
+                    openRelativeFiles(){//打开关联文件
+                        App.LS.set("signJson",JSON.stringify(this.signJson));
+                        App.LS.set("relDocList",JSON.stringify(this.relDocList));
+                        OpenWebView('pages/ccsp/relative.html');
+                    },
+                    backListening(){ //返回监听
+                        let _this = this;
+                        _this.formData.relDocList = JSON.stringify(_this.relDocList);
+                        _this.formData.payMethodDetail = JSON.stringify(_this.payMethodDetail);
+                        if(App.LS.get("signJson")){
+                            _this.formData.signJson =  App.LS.get("signJson");
+                        }
+                        
+                        document.addEventListener('back', function(e) {
+                            if(_this.isShowTreeSelect){
+                                _this.isShowTreeSelect = false;
+                                e.preventDefault(); 
+                                return;
+                            }
+                            if(_this.isEdit){
+                                if(JSON.stringify(_this.formData) != App.LS.get("docInfor")){//数据有变化
+                                    App.UI('dialog', {
+                                        type : 'confirm',
+                                        title: 'queren',
+                                        OkTxt: '确定',
+                                        CancelTxt: '取消',
+                                        msg	 : '数据未保存,请确认是否关闭！'
+                                    },function(_action){
+                                        if(_action==='OK'){
+                                            closePage();
+                                        }
+                                    })
+                                }else{
+                                    closePage();
+                                }
+                                
+                            }else{
+                                closePage();
+                            }
+                            e.preventDefault(); 
+                        })
+                    },
+                    //上传附件
+                    uploadFile1(event) {
+                        toast("上传中...");
+                        console.log(event);
+                        
+                        var _this = this;
+                        var fileObj = event.target.files[0]; // js 获取文件对象
+                        var url = ZjgyHost + ZjgyUrl["upload-attFile"]; // 接收上传文件的后台地址
+                        var fileName = fileObj.name;
+                        var form = new FormData(); // FormData 对象
+                        form.append("file", fileObj); // 文件对象
+                        form.append("type", 'attach');//formData.atts[0].type
+                        form.append("moduleId", 'PURCHASE_NOTICE');
+                        form.append("docId", ((_this.docInfor && _this.docInfor.id) || App.LS.get('newMailId')));
+                        // form.append("rules", rules);
+                        xhr = new XMLHttpRequest();  // XMLHttpRequest 对象
+                        xhr.open("post", url, true); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
+                        xhr.onload = function (data) {
+                            //try { wispApp.UI.dismissProgressDialog(); } catch (e) { }
+                            toast("上传成功！");
+                            document.getElementById("file").value = '';//清空value,解决第二次无法上传同一份文的问题
+                            _this.getAttachList();
+                        }; //请求完成
+                        xhr.onerror = function (evt) {//请求失败	
+                            try { wispApp.UI.dismissProgressDialog(); } catch (e) { }
+                            document.getElementById("file").value = '';
+                            toast("上传失败！");
+
+                        };
+                        xhr.upload.onloadstart = function () {//上传开始执行方法
+                            ot = new Date().getTime();   //设置上传开始时间
+                            oloaded = 0;//设置上传开始时，以上传的文件大小为0
+                        };
+                        xhr.send(form); //开始上传，发送form数据
+                    },
+                    getAttachList(type) {
+                        let  _this = this;
+                        let  id = _this.formData.id;
+                        ajaxRequst(ZjgyHost + ZjgyUrl["get-attach"] + "?docId=" + id + "&containFile=false", 'GET', 'application/x-www-form-urlencoded', 'json', '').then(function (json) {
+                            console.log(json);
+                            _this.attachList = json.reverse();
+                            _this.initFileList()
+                        });
+                    },
+                },
+            })
+            function saveForm(){ //保存
+                let save = true;
+                // toast("正在开发中…");
+                // return;
+                let _url =  ZjgyHost + ZjgyUrl["TRAVEL_APPROVAL-save"];
+                if(viewType == "newDraft"){//起草
+                    _url =  ZjgyHost + ZjgyUrl["TRAVEL_APPROVAL-insert"];
+                }
+                jbxx.formData.relDocList = JSON.stringify(jbxx.relDocList);
+                jbxx.formData.payMethodDetail = JSON.stringify(jbxx.payMethodDetail);
+                if(App.LS.get("signJson")){
+                    jbxx.formData.signJson =  App.LS.get("signJson");
+                }
+                if(jbxx.formData){
+                    if(jbxx.formData.travelReason == null){
+                        toast("请填写出差事由");
+                        save = false
+                        return
+                    }
+                    if(jbxx.formData.transportation.length<=0){
+                        toast("请选择交通方式");
+                        save = false
+                        return
+                    }
+                    jbxx.formData.travelAddress.forEach((item)=>{
+                        if(item.frontRangeDate == null || item.frontRangeDate.length!=2){
+                            toast("请正确填写出差日期");
+                            save = false
+                        }else if(new Date(item.frontRangeDate[0]).getTime()-new Date(item.frontRangeDate[1]).getTime()>0){
+                            toast("开始日期不能大于结束日期");
+                            save = false
+                        }
+                    })
+                }
+                if(save){
+                    ajaxRequst(_url,'post','application/json;charset=UTF-8','json',JSON.stringify(jbxx.formData)).then(function(json){
+                        // console.log(json);
+                        toast("保存成功！");
+                        if(viewType == "newDraft"){//起草
+                            startProcess();
+                        }
+                    })
+                }
+            }
+            function startProcess(){//启用流程
+                wispApp.UI.showProgressDialog("启用流程中...");
+                let listFlowInfoUrl = ZjgyHost+ZjgyUrl["listFlowInfo"] + "?businessNo="+ thisModule.toUpperCase() +"&status=1";
+                ajaxRequst( listFlowInfoUrl,'get','application/json;charset=UTF-8','json').then(function(res) {
+                    let initProcessUrl =  ZjgyHost+ZjgyUrl["initProcess-" + thisModule]+"?flowLabel="+res[0].flowLabel+"&flowVersion="+res[0].flowVersion+ "&systemNo=" + docInfor.systemNo + "&docId="+jbxx.formData.id;			
+                    ajaxRequst( initProcessUrl,'get','application/json;charset=UTF-8','json').then(function(result) {
+                        // if(curPage=="draft"){
+                            docInfor.flowStatus = "running";
+                            listInfo.flowStatus = "running";
+                            listInfo.moduleId = thisModule;
+                            listInfo.id = result;
+                            listInfo.businessDocId = jbxx.formData.id;
+                            App.LS.set("docInfor",JSON.stringify(docInfor));
+                            App.LS.set("listInfo",JSON.stringify(listInfo));
+                            App.LS.set('aid',result);
+                            App.LS.set('viewType','draft');
+                            // App.LS.set("comfrom",'draft')//表明从起草而来
+                        // }
+                        try {wispApp.UI.dismissProgressDialog();} catch(e) {}
+                        toast("流程启用成功！");
+                        closePage("refreshList()",false);
+                        location.reload();
+                    })               
+                })
+            } 
+            function jsRevoke(){ //删除
+                App.UI('dialog', {
+                    type : 'confirm',
+                    title: 'queren',
+                    OkTxt: '确定',
+                    CancelTxt: '取消',
+                    msg	 : '是否进行流程删除？'
+                },function(_action){
+                    if(_action==='OK'){
+                        let _url =  ZjgyHost + ZjgyUrl["revoke-" + thisModule];
+                        ajaxRequst(_url,'post','application/json;charset=UTF-8','json',JSON.stringify([docInfor.flowProcessId])).then(function(res){
+                            // console.log(json);
+                            if(res){
+                                toast("删除成功！");
+                                closePage("refreshList()");
+                            }else{
+                                toast("删除失败！");
+                            }
+                        })
+                    }
+                })
+                
+            }
+		</script>
+		<style>
+             .title{
+              font-size: 1rem;
+              text-align: center;
+              color: #606061;
+              padding: .8rem 0 .5rem 0;
+              background: #fff;
+            }
+            /* .date{
+                font-size: .8rem;
+                text-align: right;
+                padding-right: .5rem;
+                padding-bottom: .8rem;
+                background: #fff;
+            } */
+            dl:first-child {padding-top: .6rem;}
+            dl{padding: .3rem 0;font-size: .9rem;}
+            dt{border-bottom: #f1f0f0  solid 1px;background: #fff;}
+            dd{/*padding: .3rem 0;  border-bottom: #f1f0f0  solid 1px;*/background: #fff;height: auto;  position: relative;color: #313131;white-space: normal !important;line-height: 1rem;    display: flex;    justify-content: space-between;}
+            dd.chekBox,#basicInfor dd.checked{text-align: left;    padding-left: 0.1rem;    width: 96%;    height: auto;}
+            dd>span,dt{color: #6C6B6B; display: block;    text-align: left;}
+            dd.add{padding: 1rem;   font-size: 0.8rem;}
+            dd.add>span{ color: rgb(28, 149, 255); }
+            dd>.textcontent { width: 55%;text-align: right;}
+            dd>textarea.editable{color:#C4CBD3}
+            dd>.dlspan span { border-bottom: solid 1px #828080;  width: 1rem;  display: inline-block;    line-height: .24rem;}
+
+            .item-vline{ /*条目左侧竖线*/
+                width:4px;
+                background-color:rgb(80, 120, 254);
+                height: 1.4rem; 
+                margin-top: 12px; 
+                margin-left: 4px;
+            }
+            .right-add {
+                position: absolute;
+                right: 0;
+                color: #2389fc;
+                font-size: 0.9rem;
+            }
+            .upload input {
+                opacity: 0;
+                position: absolute;
+                display: block;
+                width: 100%;
+                top: 0;
+            }
+		</style>
+	</body>
+</html>

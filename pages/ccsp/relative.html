@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html >
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
+		<meta content="email=no" name="format-detection" />
+		<!-- <meta name="wpk-bid" content="dta_1_840942484"> <script>    !(function(c,i,e,b){var h=i.createElement("script");var f=i.getElementsByTagName("script")[0];h.type="text/javascript";h.crossorigin=true;h.onload=function(){c[b]||(c[b]=new c.wpkReporter({bid:"dta_1_840942484"}));c[b].installAll()};f.parentNode.insertBefore(h,f);h.src=e})(window,document,"https://g.alicdn.com/woodpeckerx/jssdk??wpkReporter.js","__wpk");</script> -->
+		<title>关联</title>
+		<script type="text/javascript" src="../../js/loadVersion.js" ></script>	
+		<script>
+			var loadList=[				
+				{name:"iconfontcss",type:"css",url:"../../css/iconfont.css"},
+				{name:"commoncss",type:"css",url:"../../css/common.css"},	
+				{name:"indexcss",type:"css",url:"../../css/index.css"},	
+				{name:"handleFilecss",type:"css",url:"../../css/handleFile.css"},				
+				{name:"vuejs",type:"js",url:"../../js/vue.min.js"},
+				{name:"jqueryjs",type:"js",url:"../../js/jquery-1.9.1.min.js"},
+				{name: "indexjs", type: "js", url: "../../js/index1.9.12.js" },	
+				{name:"HandleWriting",type:"js",url:"../../js/HandleWriting.js"},
+				{name:"vantjs",type:"js",url:"../../js/vant.min.js"},
+				{name:"HandleView",type:"js",url:"../../js/HandleView.js"},
+				{name:"ipConfigjs",type:"js",url:"../../js/ipConfig.js"},
+				{name:"commonjs",type:"js",url:"../../js/common.js"},
+				{name:"detaiPagejs",type:"js",url:"js/relative.js"},
+			];
+			loadVersion.iniVersion(loadList);
+		</script>
+		<style>
+			.van-search__content{background: #ECEDEF!important;}
+			.word-button{ 
+						background: #5462E7;
+						color: #F5F6FD;
+						text-align: center;
+						width: 90%;
+						margin: 0 auto;
+						border-radius: .2rem;
+						height: 1.5rem;
+						font-size: .7rem;
+						line-height: 1.5rem;
+						}
+		</style>
+	</head>
+	<body >
+		<div id="relativePage" class="page-view position-relative" >	
+			<form class="paddTop" action="/" style="margin: 0 2%;">
+				<van-search
+				  v-model="value"
+				  show-action
+				  shape="round"
+				  placeholder="请输入搜索关键词"
+				  left-icon="search"
+				>
+				<template #action>
+					<div @click="onSearch">搜索</div>
+				  </template>
+				</van-search>
+			</form> 
+			<div class="tabBody">
+					<van-pull-refresh v-model="item.refreshing" @refresh="onRefresh">
+						<van-list v-model="item.loading" :finished="item.finished" finished-text="没有更多了" @load="onLoad">
+							<ul >
+								<template v-if="item.data.list && item.data.list.length>0 ">
+									<template v-for="(obj,y) in item.data.list"> 	
+										<li class="tabBody-li indexli" :class="item.preIcon?'rjicon '+item.preIcon:''" style="display: flex;">
+											<!--<span class="fileSign" :class="(obj.fileCate==1)?'yueSign':''"></span> -->
+											<div style="width: 80%;flex: auto;padding-right: .6rem;">
+												<div class="word-title" >{{y+1}}、<span v-html="obj.C_subject" ></span></div>
+												<div class="word-bottom"><p>{{obj.S_moduleDes}}</p><p>{{obj.S_draftUserName}}</p></div>
+											</div>
+											<template v-if="isEdit">
+												<template v-if="!isRelatived(obj.id)">
+													<div style="flex: auto;width: 20%;" class="word-button" @click="addRe(obj)">关联</div>		
+												</template>	
+												<template v-else>
+													<div style="flex: auto;width: 20%;"  class="word-button" @click="cancelRe(obj)">取消关联</div>		
+												</template>
+											</template>							
+										</li>
+									</template >
+								</template>
+								<template v-else><li><img class="emptyimg" src="../../img/empty_prompt.png" /></li></template>
+						</ul>
+						</van-list>
+					</van-pull-refresh>
+			  </div>
+		</div>			
+	</body>
+</html>

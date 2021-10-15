@@ -1,0 +1,46 @@
+/*发起审批表单列表选择树形*/
+.box-dept{overflow-x: auto;overflow-y: auto;}
+.tree-list{
+    overflow-y: auto; 
+    overflow-x: hidden;
+    padding-bottom:3rem; 
+    background: #fff;
+    position:fixed;
+    top:0;
+    width:100%;
+    height:100%;
+    z-index:999
+}
+.dept-p{    display: none;padding: .5rem 0px 0px 2rem;}
+.tree-act+.tree-dept{display:block}
+.tree-dept{display: none;padding: 0px 0px 0px 30px;}
+.people-tree{height: 100%;overflow-y: auto;overflow-x: hidden;background: #ffffff;padding: 10px;}
+.people-tree label{padding: 10px 0;display: block;text-overflow: ellipsis;overflow: hidden;}
+.tree-people{white-space: initial;border-bottom: 1px solid #f5f5f5;}
+.people-lab.tree-act{color:#23a0fd;}
+.people-lab.tree-act+span{display: block;}
+.tree-dept label span{min-width: 20px;padding: 0px 2px;margin-left: 5px;color: #ffffff;width: 20px;background: #23a0fd;display: inline-block;text-align: center;border-radius: 10px;}
+.flow-header .right{position: absolute;right: 0;top: 0;height: 100%;padding: 0 .3rem;color: #ffffff;}
+.box-dept li{padding: .4rem;}
+.box-dept li:last-of-type{border-bottom-width: 0;}
+.box-dept li label{display:block;}
+
+/*树形列表样式*/
+.tabBody-ul{display: none;    overflow: hidden;}
+.tabbody-active{display: block;}
+.word-title {
+    font-size: .8rem;
+    line-height: 1.2rem;
+    color: #1B1B1B;
+}
+.word-bottom{position: relative; color: #999999; font-size: .8rem;    display: flex; justify-content: space-between;    line-height: 1rem;}
+.word-bottom>p{word-wrap: normal;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;}
+.word-bottom>p+p{text-align:right;}
+.ontheader{top: 0;}
+.tabBody-li{padding: .2rem .2rem;border-bottom: 1px solid #f1f1f1;}
+.tabTitle{text-align: center;line-height: 2.5rem;box-sizing: border-box;border-bottom: 1px solid #f1f1f1;}
+.word-title .checkbox{
+    font-size: 1rem;
+    line-height: 1.2rem;
+    padding-right: .2rem;
+}

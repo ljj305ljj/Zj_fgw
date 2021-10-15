@@ -185,7 +185,7 @@
 					</div>
 				</van-tab>
 				<div class="add-btn">
-					<span v-if="isEdit" class="rjicon iconzengjia" style="line-height: 44px;color:#5078fe; padding: 0 .4rem;"  @click="ShowTreeSelect" ></span>
+					<span v-if="isEdit" class="rjicon iconzengjia" style="line-height: 44px;color:#5078fe;"  @click="ShowTreeSelect" ></span>
 					<span v-if="isEdit" class="rjicon  rjicon-del" style="line-height: 44px;color:#e80808;padding: 0 .4rem;"  @click="deleteInforMation"></span>
 					<!-- <van-icon style="line-height: 44px;" name="add-o" color="#5078fe" size="1.2rem" /> -->
 					<!-- <van-icon style="line-height: 44px;" name="delete-o" color="#5078fe" size="1.2rem" /> -->
@@ -236,6 +236,10 @@
 				height: 44px;
 				background: #fff;
 				text-align: center;
+			}
+			.van-field__label{
+                max-width: 6.2em;
+				width: auto;
 			}
 	   </style>			
 	</body>

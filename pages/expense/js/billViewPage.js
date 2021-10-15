@@ -288,7 +288,7 @@ window.billViewPage=new Vue({
 										_this.expenseContentJson.trainTicket[i] = {
 											amount: res.money,
 											banquet: res.seat,
-											date: res.time!="" ? _this.formatChineseDate(res.time) : "",
+											date: res.time,
 											departure: res.startStation,
 											destination: res.endStation,
 											expenseAmount: res.money,
