@@ -26,6 +26,7 @@
 	</head>
 	<body>
 		<div id="ListData" class="page-view">
+			
 			<template v-if="tabData.view.length==1" >
 				<template v-for="(item,x) in tabData.view">
 					<van-pull-refresh v-model="item.refreshing" @refresh="onRefresh">
