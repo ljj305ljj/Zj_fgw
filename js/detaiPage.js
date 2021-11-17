@@ -66,6 +66,7 @@ if(viewType=="commonForm"||viewType=="allForm"){
 docId="";
 var handleType = "";//自定义阅办单类型；
 var docPermissionFlag = false;//是否获取表单信息的时候就获取流程权限
+var isEditContent = false;//是否编辑正文
 //addCookie("callback", "", 7, "/");//回调函数存放在cookie中，，存放再LS中IPHONE7手机有问题。
 //传入图片路径，返回base64
 window.detailPage=new Vue({ 
@@ -307,7 +308,7 @@ window.detailPage=new Vue({
 						_self.getListDocResource();
 					}
 					
-					if((docInfor.flowStatus && docInfor.flowStatus != "finish") || listInfo.isHistoryFile != "yes"){//办结文件 或 文件资料中的历史文件不需要获取流程权限 
+					if(docInfor.flowStatus && docInfor.flowStatus != "finish"){//办结文件 或 文件资料都不需要获取流程权限 
 						_self.getProcessPermission(moduleId);//流程权限获取
 					}else{
 						baseCommon.getOpinionList();
@@ -371,6 +372,12 @@ window.detailPage=new Vue({
 					//_MenuList.push('<a class="bottom-3nav-box" onclick=pdfFileList()><span class="iconfont piyue"></span><p>正文批注</p></a>');
 					//hasNotationBtn=true;
 					haveSignbtn = true;
+					//btns.push({btnName:"手写签批",iconCss:"piyue",toEvent:"pdfNotation"});
+				}
+				if($.inArray("editMain",businessHandle)>-1){ //编辑正文
+					//_MenuList.push('<a class="bottom-3nav-box" onclick=pdfFileList()><span class="iconfont piyue"></span><p>正文批注</p></a>');
+					//hasNotationBtn=true;
+					isEditContent = true;
 					//btns.push({btnName:"手写签批",iconCss:"piyue",toEvent:"pdfNotation"});
 				}
 				if($.inArray("send",baseAction)>-1 ){
@@ -902,7 +909,7 @@ function jsAutoSend(){//自动发送
 					}else{
 						try {wispApp.UI.dismissProgressDialog();} catch(e) {}
 						var assigndStates = sendobj[0].assigndStates[0];
-						if(sendobj.length==1 && assigndStates.autoSend=="1"){
+						if(sendobj.length==1){
 							var todata = {
 								docId:docInfor.id,
 								workTodoId:detailPage.proPermission.workTodoId,

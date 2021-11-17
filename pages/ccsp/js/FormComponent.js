@@ -288,14 +288,14 @@ Vue.component('multi-tree',{
 			});
 			$(".icon-selected").each(function(index, el) {
 				$(el).removeClass("icon-selected")
-				$(el).removeClass("icon-chekbox")
+				$(el).addClass("icon-chekbox")
 			});
 			this.$emit('tree-value', nameArr,idArr);
 		},
 		close:function(){
 			$(".icon-selected").each(function(index, el) {
 				$(el).removeClass("icon-selected")
-				$(el).removeClass("icon-chekbox")
+				$(el).addClass("icon-chekbox")
 			});
 			this.$emit('tree-value', []);
 		}

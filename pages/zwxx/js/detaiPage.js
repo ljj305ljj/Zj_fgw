@@ -330,15 +330,15 @@ window.detailPage=new Vue({
 		},
 		continueOperate() {//意见填写完继续办理
 			baseCommon.getOpinionList(true);
-			// try {
-			// 	if($.inArray("send",this.baseAction)>-1 ){
-			// 		vFBD.toEvents("jsSend","continue");
-			// 	}else if($.inArray("autosend",this.baseAction)>-1){
-			// 		jsAutoSend();
-			// 	}
-			// } catch (error) {
-			// 	alert(error);
-			// }
+			try {
+				if($.inArray("send",this.baseAction)>-1 ){
+					vFBD.toEvents("jsSend","continue");
+				}else if($.inArray("autosend",this.baseAction)>-1){
+					jsAutoSend();
+				}
+			} catch (error) {
+				alert(error);
+			}
 		}
 	}
 });	
@@ -511,12 +511,14 @@ function jsAutoSend(){//自动发送
 					}else{
 						try {wispApp.UI.dismissProgressDialog();} catch(e) {}
 						var assigndStates = sendobj[0].assigndStates[0];
-						if(sendobj.length==1 && assigndStates.autoSend=="1"){
+						if(sendobj.length==1){
 							var todata = {
 								docId:docInfor.id,
 								workTodoId:detailPage.proPermission.workTodoId,
 								transitionLabels:assigndStates.transitionLabel
 							};
+							if(App.LS.get("opinionContent")){ todata.opinionContent = encodeURI(App.LS.get("opinionContent")); } 
+							App.LS.remove("opinionContent");
 							ajaxRequst(ZjgyHost + ZjgyUrl["ZDfs-"+App.LS.get("module")],'post','application/json;charset=UTF-8','json',JSON.stringify(todata)).then(function(submitobj){
 								if(submitobj){
 									try{toast("操作成功！",3000);}catch(e){}

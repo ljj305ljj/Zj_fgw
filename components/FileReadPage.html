@@ -5,9 +5,10 @@
 		<meta name="viewport" content="initial-scale=1,maximum-scale=1, minimum-scale=1,user-scalable=no">
 		<meta content="email=no" name="format-detection" />
 		<title>文件查看</title>
+	
 	</head>
 	<body>
-		<link rel="stylesheet" href="./css/pdfh5.css" />
+		<!-- <link rel="stylesheet" href="./css/pdfh5.css" /> -->
 		<style>
 			.detail-flex{height: 100%;width: 100%;overflow: hidden;}
 			.domeBox{height: 100%;;width: 100%;padding-bottom: 2.5rem;position: relative;}
@@ -36,7 +37,10 @@
 			<div class="domeBox">
 				<span v-show="pdfInfo.canSign" class="singBtn" @click="openSingFile">签批</span>
 				<span v-show="sendBtn" class="singBtn" style="bottom:6.5rem" @click="sendAction">发送</span>
-				<div :style="'height:'+getDetailHeight()" ><iframe id="dome" src="" width="100%" height="100%" frameborder="0"></iframe></div>
+				<div ref="customMount" v-show="isEdit" class="custom-mount" :style="'height:'+getDetailHeight()" style="height: calc(100%);"></div>
+				<div ref="onlinePreview"  v-show="!isEdit" :style="'height:'+getDetailHeight()">
+					<!-- <iframe id="dome" src="" width="100%" height="100%" frameborder="0"></iframe> -->
+				</div>
 				<div class="fileListBtn" @click="showMorePage">文件清单</div>
 				<div v-show="showMore" class="file-view" @click="hideMorePage">
 					<ul class="file-ul">
@@ -78,8 +82,16 @@
 				</div>
 			</div>
 		</div>
+		<style>
+			
+				#office-iframe{
+					width:100% !important;
+					height: 100% !important;
+				}
+		
+		</style>
 		<script>
-			var fcsurl = ZjgyHost + 'wps/files/';
+			var fcsurl = ZjgyHost + 'wps/files/'; //oa接口
 			var vFile=new Vue({
 				el: '#File',
 				data(){
@@ -96,7 +108,14 @@
 						showMore:false,
 						haveSignbtn:false,
 						sendBtn:false,
-						getFilesTimes:0
+						getFilesTimes:0,
+						/* wps 预览使用 */
+						showUrl:"",
+						fileinfo:{},//当前渲染的文件
+						isWpsInit:false,
+						interval:null,
+						intervalTime:0,
+						isEdit:false //是否能编辑正文
 				    }
 				},
 				created:function(){
@@ -112,17 +131,6 @@
 					if(App.LS.get("docId2")){
 						this.getAllFiles(App.LS.get("docId2"));
 					}
-					/*if(typeof(attList2) != "undefined"){
-						var atts = attList.concat(attList2);
-					}else{
-						var atts = attList;
-					}
-					if(atts.length>0)this.pdflist(atts);*/
-					//if(attList.length>0)this.pdflist(attList);
-					// if(detailPage.docResource.length>0){
-					// 	attList = attList.concat(detailPage.docResource);
-					// 	this.pdflist(attList);
-					// }else if(attList.length>0)this.pdflist(attList);
 				},
 				methods:{
 					getDetailHeight:function(){
@@ -186,11 +194,11 @@
 					console.log(list);
 				    	var _this = this;
 				    	var mainLen = 0;
-				    	var docInfor = toArr(App.LS.get("docInfor"));						
+				    	var docInfor = toArr(App.LS.get("docInfor"));	
+						_this.isEdit = isEditContent;					
 				    	$.each(list, function(i,item) {
 							//正文
-							var tempurl= innerOA  + ZjgyUrl["File-download"]+ '?id='+item.id+"&x-auth-token="+getCookieValue("x-auth-token") +"&tTime="+(new Date()).getTime();							 
-							
+							var tempurl= innerOA  + ZjgyUrl["File-download"]+ '?id='+item.id+"&x-auth-token="+getCookieValue("x-auth-token") +"&tTime="+(new Date()).getTime();
 							//var _url= fcsurl + 'fileurl=' + encodeURIComponent(tempurl+'&tTime='+(expires.getTime()))+'&task='+filetask+'&type=src&res=url&filetype='+fileSuffix+'&jsoncallback=?';		
 							//console.log(_url);
 							if(item.resourceSubject){
@@ -204,7 +212,8 @@
 							//autoflag=true;
 							//var tempurl= outerBasehost + '/wisp_fcs/conversion/conved' + result.Content;
 							// var _url = fcsurl + 'fileurl=' + encodeURIComponent(tempurl)+'&task='+filetask+'&type=src&res=url&filetype='+fileSuffix+'&reqType=app';
-							var _url = fcsurl + item.id + "/get-online-preview-url?urlToken=" + getCookieValue("x-auth-token") + "&fileType=" + fileSuffix + "&watermark=" + watermark + "&time=" + expires.getTime();
+							let isEdit = _this.isEdit ? 'edit' : 'preview';
+							var _url = fcsurl + item.id + `/get-online-${isEdit}-url?urlToken=` + getCookieValue("x-auth-token") + "&fileType=" + fileSuffix + "&watermark=" + watermark + "&time=" + expires.getTime();
 							//http://223.4.76.182:5050/wps/files/13e31252d4cbe000/get-online-preview-url?urlToken=500a8541-220d-4d7d-acdf-468e75ec42fd&fileType=wps&watermark=%E9%99%88%E8%A1%A1%E6%B2%BB&time=1633662856839&_t=1633662856862
 								if(item.resourceSubject){
 									var obj = {
@@ -370,6 +379,7 @@
 						this.pdfInfo.type=type;
 						this.pdfInfo.index=num;
 						var fileinfo = this.ArrsList[type][index];
+						this.fileinfo = fileinfo;
 						this.pdfInfo.moduleId = fileinfo.moduleId;
 						var pdfurl = fileinfo.pdfurl;
 						if(pdfurl==""){
@@ -382,25 +392,133 @@
 							this.showSignBtn(fileinfo,type);
 							$("#dome").empty();
 							console.log(pdfurl);
-							if(location.protocol == 'https:'){
-								pdfurl = pdfurl.replace('http://10.168.100.101', outerBasehost+"/httpsViewer");
-								pdfurl = pdfurl.replace('http://10.249.137.58', outerBasehost+"/httpsViewer");
-							}else{
-								pdfurl = pdfurl.replace('http://10.168.100.101',  outerBasehost+"/httpViewer");
-								pdfurl = pdfurl.replace('http://10.249.137.58', outerBasehost+"/httpViewer");
+							pdfurl = pdfurl.replace('http://10.168.100.101', wpsHost);//把内网地址替换成外网映射的地址 var wpsHost = "https://oa.fzggw.zj.gov.cn:9999";
+							pdfurl = pdfurl.replace('http://10.249.137.58', wpsHost);
+							
+							//预览的时候需要加参数
+							this.showUrl = !this.isEdit ? pdfurl + '&wpsPreview=1110100' : pdfurl;//wpsPreview=1110100 预览去掉痕迹
+							if(!this.isEdit){
+								let iframeHtml = `<iframe id="dome" src="${this.showUrl + '&printShowFront=false'}" width="100%" height="100%" frameborder="0"></iframe>`
+								this.isWpsInit = false;
+								//监听预览初始化完成
+								window.addEventListener('message', (e) => {
+									setTimeout(()=>{
+										if(!this.interval){
+											//如果初始化失效，手动重新初始化
+											this.intervalTime = 0;
+											this.interval = setInterval(() => {
+												if(!this.isWpsInit && this.intervalTime < 180){
+													this.wpsInit(fileinfo.fileSuffix);//wps初始化
+													this.intervalTime ++;
+												}else{
+													clearInterval(this.interval);
+												}
+											},1000)
+										}
+									},3000)
+									if (e.data === 'wpsPreviewReadyed') {
+										this.wpsInit(fileinfo.fileSuffix);//wps初始化
+									}
+								});
+								this.$refs.onlinePreview.innerHTML = iframeHtml;
+							}else{//在线编辑的时候需要用sdk调用
+								this.instance = WebOfficeSDK.config({
+									mount: this.$refs.customMount,
+									url: this.showUrl,
+									wordOptions: {
+										isShowDocMap:false,
+										// mobile: {
+										// 	isOpenIntoEdit:true
+										// }
+									}
+								})
+								//wps在线编辑操作
+								this.example();
 							}
-							// pdfurl = pdfurl.replace('http://10.249.137.58/', outerBasehost+"/viewer/");
-							document.getElementById("dome").src = pdfurl;
-							// openPdf("dome",pdfurl,{
-							// 	//waterMark:userInfor.userName,
-							// 	waterMark: "省发改委  " + (userInfo.userName || userInfo.username) + " " + (userInfo.phone ?  userInfo.phone.substring(7) : ""),
-							// 	ctrlSwiper:function(scale){
-							// 		BackCtrlSwiper("swiper-container3",scale);
-							// 	}
-							// });
 							App.LS.set("openpdf",pdfurl);//记录当时打开的文件url用于转屏的时候重新渲染页面 
 							this.showMore=false;
 							wispApp.UI.dismissProgressDialog();
+						}
+					},
+					//wps在线预览初始化后处理
+					wpsInit(fileSuffix){
+						try{
+							this.iframeWin = document.getElementById("dome").contentWindow;
+						}catch(e){
+							return
+						}
+						this.isWpsInit = true;
+						this.interval ? clearInterval(this.interval) : '';
+						//初始化完成处理预览的打印按钮显示
+						// if(!this.isEdit){
+						// 	this.$emit('update:previewActive',true);
+						// }
+						// 初始化完成回调
+						// 可以执行缩放
+						if(['wps','doc','docx'].includes(fileSuffix.toLowerCase())){
+							this.iframeWin.postMessage({
+								eventName: 'wordZoomAuto',
+								data: -1 //自适应控制参数
+							}, '*'); //文字
+						}else if(['xlsx','xls'].includes(fileSuffix.toLowerCase())){
+							this.iframeWin.postMessage({
+								eventName: 'excelZoomAuto',
+								data: -1 //自适应控制参数
+							}, '*'); //文字
+						}else if(['ppt'].includes(fileSuffix.toLowerCase())){
+							this.iframeWin.postMessage({
+								eventName: 'pptZoomAuto',
+								data: -1 //自适应控制参数
+							}, '*'); //演示
+						}else if(['pdf'].includes(fileSuffix.toLowerCase())){
+							this.iframeWin.postMessage({
+								eventName: 'pdfZoomAuto',
+								data: -1 //自适应控制参数
+							}, '*'); //演示
+						}else{
+							this.iframeWin.postMessage({
+								eventName: 'wordZoomAuto',
+								data: -1 //自适应控制参数
+							}, '*'); //文字
+							this.iframeWin.postMessage({
+								eventName: 'excelZoomAuto',
+								data: -1 //自适应控制参数
+							}, '*'); //文字
+							this.iframeWin.postMessage({
+								eventName: 'pptZoomAuto',
+								data: -1 //自适应控制参数
+							}, '*'); //演示
+							this.iframeWin.postMessage({
+								eventName: 'pdfZoomAuto',
+								data: -1 //自适应控制参数
+							}, '*'); //演示
+						}
+						// this.iframeWin.postMessage({
+						// 	eventName: 'wordZoomAuto',
+						// 	data: 2 //自适应控制参数
+						// }, '*'); //文字
+						// this.iframeWin.postMessage({
+						// 	eventName: 'pptZoomAuto',
+						// 	data: -1 //自适应控制参数
+						// }, '*'); //演示
+						// this.iframeWin.postMessage({
+						// 	eventName: 'pdfZoomAuto',
+						// 	data: -1 //自适应控制参数
+						// }, '*'); //演示
+					},
+					//wps操作
+					async example() {
+						await this.instance.ready();
+						const app = this.instance.Application;
+						this.instance.WordApplication().ActiveDocument.ActiveWindow.DocumentMap = false; // 隐藏目录
+						this.instance.WordApplication().ActiveDocument.ActiveWindow.View.Zoom.PageFit = 2; //文档窗口大小进行调整后使页面以最佳尺寸适应活动窗口
+						this.instance.WordApplication().ActiveDocument.TrackRevisions = true;// 将当前文档的编辑状态切换成修订模式
+						this.instance.WordApplication().ActiveDocument.ActiveWindow.View.ShowComments = false;// 隐藏评论
+						 
+					},
+					async onlineEditAfter(){
+						if(this.instance){
+							let result = await this.instance.save();
 						}
 					},
 				    getFileIcon: function(val){

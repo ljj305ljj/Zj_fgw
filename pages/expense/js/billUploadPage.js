@@ -1,16 +1,16 @@
 // 初始化vConsole
-window.vConsole = new window.VConsole({
-	defaultPlugins: ['system', 'network', 'element', 'storage'], // 可以在此设定要默认加载的面板
-	maxLogNumber: 1000,
-	// disableLogScrolling: true,
-	onReady: function() {
-		console.info(dd)
-	  console.log('vConsole is ready.');
-	},
-	onClearLog: function() {
-	  console.log('on clearLog');
-	}
-});
+// window.vConsole = new window.VConsole({
+// 	defaultPlugins: ['system', 'network', 'element', 'storage'], // 可以在此设定要默认加载的面板
+// 	maxLogNumber: 1000,
+// 	// disableLogScrolling: true,
+// 	onReady: function() {
+// 		console.info(dd)
+// 	  console.log('vConsole is ready.');
+// 	},
+// 	onClearLog: function() {
+// 	  console.log('on clearLog');
+// 	}
+// });
 var userInfo = toArr(App.LS.get('userInfo'));
 var docInfor = toArr(App.LS.get("docInfor"));
 var billAttList = [];//票据附件

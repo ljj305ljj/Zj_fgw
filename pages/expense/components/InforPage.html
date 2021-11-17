@@ -209,6 +209,23 @@
                         </van-checkbox-group>
                         </dl>
                         <dl>
+                            <dd><van-field  label="其他附件">
+                                <template #input>
+                                    <span class="right-add rjicon iconadd upload" id="addFile-btn">
+                                        <input type="file" name="myfile" id="file" @change="uploadFile1(event)">
+                                        上传材料
+                                    </span>
+                                </template>
+                            </van-field></dd>
+                            <ul class="main-filelist">
+                                <li v-for="(obj,i) in attachList">
+                                {{i+1 + '.'+obj.fileName+'.'+obj.fileSuffix}}
+                                <span style="margin-left: 1rem;font-size: 1rem;" @click="deleteAttach(obj.id)"
+                                    class="rjicon rjicon-del"></span>
+                                </li>
+                            </ul>
+                        </dl>
+                        <dl>
                             <dd><van-field
                                 v-model="formData.otherAmountDetail"					
                                 input-align="right"
@@ -473,12 +490,16 @@
                         rules: {
                             subjectMatter: [{ type: 'string',required: true, message: '请填写出差事由' }],
                         },
+                        attachList :[],
                     }
                 },
                 created:function(){
                     try {wispApp.UI.dismissProgressDialog();} catch(e) {}
-                    this.backListening();
-                    this.initBtn();
+                    if(this.businessNo==='TRAVEL_EXPENSE'){
+                        this.backListening();
+                        this.initBtn();
+                        if(viewType != "newDraft"){ this.getAttachList(); }
+                    }
                 },
                 methods:{
                     initBtn(){
@@ -685,7 +706,7 @@
                         this.expenseContentJson = toArr(App.LS.get("expenseContentJson"));
                         this.signJson = toArr(App.LS.get("signJson"));
                         this.payMethodDetail = toArr(App.LS.get("payMethodDetail"));
-                        this.formData = toArr(App.LS.get("formData"));
+                        this.formData = toArr(App.LS.get("formData")) ||  this.formData;
                     },
                     updateRelDocList(){
                         this.relDocList = toArr(App.LS.get("relDocList"));
@@ -740,12 +761,70 @@
                             }
                             e.preventDefault(); 
                         })
-                    }
+                    },
+                    //上传附件
+                    uploadFile1(event) {
+                        wispApp.UI.showProgressDialog("上传中...");
+                        console.log(event);
+                        var _this = this;
+                        var fileObj = event.target.files[0]; // js 获取文件对象
+                        var url = ZjgyHost + ZjgyUrl["upload-attFile"]; // 接收上传文件的后台地址
+                        var fileName = fileObj.name;
+                        var form = new FormData(); // FormData 对象
+                        form.append("file", fileObj); // 文件对象
+                        form.append("type", 'attach');//formData.atts[0].type
+                        form.append("moduleId", thisModule);
+                        form.append("docId", App.LS.get("docId"));
+                        // form.append("rules", rules);
+                        xhr = new XMLHttpRequest();  // XMLHttpRequest 对象
+                        xhr.open("post", url, true); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
+                        xhr.onload = function (data) {
+                            try { wispApp.UI.dismissProgressDialog(); } catch (e) { }
+                            toast("上传成功！");
+                            document.getElementById("file").value = '';//清空value,解决第二次无法上传同一份文的问题
+                            _this.getAttachList();
+                        }; //请求完成
+                        xhr.onerror = function (evt) {//请求失败	
+                            try { wispApp.UI.dismissProgressDialog(); } catch (e) { }
+                            document.getElementById("file").value = '';
+                            toast("上传失败！");
+
+                        };
+                        xhr.upload.onloadstart = function () {//上传开始执行方法
+                            ot = new Date().getTime();   //设置上传开始时间
+                            oloaded = 0;//设置上传开始时，以上传的文件大小为0
+                        };
+                        xhr.send(form); //开始上传，发送form数据
+                    },
+                    getAttachList() {
+                        let  _this = this;
+                        // let  id = _this.formData.id;
+                        ajaxRequst(ZjgyHost + ZjgyUrl["get-attach"] + "?docId=" +  App.LS.get("docId") + "&containFile=false", 'GET', 'application/x-www-form-urlencoded', 'json', '').then(function (json) {
+                            console.log(json);
+                            _this.attachList = json.reverse();
+                            detailPage.getAllFiles();
+                            // _this.initFileList()
+                        });
+                    },
+                    deleteAttach(id){//删除附件  isTip=true 需要提示删除
+                        let _this = this;
+                        let _url =  ZjgyHost + ZjgyUrl["delete-attFile"];
+                        let data = [id];
+                        ajaxRequst(_url,'post','application/json;charset=UTF-8','json',JSON.stringify(data)).then(function(result){
+                            if(result){
+                                toast("删除成功！");
+                                _this.getAttachList();
+                            }else{
+                                toast("删除失败！");
+                            }
+                        });  
+                    },
                 },
              })
              function saveForm(){ //保存
                 // toast("正在开发中…");
                 // return;
+                let isSave = true;
                 let _url =  ZjgyHost + ZjgyUrl["save-travel_expense"];
                 if(viewType == "newDraft"){//起草
                     _url =  ZjgyHost + ZjgyUrl["insert-travel_expense"];
@@ -758,14 +837,48 @@
                 if(App.LS.get("signJson")){
                     jbxx.formData.signJson =  App.LS.get("signJson");
                 }
-                // _this.payMethodDetail
-                ajaxRequst(_url,'post','application/json;charset=UTF-8','json',JSON.stringify(jbxx.formData)).then(function(json){
-                    // console.log(json);
-                    toast("保存成功！");
-                    if(viewType == "newDraft"){//起草
-                        startProcess();
+                if(jbxx.formData){
+                    if(jbxx.formData.subjectMatter == null || jbxx.formData.subjectMatter == ""){
+                        toast("请填写出差事由");
+                        isSave = false;
+                        return;
                     }
-                })
+                    let expenseContentJson = toArr(jbxx.formData.expenseContentJson);
+                    for(let pageId in expenseContentJson){
+                        expenseContentJson[pageId].forEach(expense => {
+                            if(expense.amount == null || expense.amount == ""){
+                                toast("请填写报销金额");
+                                isSave = false;
+                                return;
+                            }else if(expense.expenseAmount == null || expense.expenseAmount == ""){
+                                toast("请填写发票金额");
+                                isSave = false;
+                                return;
+                            }else if(expense.invoiceNumber == null || expense.invoiceNumber == ""){
+                                toast("请填写票据号码");
+                                isSave = false;
+                                return;
+                            }
+                        })
+                    }
+                    let signJson = toArr(jbxx.formData.signJson);
+                    signJson && signJson.signJsonList.forEach(sign => {
+                        if(sign.startDate == null || sign.startDate == "" || sign.endDate == null || sign.endDate == ""){
+                            toast("请填写信息登记的出差日期");
+                            isSave = false;
+                            return;
+                        }
+                    })
+                }
+                if(isSave){
+                    ajaxRequst(_url,'post','application/json;charset=UTF-8','json',JSON.stringify(jbxx.formData)).then(function(json){
+                        // console.log(json);
+                        toast("保存成功！");
+                        if(viewType == "newDraft"){//起草
+                            startProcess();
+                        }
+                    })
+                }
             }
             function startProcess(){//启用流程
                 wispApp.UI.showProgressDialog("启用流程中...");
@@ -816,6 +929,36 @@
                 })
                 
             }
+            function networkError(er,url) {
+                try{wispApp.UI.dismissProgressDialog();}catch(e){}
+                if(er.status=="401"){
+                    //toast("登陆过期，即将重新验证。"+url);
+                    closePage('toast("登陆过期，即将重新验证。");location.reload();');
+                }else{
+                    try{
+                        //toast(toArr(er.responseText).message);
+                        let errorMessage = "请求出错，请联系管理员！";
+                        switch (er.status){
+                            case "400":
+                                errorMessage = " 请求出现语法错误！";
+                            case "404":
+                                errorMessage = "无法找到指定位置的资源！";
+                            case "500":
+                                errorMessage = "内部服务器错误！";
+                            case "502":
+                                errorMessage = "错误的网关！";
+                            case "504":
+                                errorMessage = "网关超时！";
+                            default:
+                                errorMessage = toArr(er.responseText).message;
+                        }
+                        toast(errorMessage);
+                    }catch(e){
+                        //网络异常	
+                        toast('请求异常，请检查网络!'+url);
+                    }
+                }
+            }
 		</script>
 		<style>
              .title{
@@ -855,6 +998,34 @@
                 max-width: 6.2em;
 				width: auto;
 			}
+            .right-add {
+                position: absolute;
+                right: 0;
+                color: #2389fc;
+                font-size: 0.9rem;
+            }
+            .upload input {
+                opacity: 0;
+                position: absolute;
+                display: block;
+                width: 100%;
+                top: 0;
+            }
+            .main-filelist li {
+                padding: 10px;
+                word-spacing: normal;
+                white-space: normal;
+                border-bottom: 1px solid #f5f5f5;
+                color: #4eaefe;
+                background:#fff;
+            }
+            .main-filelist li:last-of-type {
+                border-bottom: none;
+            }
+            .main-filelist li.notopen {
+                background: #f5f5f5;
+                color: #333333;
+            }
 		</style>
 	</body>
 </html>

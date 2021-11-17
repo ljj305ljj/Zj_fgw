@@ -252,7 +252,7 @@
                                     <dl>
                                         <dd>
                                             <van-field
-                                                    v-model="travelData.startDate"					
+                                                    v-model="travelData.frontRangeDate[0]"					
                                                     input-align="right"
                                                     label="开始日期"
                                                     autosize
@@ -273,7 +273,7 @@
                                         </dd>
                                         <dd>
                                             <van-field
-                                                    v-model="travelData.endDate"					
+                                                    v-model="travelData.frontRangeDate[1]"					
                                                     input-align="right"
                                                     label="结束日期"
                                                     autosize
@@ -383,6 +383,7 @@
                         this.formData.isChangeAddress = '0';
                         this.formData.isLeaderTeam = '0';
                         this.formData.isChuLeader = '0';
+                        this.formData.travelAddress[0].frontRangeDate = []
                         let _url = ZjgyHost + ZjgyUrl["TRAVEL_APPROVAL-createId"];
                         ajaxRequst(_url,'get','application/json;charset=UTF-8','json').then(json=>{
                             this.formData.id = json
@@ -417,12 +418,12 @@
                     },
                     onConfirmStart(date){
                         this.showCalendar = false;
-                        this.formData.travelAddress[this.startIndex].startDate = this.formatDate(date);
-                        if(!this.formData.travelAddress[this.startIndex].frontRangeDate){
-                            this.formData.travelAddress[this.startIndex].frontRangeDate = []
-                        }
-                        this.formData.travelAddress[this.startIndex].frontRangeDate.push(this.formatDate(date))
-                        console.log(this.formData);
+                        // this.formData.travelAddress[this.startIndex].startDate = this.formatDate(date);
+                        // if(!this.formData.travelAddress[this.startIndex].frontRangeDate){
+                        //     this.formData.travelAddress[this.startIndex].frontRangeDate = []
+                        // }
+                        this.formData.travelAddress[this.startIndex].frontRangeDate[0] = this.formatDate(date)
+                        console.log(this.formData.travelAddress);
                         
                     },
                     showCalendarEnd(index){
@@ -431,8 +432,9 @@
                     },
                     onConfirmEnd(date){
                         this.showCalendar2 = false;
-                        this.formData.travelAddress[this.endIndex].endDate = this.formatDate(date);
-                        this.formData.travelAddress[this.endIndex].frontRangeDate.push(this.formatDate(date))
+                        // this.formData.travelAddress[this.endIndex].endDate = this.formatDate(date);
+                        this.formData.travelAddress[this.endIndex].frontRangeDate[1]= this.formatDate(date);
+                        console.log(this.formData.travelAddress);
                     },
                     formatDate(date) {
                         return date.Format("yyyy-MM-dd");

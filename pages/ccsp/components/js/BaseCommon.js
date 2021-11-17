@@ -166,7 +166,7 @@ var baseCommon = {
 		var getopinurl = ZjgyHost + ZjgyUrl["get-opinlist"] + "?docId=" + docInfor.id;
 		//var getopinobj = JSON.stringify({docId:docInfor.form.id});
 		ajaxRequst( getopinurl,"get",'application/json',"json").then((opinionData) => {
-			if(refreshOpin){opinionPage.opinionList = opinionData;}
+			// if(refreshOpin){opinionPage.opinionList = opinionData;}
 			App.LS.set("oplist",JSON.stringify(opinionData));
 		 	baseCommon.fullOpinions(opinionData);
 		});

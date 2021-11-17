@@ -71,16 +71,55 @@
 					// 	//return (($("body").height()-132-54) + "px");
 					// 	return ($(window).height()-132-60)/document.documentElement.style.fontSize.split("px")[0] + "rem";
 					// },
+					
 					toEvents: function(name,thisObj){
 						console.log(name);
 						this.isShowGengduoMenu = false;
 						//closePage();
-						if(name=="jsEnd" || name=="jsOver" || name=="jsFreeReturn" || name=="jsCancle" || name=="startProcess" || name=="saveForm" || name=="jsAutoSend"){
-							eval("("+name+"())");
+						if(name=="jsEnd" || name=="jsOver" || name=="jsFreeReturn" || name=="jsCancle" || name=="startProcess" || name=="saveForm" || name=="jsAutoSend" || name=="collectFolder" || name=="delCollect" || name == "jsReaded"){
+							if(this.isGotoOpinion() && name == "jsAutoSend" && thisObj != "continue"){//发送
+								App.LS.set("flowType","writeOpin");
+								OpenWebView("/FlowBoxPage.html");
+							}else{
+								eval("("+name+"())");
+							}
 						}else{
 							App.LS.set("flowType",name);
-							OpenWebView("/FlowBoxPage.html");
+							if(name == "jsReadSend"){
+								OpenWebView("/ReadSendPage.html");
+							}else{
+								if(this.isGotoOpinion() && name == "jsSend" && thisObj != "continue"){//发送
+									App.LS.set("flowType","writeOpin");
+								}
+								OpenWebView("/FlowBoxPage.html");
+							}
 						}
+					},
+					isGotoOpinion(){//是否跳转到意见框
+						let isGotoOpin = true;
+						let myOpinions = toArr(App.LS.get("myOpinions"));
+						
+						Opinions.forEach(opin => {
+							if(myOpinions){
+								myOpinions.forEach(mopin => {
+									if(opin.opinionNo == mopin.opinionCode && opin.isEdit && mopin.docId == App.LS.get("docId") && (mopin.opinionUserNo == userInfo.userId || mopin.opinionUserNo == userInfo.username)){//写过意见
+										isGotoOpin = false;
+									}
+								})
+							}
+							if(opin.isEdit){
+								let temp = [];
+								temp.push(opin);
+								App.LS.set('flowParam',JSON.stringify(temp));
+							}
+						});
+						if(detailPage.proPermission && detailPage.proPermission.stateBusiness != undefined && detailPage.proPermission.stateBusiness.businessOpinion){
+							let businessOpinion = detailPage.proPermission.stateBusiness.businessOpinion;
+							if(businessOpinion.length == 0){//不需要填写意见
+								isGotoOpin = false;
+							}
+						}
+						return isGotoOpin;
 					},
 					initBtnData : function(){
 						if(detailPage.proPermission && detailPage.proPermission.stateBusiness && detailPage.proPermission.stateBusiness.businessHandle && detailPage.proPermission.flowStatus != "read"){						

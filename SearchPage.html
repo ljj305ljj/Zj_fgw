@@ -43,7 +43,7 @@
 			<header class="search-header">
 		        <div class="search-btn">
 		        	<span class="rjicon rjicon-sousuo"></span>
-		        	<input type="text" v-model="keyWord" placeholder="搜索 标题 + 正文" />
+		        	<input type="text" v-model="keyWord" placeholder="搜索 标题" />
 		        </div>
 		        <span v-show="keyWord!=''" class="toSearchBtn"  @click="toSearch">搜索</span>
 	      	</header>
@@ -82,8 +82,8 @@
 							sList : [],//请求数据
 							historyKey : {keyWord:"",filter:""},
 							keyWord : "",
-							addKeyWord : false,//是否空格隔开
-							sourceType : "all",//title content all
+							addKeyWord : true,//是否空格隔开
+							sourceType : "title",//title content all
 							timeRange : "all",//day week month year all
 							order : "timeDesc",//timeDesc timeAsc default
 							filter : "",//发文 收文
@@ -125,7 +125,7 @@
 							var userinfo = toArr(App.LS.get("userInfo"));
 							var _url = ZjgyHost + ZjgyUrl["searchQuery"];
 							var obj = {
-								addKeyWord:false,
+								addKeyWord:true,
 								firstOpen:true,
 								matchType:"default",
 								limit:item.count,
@@ -133,6 +133,7 @@
 								filter:item.filter,
 								q:item.keyWord,
 								order:item.order,
+								precise:true,//是否精准搜索
 								sourceType:item.sourceType,
 								timeRange:item.timeRange,
 								userinfo:{"userNo":userinfo.username,"sysNo":userinfo.systemNo}

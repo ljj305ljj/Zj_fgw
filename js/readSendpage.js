@@ -84,6 +84,7 @@ window.readSendPages = new Vue({
 			ajaxRequst(_url, 'post', 'application/json;charset=UTF-8', 'json', JSON.stringify(data)).then(function (res) {
 				//this.bus.$emit(this.bus_event.UPDATE_OPINION);
 				if (res) {
+					_this.updateCommitteeLeadersApprovalByReceival();
 					_this.isRead();
 				}
 			});
@@ -102,6 +103,21 @@ window.readSendPages = new Vue({
 				}
 			});
 		},
+		/**
+		 * 根据新增\更新委领导批示
+		 */
+		updateCommitteeLeadersApprovalByReceival() {
+			let _url =  ZjgyHost + '/doc/committeeLeader/updateCommitteeLeadersApprova';
+			let data = {
+				docId: App.LS.get("docId"),
+				businessNo: App.LS.get("module"),
+			};
+			ajaxRequst(_url, 'get', 'application/json;charset=UTF-8', 'json', data).then((res) => {
+
+			});
+
+		}
+
 	}
 });
 

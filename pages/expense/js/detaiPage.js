@@ -154,6 +154,7 @@ window.detailPage=new Vue({
 			App.LS.remove("signJson");
 			App.LS.remove("payMethodDetail");
 			App.LS.remove("relDocList");
+			App.LS.remove("formData")
 			if(viewType != "newDraft"){
 				if(listInfo.businessDocId){
 					var obj = {docId:listInfo.businessDocId,aid:listInfo.id,id:listInfo.businessDocId};
@@ -578,7 +579,7 @@ function jsAutoSend(){//自动发送
 					}else{
 						try {wispApp.UI.dismissProgressDialog();} catch(e) {}
 						var assigndStates = sendobj[0].assigndStates[0];
-						if(sendobj.length==1 && assigndStates.autoSend=="1"){
+						if(sendobj.length==1){
 							var todata = {
 								docId:docInfor.id,
 								workTodoId:detailPage.proPermission.workTodoId,

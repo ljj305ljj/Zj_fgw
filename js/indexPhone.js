@@ -376,6 +376,7 @@ var indexPhone = new Vue({
 			addCookie("x-auth-token", decodeURIComponent(token), 7, "/");
 			App.LS.set("userInfo", decodeURIComponent(userinfo));
 			App.LS.set("isCanLoad", false);
+			this.moduleConfig();
 			this.onRefresh();
 			//this.getEcharts();
 		},
@@ -393,7 +394,7 @@ var indexPhone = new Vue({
 					_tempData.user.userId = _temp.userId;
 					_tempData.user.phone = _temp.phone;
 					_tempData.user.accountId = _temp.accountId;
-					// _tempData.token = "d1781ccf-9066-48f7-a33d-54c0e91bff47";
+					// _tempData.token = "756fc902-2002-4ca2-8346-384baad6b536";
 					htmllist.push('<li class=Public-ptn onclick=indexPhone.repeatLogin("' + _tempData.token + '","' + encodeURIComponent(JSON.stringify(_tempData.user)) + '")>' + item.orgName.substring(item.orgName.lastIndexOf("/") + 1) + "/" + item.userName + '</li>');
 				})
 				pdfwin = App.UI('dialog', {
@@ -593,6 +594,19 @@ var indexPhone = new Vue({
 		},
 		moduleConfig(){//模块配置
 			let _this = this;
+			let  userInfo = eval("("+App.LS.get('userInfo')+")");
+			// alert(userInfo.orgNo);
+			if(userInfo.orgNo && userInfo.orgNo == "D00002"){//委领导
+				_this.moudleInfo[0].view = moudleInfo[0].view.map(item => {
+					// let viewConfigs = [];
+					if(item.id != "mobile_todo_all" && item.id != "mobile_toread_all"){//非 待办待阅
+						item.isCheck = false;
+					}
+					return item;
+				})
+			}else{
+				_this.moudleInfo[0].view =  moudleInfo[0].view;
+			}
 			//首页模块过滤
 			if(App.LS.get('indexTabData')  && JSON.stringify(indexTabData) != App.LS.get('indexTabData')){
 				//console.log("index111");
@@ -619,14 +633,14 @@ var indexPhone = new Vue({
 			}
 			//console.log("moudleInfoView:"+App.LS.get('moudleInfoView'));
 			//ipconfig配置中的
-			let moduleViewConfig = JSON.stringify( moudleInfo[0].view.map(item => { return { id: item.id, name: item.name, isCheck: item.isCheck } }) );
+			let moduleViewConfig = JSON.stringify( _this.moudleInfo[0].view.map(item => { return { id: item.id, name: item.name, isCheck: item.isCheck } }) );
 			if (moduleViewShow && (moduleViewConfig != moduleViewShow)) {
 				//console.log("111");
 				if (moduleViewConfig != App.LS.get('moudleInfoViewNew')) {//若ipconfig中的moudleInfo[0].view配置改变，则重置设置页面
 					//console.log("222");
-					App.LS.set('moudleInfoView', JSON.stringify(moudleInfo[0].view));
-					App.LS.set('moudleInfoViewNew', JSON.stringify(moudleInfo[0].view.map(item => { return { id: item.id, name: item.name, isCheck: item.isCheck } })));
-					_this.tabData.view = moudleInfo[0].view.filter(item => item.isCheck);
+					App.LS.set('moudleInfoView', JSON.stringify(_this.moudleInfo[0].view));
+					App.LS.set('moudleInfoViewNew', JSON.stringify(_this.moudleInfo[0].view.map(item => { return { id: item.id, name: item.name, isCheck: item.isCheck } })));
+					_this.tabData.view = _this.moudleInfo[0].view.filter(item => item.isCheck);
 					//_this.moudleInfo = moudleInfo;
 				} else {
 					//console.log("333");
@@ -634,9 +648,9 @@ var indexPhone = new Vue({
 				}
 			} else {
 				//console.log("444");
-				App.LS.set('moudleInfoView', JSON.stringify(moudleInfo[0].view));
-				App.LS.set('moudleInfoViewNew', JSON.stringify(moudleInfo[0].view.map(item => { return { id: item.id, name: item.name, isCheck: item.isCheck } })));
-				_this.tabData.view = moudleInfo[0].view.filter(item => item.isCheck);
+				App.LS.set('moudleInfoView', JSON.stringify(_this.moudleInfo[0].view));
+				App.LS.set('moudleInfoViewNew', JSON.stringify(_this.moudleInfo[0].view.map(item => { return { id: item.id, name: item.name, isCheck: item.isCheck } })));
+				_this.tabData.view = _this.moudleInfo[0].view.filter(item => item.isCheck);
 				//_this.moudleInfo = moudleInfo;
 			}
 			fontSizeSet.initFontSize();

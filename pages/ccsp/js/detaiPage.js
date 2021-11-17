@@ -578,7 +578,7 @@ function jsAutoSend(){//自动发送
 					}else{
 						try {wispApp.UI.dismissProgressDialog();} catch(e) {}
 						var assigndStates = sendobj[0].assigndStates[0];
-						if(sendobj.length==1 && assigndStates.autoSend=="1"){
+						if(sendobj.length==1){
 							var todata = {
 								docId:docInfor.id,
 								workTodoId:detailPage.proPermission.workTodoId,

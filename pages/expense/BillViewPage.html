@@ -15,7 +15,7 @@
 				{name:"vuejs",type:"js",url:"../../js/vue.min.js"},
 				{name:"jqueryjs",type:"js",url:"../../js/jquery-1.9.1.min.js"},
 				{name:"indexjs",type:"js",url:"../../js/index1.9.12.js"},	
-				{name:"vantjs",type:"js",url:"../../js/vant.min.js"},
+				{name:"vantjs",type:"js",url:"../../js/vant2.12.min.js"},
 				{name:"imageConversionjs",type:"js",url:"./js/imageConversion.js"},
 				//{name:"commonjs",type:"js",url:"../../js/vconsole.min.js"},
 				{name:"ipConfigjs",type:"js",url:"../../js/ipConfig.js"},
@@ -36,7 +36,7 @@
 							<van-list v-model="item.loading" :finished="item.finished" finished-text="没有更多了" @load="getBillList" :id="item.pageId">
 							<ul v-if="item.billAttList.length != 0">
 								<li class="list-li" v-for="(billAtt,a) in item.billAttList">
-									<div class="image-li"><img :ref="billAtt.id" src="../../img/loading.png" width="100%" height="100%" style="object-fit: cover;"/></div>
+									<div class="image-li" @click="showBillImg(billAtt.id)"><img :ref="billAtt.id" src="../../img/loading.png" width="100%" height="100%" style="object-fit: cover;"/></div>
 									<div class="title-li">
 										<p class="title">{{billAtt.fileName}}</p>
 										<p class="bottom"><span>上传时间：</span><span>{{billAtt.createTime}}</span></p>
@@ -57,6 +57,9 @@
 					</van-tab>
 				</template>
 			</van-tabs>
+			<van-image-preview ref="imgPreview" v-model="showImg" :images="images" :start-position="imgIndex" @change="onChange" show-indicators>
+				<template v-slot:imgIndex>第{{ imgIndex+1 }}页</template>
+			  </van-image-preview>
 		</div>
 		<style>
 		   dl:first-child {padding-top: .6rem;}

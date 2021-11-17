@@ -9,7 +9,7 @@ var filePath = outerBasehost + "/rjmoafgw/";
 var innerOA = "http://10.168.100.98:2080";//http://10.249.138.45:2080/
 var fcsurl = "/wisp_fcs/fileConvServlet?";//mogo
 var fcsgetfile = '/wisp_fcs/QueryDocumentIntf?key=';//mogo
-
+var wpsHost = "https://oa.fzggw.zj.gov.cn:9999";
 // var fcsurl = outerBasehost+'/wisp_fcs/fileConvServlet?';//fcs 普通windo地址
 // var fcshost=outerBasehost+"/wisp_fcs/conversion/conved";
 var mgrUrl = outerBasehost;
@@ -630,8 +630,7 @@ var indexTabData = [
 				// 	url:'pages/finance/ListPage.html?moduleId=moa-gzdcx',
 				// }
                 ]
-            },
-            
+            }
         ]
     },
 ]
@@ -691,6 +690,46 @@ var moudleInfo = [
                 finished: false,
                 count: 0,
                 isCheck:true
+            },
+            {
+                "id": "mobile_atdo_all",
+                "type": "todo",
+                "url": "todo|todo|todo|todo",
+                "titleIcon": "rjicon_title",
+                "paras": "?includeBusinessNo=RECEIVAL,DISPATCH,MEETING_ISSUE,MEETING,MEETING_OFFICE,MEETING_EXTERNAL,MEETING_BOOK,MEETING_ACTIVITY,LEAVE,TRAVEL_APPROVAL,INFOREPORT,INFO,CAR_APPLY,GOODS,SUPPLIES,URGER,MAJORURGER,LISTURGER,INFORMAL,SPECIAL_WORK,TRAVEL_EXPENSE,OTHER_EXPENSE,LABOR_UNION_EXPENSE,PARTY_UNION_EXPENSE,CONTRACT_APPROVE,PURCHASE_NOTICE,PURCHASE_RESULT,MEETING_PAY_ISSUED,OFFICIAL_RECEPTION,UNION_ACTIVITIES,PROJECT_PLANNING_SERVICE,GOODS_PURCHASE&isFirstState=0&flowStatus=done&sort=endTime,desc|?businessNo=CAR_APPLY&businessCate=apply&flowStatus=done&sort=endTime,desc|?businessNo=MEETING_OFFICE&flowStatus=done&isFirstState=0&businessCate=党组会议;主任办公会议&sort=endTime,desc|?businessNo=MEETING&flowStatus=done&businessCate=" + encodeURIComponent('专题会议') + "&sort=endTime,desc",
+                "openUrl": "gy042",
+                "subjectId": "businessSubject",
+                "field": [
+                    {
+                        "name": "应用类型",
+                        "id": "businessName",
+                        "showName": false,
+                        "icon": "",
+                        "color": ""
+                    }, {
+                        "name": "时间",
+                        "id": "createTime",
+                        "showName": false,
+                        "icon": "",
+                        "color": "",
+                        "count": 11
+                    }, {
+                        "name": "发送环节",
+                        "id": "processExtension|stateName",
+                        "showName": false,
+                        "icon": "",
+                        "color": ""
+                    }
+                ],
+                "name": "在办",
+                "offset": 0,
+                "limit": 10000,
+                data: {},
+                loading: true,
+                refreshing: false,
+                finished: false,
+                count: 0,
+                isCheck:false
             },
             {
                 "id": "mobile_toread_all",
@@ -6714,6 +6753,7 @@ var ZjgyUrl = {
     "revoke-travel_approval":"travelApproval/workflow/flowRevoke",//删除流程
     "TRAVEL_APPROVAL-save":"/travelApproval/updateTravelApproval",//更新
     "TRAVEL_APPROVAL-insert":"/travelApproval/insertTravelApproval",//新增
+    "getAllBySolr-travel_approval": "/finance/common/getAllBySolr",//关联文件里的搜索
 
     /*因公出差审批*/
     "travel_approval-wj": "/travelApproval/getTravelApprovalById",/*因公出差基本信息*/

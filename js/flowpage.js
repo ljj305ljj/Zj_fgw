@@ -544,6 +544,8 @@ Vue.component('tree',{
 											urlNos="Tzb-"+App.LS.get("module"); 
 										}
 										todata={docId:docInfor.id,workTodoId:(App.LS.get("workTodoId") || listInfo.id),submitStates:Result};
+										if(App.LS.get("opinionContent")){ todata.opinionContent = encodeURI(App.LS.get("opinionContent")); } 
+										App.LS.remove("opinionContent");
 										console.log(todata);
 										//return false
 										ajaxRequst(ZjgyHost + ZjgyUrl[urlNos],'post','application/json;charset=UTF-8','json',JSON.stringify(todata)).then(function(submitobj){
@@ -1204,7 +1206,11 @@ Vue.component('tree',{
 							myOpinions.push(responseData);
 							App.LS.set("myOpinions", JSON.stringify(myOpinions));
 
-							if(!opinion && moduleId == "dispatch"){ _self.signOpinoin(paradata);}//发文才有签发意见
+							if(!opinion && moduleId == "dispatch"){ 
+								_self.signOpinoin(paradata);//发文才有签发意见
+								_self.dealPublic();//公开属性意见处理
+							}
+							App.LS.set("opinionContent",responseData.opinionContent);
 							toast("意见提交成功",2000);
 							closePage('detailPage.continueOperate();');
 							try{wispApp.UI.dismissProgressDialog();}catch(e){}
@@ -1281,8 +1287,10 @@ Vue.component('tree',{
 								id: opinion.docId,
 								signUserNo: opinion.opinionUserNo
 							}
-							ajaxRequst( _url,"post",'application/json',"json",JSON.stringify(data)).then((json) => {
-								
+							ajaxRequst( _url,"post",'application/json',"json",JSON.stringify(data)).then((res) => {
+								if(!res){
+									toast("签发意见保存失败！");
+								}
 							});
 						}
 			
@@ -1300,9 +1308,72 @@ Vue.component('tree',{
 							return readers;
 							
 						}
-					}
+					},
+					 /**
+					 *
+					 * 单独处理公开信息理由
+					 */
+					  dealPublic () {
+						debugger;
+						let isPublicRule = false;
+						// 新增规则判断是否需要添加公开属性意见
+						try {
+							if( stateBase.rules && typeof JSON.parse(stateBase.rules) == "object" && JSON.parse(stateBase.rules).isPublic){
+								isPublicRule = true;
+							}
+						} catch(e) {
+							isPublicRule = false
+						}
+						if (isPublicRule) {
+							const publicType = docInfor.publicFlag;
+							let opinionContent = '';
+							if (publicType === "NOT_PUBLIC") {
+								// 不予公开
+								opinionContent = "不予公开" + "(" + docInfor.noPublicReason + ")。";
+							} else if (publicType === "PUBLIC") {
+								opinionContent = "主动公开。";
+							} else if (publicType === "APPLY_PUBLIC") {
+								opinionContent = "依申请公开。";
+							}
+							const oplist = toArr(App.LS.get("oplist"));//全部意见
+							const publicId = oplist.filter(item => {
+								return item.opinionCode === 'gksxyj' && item.opinionUserNo === (userinfo.userId || userinfo.username);
+							})
+							if (publicId.length > 0 ) {
+								this.onSubmitPublicOpinion(opinionContent, publicId[0].id);
+							} else {
+								this.onSubmitPublicOpinion(opinionContent);
+							}
+						}
+					},
+					// 公开属性意见
+					onSubmitPublicOpinion(opinionContent,id) { //提交公开属性意见
+						let _this = this;
+						let moduleId = App.LS.get("module");
+						let _url = ZjgyHost + ZjgyUrl["opinion-add"];
+						// if(moduleId == "receival" || moduleId == "dispatch"){//收发文的意见提交接口不同
+						if(id){
+							_url = ZjgyHost + ZjgyUrl["opinion-upd"];
+						}
+						// }
+						let data = {
+							// createTime: '',
+							docId: App.LS.get("docId"),
+							flowSlab: '',
+							id: id || '',
+							moduleId: App.LS.get("module"),
+							opinionCode: "gksxyj",
+							opinionCodeName: "公开属性意见",
+							opinionContent: opinionContent,
+							status: 0,
+						}
+						ajaxRequst(_url, 'post', 'application/json;charset=UTF-8', 'json', JSON.stringify(data)).then(function (res) {
+							if (!res) {
+								toast("公开属性意见保存失败！");
+							}
+						});
 
-
+					},
 				}
 			});	
 

@@ -28,6 +28,9 @@ window.billViewPage=new Vue({
 			expenseContentJson: toArr(App.LS.get("expenseContentJson")) || toArr(docInfor.expenseContentJson) || {},
 			isEdit: toArr(App.LS.get("isEdit")),//表单是否可编辑
 			billAttNums:0,
+			showImg:false,//是否显示图片预览
+			imgIndex: 0,
+			images: [],
 		}
 	},
 	mounted() {
@@ -92,7 +95,8 @@ window.billViewPage=new Vue({
 								}else{
 									var tempurl = ZjgyHost  + ZjgyUrl["File-download"]+ '?id='+item.id+"&x-auth-token="+getCookieValue("x-auth-token") +"&tTime="+(new Date()).getTime();
 								}
-								// item.img = tempurl;	
+								// item.img = tempurl;
+								_this.images.push(tempurl);
 								_this.$refs[item.id][0].src = tempurl;
 							});
 							_this.tabData[_this.tabActive].loading = false;
@@ -112,7 +116,8 @@ window.billViewPage=new Vue({
 									// }else{
 										var tempurl = ZjgyHost  + ZjgyUrl["File-download"]+ '?id='+item.id+"&x-auth-token="+getCookieValue("x-auth-token") +"&tTime="+(new Date()).getTime();
 									// }
-									// item.img = tempurl;	
+									// item.img = tempurl;
+									_this.images.push(tempurl);	
 									_this.$refs[item.id][0].src = tempurl;
 								})
 								_this.tabData[_this.tabActive].loading = false;
@@ -428,7 +433,20 @@ window.billViewPage=new Vue({
 				closePage("billPage.updateForm();");
 				e.preventDefault();
 			})
-		}
+		},
+		showBillImg(id){
+			let _this = this;
+			this.showImg = true;
+			this.images.forEach((img,i) => {
+				if(img.indexOf(id) > -1){
+					_this.imgIndex = i;
+					// _this.$refs.imgPreview.swipeTo(i);
+				}
+			})
+		},
+		onChange(index) {
+			this.imgIndex = index;
+		},
 	}
 });	
 

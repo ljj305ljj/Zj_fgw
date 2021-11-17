@@ -102,7 +102,7 @@ if (/Android|webOS|iPhone|iPad|BlackBerry/i.test(navigator.userAgent)) {
 			<van-tabs v-model="tabActive" swipeable color="#5078FE" animated title-active-color="#5078FE"
 				:line-width="(1/tabData.view.length)*100+'%'" line-height="2px" sticky @change="onChange">
 				<template v-for="(item,x) in tabData.view">
-					<van-tab :title="item.name" :badge="item.count>0?item.count:''">
+					<van-tab :title="item.name" :badge="(item.count && item.id != 'mobile_atdo_all')>0 ? (item.count > 999 ? '999+' : item.count) : ''">
 						<van-pull-refresh v-model="item.refreshing" @refresh="onRefresh">
 							<van-list v-model="item.loading" :finished="item.finished" finished-text="没有更多了"
 								@load="onLoad" :id="item.id">
